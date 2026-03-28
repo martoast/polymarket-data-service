@@ -244,13 +244,13 @@ class SessionImportService
         if (! $assetId || ! $ts) return null;
 
         return [
-            'asset_id' => $assetId,
-            'open'     => (float) ($row['o'] ?? 0),
-            'high'     => (float) ($row['h'] ?? 0),
-            'low'      => (float) ($row['l'] ?? 0),
-            'close'    => (float) ($row['c'] ?? 0),
-            'volume'   => (float) ($row['v'] ?? 0),
-            'ts'       => $ts,
+            'asset_id'  => $assetId,
+            'open_usd'  => (float) ($row['o'] ?? 0),
+            'high_usd'  => (float) ($row['h'] ?? 0),
+            'low_usd'   => (float) ($row['l'] ?? 0),
+            'close_usd' => (float) ($row['c'] ?? 0),
+            'volume'    => (float) ($row['v'] ?? 0),
+            'ts'        => $ts,
         ];
     }
 
@@ -271,7 +271,7 @@ class SessionImportService
         DB::table('candles_1m')->upsert(
             $rows,
             ['asset_id', 'ts'],
-            ['open', 'high', 'low', 'close', 'volume']
+            ['open_usd', 'high_usd', 'low_usd', 'close_usd', 'volume']
         );
     }
 }
