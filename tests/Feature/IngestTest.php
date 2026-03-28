@@ -53,17 +53,18 @@ class IngestTest extends TestCase
     {
         $this->pdo->exec("
             CREATE TABLE IF NOT EXISTS markets (
-                condition_id  TEXT PRIMARY KEY,
-                asset         TEXT NOT NULL,
+                id            INTEGER PRIMARY KEY AUTOINCREMENT,
+                condition_id  TEXT UNIQUE NOT NULL,
                 slug          TEXT,
                 question      TEXT,
+                yes_token_id  TEXT,
+                no_token_id   TEXT,
+                open_ts       INTEGER,
+                close_ts      INTEGER,
                 break_price   REAL,
-                open_ts       INTEGER NOT NULL,
-                close_ts      INTEGER NOT NULL,
-                duration_sec  INTEGER,
-                resolved_ts   INTEGER,
                 winner        TEXT,
-                discovered_at INTEGER NOT NULL
+                resolved      INTEGER DEFAULT 0,
+                created_at    INTEGER NOT NULL
             );
 
             CREATE TABLE IF NOT EXISTS oracle_ticks (
@@ -114,12 +115,12 @@ class IngestTest extends TestCase
         $openTs  = (time() - 3600) * 1000;  // 1 hour ago
         $closeTs = (time() - 3300) * 1000;  // 55 min ago
 
+        $slug = 'btc-updown-5m-' . intdiv($openTs, 1000);
         $this->pdo->exec("
             INSERT INTO markets
-                (condition_id, asset, slug, break_price, open_ts, close_ts, duration_sec, winner, discovered_at)
+                (condition_id, slug, break_price, open_ts, close_ts, winner, created_at)
             VALUES
-                ('0xABC123', 'BTC', 'btc-updown-5m-" . intdiv($openTs, 1000) . "',
-                 87000.5, {$openTs}, {$closeTs}, 300, 'YES', {$openTs});
+                ('0xABC123', '{$slug}', 87000.5, {$openTs}, {$closeTs}, 'YES', {$openTs});
         ");
 
         // 5 oracle ticks

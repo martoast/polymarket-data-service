@@ -115,11 +115,9 @@ class SqliteSyncService
 
     private function syncMarkets(): int
     {
-        // markets table uses condition_id TEXT as PK (no integer id).
-        // We use the SQLite implicit rowid for cursor tracking.
         $lastId  = $this->getCursor('markets');
         $stmt    = $this->readPdo->prepare(
-            'SELECT rowid, * FROM markets WHERE rowid > ? ORDER BY rowid LIMIT 1000'
+            'SELECT * FROM markets WHERE id > ? ORDER BY id LIMIT 1000'
         );
         $stmt->execute([$lastId]);
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -132,16 +130,18 @@ class SqliteSyncService
         $newLastId = $lastId;
 
         foreach ($rows as $row) {
-            $rowId   = (int) $row['rowid'];
-            $assetId = $this->getAssetId($row['asset']);
+            $rowId = (int) $row['id'];
+            $slug  = $row['slug'] ?? '';
+
+            // Asset is not stored directly — parse from slug prefix (e.g. "btc-updown-5m-…" → "BTC")
+            $assetSymbol = strtoupper(explode('-', $slug)[0] ?? '');
+            $assetId     = $this->getAssetId($assetSymbol);
 
             if ($assetId === null) {
-                Log::warning("SqliteSyncService: unknown asset '{$row['asset']}' for market {$row['condition_id']}");
+                Log::warning("SqliteSyncService: cannot determine asset from slug '{$slug}'");
                 $newLastId = max($newLastId, $rowId);
                 continue;
             }
-
-            $slug     = $row['slug'];
             $breakUsd = (float) $row['break_price'];
             $breakBp  = (int) ($breakUsd * 100);
 
