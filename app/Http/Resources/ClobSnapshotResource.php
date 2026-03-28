@@ -11,6 +11,7 @@ class ClobSnapshotResource extends JsonResource
     {
         return [
             'window_id' => $this->window_id,
+            'asset'     => $this->asset->symbol ?? null,
             'yes_ask'   => $this->yes_ask,
             'yes_bid'   => $this->yes_bid,
             'no_ask'    => $this->no_ask,

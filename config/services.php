@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    'recorder' => [
+        'sqlite_file'               => env('RECORDER_SQLITE_FILE', storage_path('app/polymarket.db')),
+        'gamma_base'                => env('GAMMA_API_BASE', 'https://gamma-api.polymarket.com'),
+        'resolution_delay_minutes'  => env('RESOLUTION_DELAY_MINUTES', 5),
+    ],
+
 ];

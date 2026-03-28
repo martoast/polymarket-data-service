@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Asset extends Model
 {
+    public $timestamps = false;
+
     protected $fillable = [
         'symbol',
         'chain',
