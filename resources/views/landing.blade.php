@@ -225,21 +225,28 @@
             {{-- ── Right: product data card ── --}}
             <div class="hidden lg:block fade-up relative" style="animation-delay:.15s"
                  x-data="{
-                     get btcPrice() {
-                         const p = $store.live.oracle['BTC']?.price_usd;
+                     asset: 'BTC',
+                     duration: '5m',
+                     assets: {
+                         BTC: { logo: 'https://assets.coingecko.com/coins/images/1/small/bitcoin.png',   bgClass: 'bg-[#f7931a]/10', borderClass: 'border-[#f7931a]/20' },
+                         ETH: { logo: 'https://assets.coingecko.com/coins/images/279/small/ethereum.png', bgClass: 'bg-[#8a92b2]/10', borderClass: 'border-[#8a92b2]/20' },
+                         SOL: { logo: 'https://assets.coingecko.com/coins/images/4128/small/solana.png',  bgClass: 'bg-[#9945ff]/10', borderClass: 'border-[#9945ff]/20' },
+                     },
+                     get cfg() { return this.assets[this.asset]; },
+                     get clob() { return $store.live.clob[this.asset]?.[this.duration] ?? null; },
+                     get price() {
+                         const p = $store.live.oracle[this.asset]?.price_usd;
                          return p ? '$' + Number(p).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) : '$—';
                      },
-                     get yesBid() { return $store.live.clob?.yes_bid ?? 0.58; },
-                     get noBid()  { return $store.live.clob?.no_bid  ?? 0.42; },
-                     get yesAsk() { return $store.live.clob?.yes_ask ?? 0.60; },
-                     get noAsk()  { return $store.live.clob?.no_ask  ?? 0.44; },
+                     get yesBid() { return this.clob?.yes_bid ?? 0.58; },
+                     get noBid()  { return this.clob?.no_bid  ?? 0.42; },
+                     get yesAsk() { return this.clob?.yes_ask ?? 0.60; },
+                     get noAsk()  { return this.clob?.no_ask  ?? 0.44; },
                      get spread() {
-                         const c = $store.live.clob;
-                         if (!c?.spread) return '—';
-                         return Number(c.spread).toFixed(2);
+                         if (!this.clob?.spread) return '—';
+                         return Number(this.clob.spread).toFixed(2);
                      },
                      step(base, n) {
-                         // Use 1% of base as step size, clamped to [0.01, 1.00]
                          const s = Math.max(0.01, Math.min(0.05, +(base * 0.01).toFixed(2)));
                          return Math.max(0.01, Math.min(0.99, +(base + n * s).toFixed(2)));
                      },
@@ -253,35 +260,63 @@
                 <div class="relative rounded-2xl border border-[#1f2937] bg-[#0d0e13] shadow-[0_40px_100px_rgba(0,0,0,.7)] overflow-hidden">
 
                     {{-- Card header --}}
-                    <div class="flex items-center justify-between px-5 py-4 bg-[#17181c] border-b border-[#1f2937]">
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-lg bg-[#f7931a]/15 border border-[#f7931a]/20 flex items-center justify-center flex-shrink-0">
-                                <span class="text-[#f7931a] font-bold text-sm">₿</span>
-                            </div>
-                            <div>
-                                <div class="flex items-center gap-2">
-                                    <span class="text-white text-sm font-bold">BTC Up/Down</span>
-                                    <span class="text-[10px] font-semibold text-[#697d91] bg-[#1e2428] border border-[#2e3841] px-1.5 py-0.5 rounded">5m</span>
+                    <div class="px-5 py-3 bg-[#17181c] border-b border-[#1f2937]">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 border"
+                                     :class="cfg.bgClass + ' ' + cfg.borderClass">
+                                    <img :src="cfg.logo" :alt="asset" class="w-5 h-5 object-contain rounded-sm">
                                 </div>
-                                <div class="text-[10px] text-[#697d91] font-mono mt-0.5">Live · Chainlink RTDS</div>
+                                <div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-white text-sm font-bold" x-text="asset + ' Up/Down'"></span>
+                                        <span class="text-[10px] font-semibold text-[#697d91] bg-[#1e2428] border border-[#2e3841] px-1.5 py-0.5 rounded" x-text="duration"></span>
+                                    </div>
+                                    <div class="text-[10px] text-[#697d91] font-mono mt-0.5">Live · Chainlink RTDS</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span x-show="$store.live.latency"
+                                      class="text-[10px] font-mono text-[#697d91] bg-[#0d0e13] border border-[#1f2937] px-2 py-0.5 rounded"
+                                      x-text="$store.live.latency + 'ms'"></span>
+                                <div class="flex items-center gap-1.5 text-[10px] font-bold text-[#26a05e]">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-[#26a05e] animate-pulse inline-block"></span>
+                                    LIVE
+                                </div>
                             </div>
                         </div>
-                        <div class="flex items-center gap-3">
-                            <span x-show="$store.live.latency"
-                                  class="text-[10px] font-mono text-[#697d91] bg-[#0d0e13] border border-[#1f2937] px-2 py-0.5 rounded"
-                                  x-text="$store.live.latency + 'ms'"></span>
-                            <div class="flex items-center gap-1.5 text-[10px] font-bold text-[#26a05e]">
-                                <span class="w-1.5 h-1.5 rounded-full bg-[#26a05e] animate-pulse inline-block"></span>
-                                LIVE
+                        {{-- Asset tabs + duration toggle --}}
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-1">
+                                <template x-for="sym in ['BTC','ETH','SOL']" :key="sym">
+                                    <button @click="asset = sym"
+                                            class="flex items-center gap-1.5 px-2.5 py-1 rounded text-[10px] font-bold tracking-wide transition-all duration-150"
+                                            :class="asset === sym
+                                                ? 'bg-[#0093fd]/20 text-[#0093fd] border border-[#0093fd]/40'
+                                                : 'text-[#697d91] border border-transparent hover:text-[#9ab] hover:bg-[#1f2937]'">
+                                        <img :src="assets[sym].logo" :alt="sym" class="w-3.5 h-3.5 object-contain rounded-full">
+                                        <span x-text="sym"></span>
+                                    </button>
+                                </template>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <template x-for="dur in ['5m','15m']" :key="dur">
+                                    <button @click="duration = dur"
+                                            class="px-2 py-1 rounded text-[10px] font-semibold tracking-wide transition-all duration-150"
+                                            :class="duration === dur
+                                                ? 'bg-[#1f2937] text-[#e5e5e5] border border-[#3a4a5a]'
+                                                : 'text-[#697d91] border border-transparent hover:text-[#9ab]'"
+                                            x-text="dur"></button>
+                                </template>
                             </div>
                         </div>
                     </div>
 
                     {{-- Oracle reference price --}}
                     <div class="flex items-center justify-between px-5 py-3 border-b border-[#1f2937]">
-                        <span class="text-[10px] font-semibold text-[#697d91] uppercase tracking-widest">Oracle Reference · BTC/USD</span>
+                        <span class="text-[10px] font-semibold text-[#697d91] uppercase tracking-widest" x-text="'Oracle Reference · ' + asset + '/USD'"></span>
                         <div class="text-right">
-                            <span class="text-white font-bold text-sm font-mono" x-text="btcPrice"></span>
+                            <span class="text-white font-bold text-sm font-mono" x-text="price"></span>
                         </div>
                     </div>
 
@@ -338,7 +373,7 @@
                     {{-- Order book --}}
                     <div class="px-5 py-3 border-b border-[#1f2937]">
                         <div class="flex items-center justify-between mb-3">
-                            <span class="text-[10px] font-bold text-[#697d91] uppercase tracking-widest">Order Book — YES Token</span>
+                            <span class="text-[10px] font-bold text-[#697d91] uppercase tracking-widest" x-text="'Order Book — ' + asset + ' YES'"></span>
                             <span class="text-[10px] font-semibold text-[#0093fd]" x-text="spread + ' spread'"></span>
                         </div>
                         <div class="grid grid-cols-2 gap-3 text-[10px] font-mono">
@@ -445,21 +480,29 @@ document.addEventListener('alpine:init', () => {
     Alpine.store('live', {
         latency: null,
         oracle: {},
-        clob: null,
+        clob: {},
         async poll() {
             const t0 = Date.now();
             try {
                 const r = await fetch('/api/public/live');
+                this.latency = Date.now() - t0;
                 if (!r.ok) return;
                 const d = await r.json();
-                this.latency = Date.now() - t0;
                 // Merge per-asset so a partial response never wipes existing values
                 if (d.oracle) {
                     Object.entries(d.oracle).forEach(([sym, val]) => {
                         this.oracle[sym] = val;
                     });
                 }
-                if (d.clob) this.clob = d.clob;
+                if (d.clob) {
+                    Object.entries(d.clob).forEach(([sym, val]) => {
+                        if (!val) return;
+                        if (!this.clob[sym]) this.clob[sym] = {};
+                        Object.entries(val).forEach(([dur, data]) => {
+                            if (data) this.clob[sym][dur] = data;
+                        });
+                    });
+                }
             } catch(e) {}
         }
     });

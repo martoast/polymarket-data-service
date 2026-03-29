@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\ClobSnapshot;
 use App\Models\OracleTick;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Cache;
@@ -13,9 +12,7 @@ class PublicLiveController extends Controller
 {
     public function __invoke(): JsonResponse
     {
-        // Cache the full response for 5 seconds — matches the landing page poll interval.
-        // All DB queries are skipped on cache hits, making the endpoint safe under load.
-        $data = Cache::remember('public_live_v1', 5, fn () => $this->build());
+        $data = Cache::remember('public_live_v3', 5, fn () => $this->build());
 
         return response()->json($data)
             ->header('Cache-Control', 'public, max-age=5');
@@ -23,8 +20,12 @@ class PublicLiveController extends Controller
 
     private function build(): array
     {
-        // Latest tick per asset — one targeted query per symbol so BTC is always present
-        $oracle = collect(['BTC', 'ETH', 'SOL'])->mapWithKeys(function (string $symbol) {
+        $nowMs     = (int) (microtime(true) * 1000);
+        $assets    = ['BTC', 'ETH', 'SOL'];
+        $durations = [300 => '5m', 900 => '15m'];
+
+        // Latest oracle tick per symbol
+        $oracle = collect($assets)->mapWithKeys(function (string $symbol) {
             $tick = OracleTick::whereHas('asset', fn ($q) => $q->where('symbol', $symbol))
                 ->orderByDesc('ts')
                 ->first();
@@ -34,58 +35,66 @@ class PublicLiveController extends Controller
             ]] : [];
         })->filter();
 
-        // Find the active BTC window with the most recent CLOB snapshot
-        $nowMs      = (int) (microtime(true) * 1000);
-        $btcAssetId = DB::table('assets')->where('symbol', 'BTC')->value('id');
+        // Latest CLOB snapshot per asset per duration
+        $clob = collect($assets)->mapWithKeys(function (string $symbol) use ($nowMs, $durations) {
+            $assetId = DB::table('assets')->where('symbol', $symbol)->value('id');
+            if (!$assetId) return [$symbol => null];
 
-        $clobData = null;
-        if ($btcAssetId) {
-            $windowId = DB::table('clob_snapshots')
-                ->join('windows', 'clob_snapshots.window_id', '=', 'windows.id')
-                ->where('clob_snapshots.asset_id', $btcAssetId)
-                ->where('windows.close_ts', '>', $nowMs)
-                ->whereNull('windows.outcome')
-                ->orderByDesc('clob_snapshots.ts')
-                ->value('clob_snapshots.window_id');
-
-            if ($windowId) {
-                // Each WS event sets only ONE field — get latest non-null per column
-                // via four targeted single-row queries instead of loading 500 rows in PHP
-                $pick = fn (string $col) => DB::table('clob_snapshots')
-                    ->where('window_id', $windowId)
-                    ->whereNotNull($col)
-                    ->orderByDesc('ts')
-                    ->value($col);
-
-                $yesBid = (float) ($pick('yes_bid') ?? 0);
-                $yesAsk = (float) ($pick('yes_ask') ?? 0);
-                $noBid  = (float) ($pick('no_bid')  ?? 0);
-                $noAsk  = (float) ($pick('no_ask')  ?? 0);
-
-                if ($yesBid || $yesAsk || $noBid || $noAsk) {
-                    $yesBid = round($yesBid, 3);
-                    $yesAsk = round($yesAsk, 3);
-                    $noBid  = round($noBid,  3);
-                    $noAsk  = round($noAsk,  3);
-                    $spread    = ($yesAsk && $yesBid) ? round($yesAsk - $yesBid, 3) : null;
-                    $mid       = ($yesAsk && $yesBid) ? round(($yesBid + $yesAsk) / 2, 3) : null;
-                    $denom     = $yesBid + $noBid;
-                    $imbalance = $denom > 0 ? round(($yesBid - $noBid) / $denom, 3) : null;
-                    $clobData  = [
-                        'yes_bid'   => $yesBid ?: null,
-                        'yes_ask'   => $yesAsk ?: null,
-                        'no_bid'    => $noBid  ?: null,
-                        'no_ask'    => $noAsk  ?: null,
-                        'spread'    => $spread,
-                        'mid'       => $mid,
-                        'imbalance' => $imbalance,
-                        'window_id' => $windowId,
-                        'ts'        => (int) (microtime(true) * 1000),
-                    ];
+            $byDuration = [];
+            foreach ($durations as $durationSec => $label) {
+                $entry = $this->clobForWindow($assetId, $durationSec, $nowMs);
+                if ($entry) {
+                    $byDuration[$label] = $entry;
                 }
             }
-        }
 
-        return ['oracle' => $oracle, 'clob' => $clobData];
+            return $byDuration ? [$symbol => $byDuration] : [$symbol => null];
+        })->filter();
+
+        return ['oracle' => $oracle, 'clob' => $clob];
+    }
+
+    private function clobForWindow(int $assetId, int $durationSec, int $nowMs): ?array
+    {
+        $windowId = DB::table('clob_snapshots')
+            ->join('windows', 'clob_snapshots.window_id', '=', 'windows.id')
+            ->where('clob_snapshots.asset_id', $assetId)
+            ->where('windows.duration_sec', $durationSec)
+            ->where('windows.close_ts', '>', $nowMs)
+            ->whereNull('windows.outcome')
+            ->orderByDesc('clob_snapshots.ts')
+            ->value('clob_snapshots.window_id');
+
+        if (!$windowId) return null;
+
+        $pick = fn (string $col) => DB::table('clob_snapshots')
+            ->where('window_id', $windowId)
+            ->whereNotNull($col)
+            ->orderByDesc('ts')
+            ->value($col);
+
+        $yesBid = round((float) ($pick('yes_bid') ?? 0), 3);
+        $yesAsk = round((float) ($pick('yes_ask') ?? 0), 3);
+        $noBid  = round((float) ($pick('no_bid')  ?? 0), 3);
+        $noAsk  = round((float) ($pick('no_ask')  ?? 0), 3);
+
+        if (!$yesBid && !$yesAsk && !$noBid && !$noAsk) return null;
+
+        $spread    = ($yesAsk && $yesBid) ? round($yesAsk - $yesBid, 3) : null;
+        $mid       = ($yesAsk && $yesBid) ? round(($yesBid + $yesAsk) / 2, 3) : null;
+        $denom     = $yesBid + $noBid;
+        $imbalance = $denom > 0 ? round(($yesBid - $noBid) / $denom, 3) : null;
+
+        return [
+            'yes_bid'   => $yesBid ?: null,
+            'yes_ask'   => $yesAsk ?: null,
+            'no_bid'    => $noBid  ?: null,
+            'no_ask'    => $noAsk  ?: null,
+            'spread'    => $spread,
+            'mid'       => $mid,
+            'imbalance' => $imbalance,
+            'window_id' => $windowId,
+            'ts'        => $nowMs,
+        ];
     }
 }
