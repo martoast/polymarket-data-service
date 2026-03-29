@@ -521,7 +521,7 @@ document.addEventListener('alpine:init', () => {
                         <div class="p-5 font-mono text-xs leading-7">
                             <span class="tw-line tw-l1 text-[#697d91]">$ curl \</span>
                             <span class="tw-line tw-l2 pl-4 text-[#697d91]">-H <span class="text-[#26a05e]">"Authorization: Bearer sk-••••••••"</span> \</span>
-                            <span class="tw-line tw-l3 pl-4 text-[#0093fd]">"https://api.polymarketdata.io/v1/oracle-ticks?asset=BTC"<span class="cursor-blink text-[#697d91]">█</span></span>
+                            <span class="tw-line tw-l3 pl-4 text-[#0093fd]">"https://polymarket-data-api.fullstacklabs.org/api/v1/oracle/ticks?asset=BTC"<span class="cursor-blink text-[#697d91]">█</span></span>
                             <div class="mt-3 space-y-0.5">
                                 <div class="tw-j tw-j1 text-[#697d91]">{</div>
                                 <div class="tw-j tw-j2 pl-4 text-[#697d91]">"data": [{</div>
@@ -945,8 +945,8 @@ document.addEventListener('alpine:init', () => {
                             </div>
                             <div class="bg-[#0d0e13] border border-[#1f2937] rounded-lg p-4">
                                 <div class="text-xs text-[#697d91] mb-2 font-mono">Quick test</div>
-                                <pre class="text-xs font-mono leading-relaxed text-[#e5e5e5] overflow-x-auto whitespace-pre-wrap"><span class="text-[#697d91]">$</span> curl https://polymarketdata.io/api/v1/windows \
-  <span class="text-[#697d91]">-H</span> <span class="text-[#26a05e]">"Authorization: Bearer pmd_live_sk_a7f3..."</span></pre>
+                                <pre class="text-xs font-mono leading-relaxed text-[#e5e5e5] overflow-x-auto whitespace-pre-wrap"><span class="text-[#697d91]">$</span> curl https://polymarket-data-api.fullstacklabs.org/api/v1/windows \
+  <span class="text-[#697d91]">-H</span> <span class="text-[#26a05e]">"Authorization: Bearer sk-••••••••"</span></pre>
                             </div>
                         </div>
                     </div>
@@ -1451,7 +1451,7 @@ document.addEventListener('alpine:init', () => {
                     ['Chainlink RTDS',        'wss://ws-live-data.polymarket.com',          'Real-time oracle prices',      '#0093fd', 'M5 3h6M3 7h10M5 11h6', true],
                     ['Polymarket CLOB',       'wss://ws-subscriptions-clob.polymarket.com', 'Yes/No order book per tick',   '#a78bfa', 'M2 4h12M2 8h12M2 12h8',true],
                     ['Gamma API',             'https://gamma-api.polymarket.com',            'Market discovery every 20s',   '#26a05e', 'M8 2a6 6 0 100 12A6 6 0 008 2zm0 4v4m0 0l-2-2m2 2l2-2', true],
-                    ['REST API',              'api.polymarketdata.io/v1/*',                  'Your language. Your queries.', '#f97316', 'M2 6h12v8H2zM6 6V4h4v2',false],
+                    ['REST API',              'polymarket-data-api.fullstacklabs.org/api/v1/*', 'Your language. Your queries.', '#f97316', 'M2 6h12v8H2zM6 6V4h4v2',false],
                 ];
                 @endphp
 
