@@ -20,6 +20,14 @@ Route::get('/docs', fn () => view('docs'))->name('docs');
 Route::get('/terms', fn () => view('terms'))->name('terms');
 Route::get('/privacy', fn () => view('privacy'))->name('privacy');
 
+// Password reset routes (guest only)
+Route::middleware('guest')->group(function () {
+    Route::get('/forgot-password', [WebAuthController::class, 'showForgotPassword'])->name('password.request');
+    Route::post('/forgot-password', [WebAuthController::class, 'sendResetLink'])->name('password.email');
+    Route::get('/reset-password/{token}', [WebAuthController::class, 'showResetPassword'])->name('password.reset');
+    Route::post('/reset-password', [WebAuthController::class, 'resetPassword'])->name('password.update');
+});
+
 // Email verification routes
 Route::middleware('auth')->group(function () {
     Route::get('/email/verify', fn () => view('auth.verify-email'))->name('verification.notice');

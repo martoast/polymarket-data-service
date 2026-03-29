@@ -229,20 +229,6 @@
                     </div>
                 </div>
 
-                {{-- Floating chips --}}
-                <div class="absolute -bottom-5 -left-5 bg-[#17181c] border border-[#1f2937] rounded-xl
-                            px-4 py-3 shadow-2xl backdrop-blur-sm">
-                    <div class="text-[10px] text-[#697d91] uppercase tracking-wider mb-1">Oracle cadence</div>
-                    <div class="text-sm font-bold text-white flex items-center gap-1.5">
-                        ~3<span class="text-xs font-normal text-[#697d91]">s</span>
-                        <span class="text-[10px] text-[#26a05e] font-semibold bg-[#26a05e]/10 border border-[#26a05e]/20 rounded px-1.5 py-0.5">LIVE</span>
-                    </div>
-                </div>
-                <div class="absolute -top-5 -right-5 bg-[#17181c] border border-[#1f2937] rounded-xl
-                            px-4 py-3 shadow-2xl backdrop-blur-sm">
-                    <div class="text-[10px] text-[#697d91] uppercase tracking-wider mb-1">Resolved windows</div>
-                    <div class="text-sm font-bold text-white">2,734+</div>
-                </div>
             </div>
         </div>
     </div>
@@ -252,112 +238,224 @@
 {{-- ============================================================
      §2  LIVE STATS BAR (animated counters)
 ============================================================ --}}
-<section class="border-y border-[#1f2937] bg-[#17181c]/50 py-0"
-         x-data="{
-            started: false,
-            counters: [
-                { label: 'Oracle ticks recorded', sub: 'And counting', target: 188203, val: 0, suffix: '' },
-                { label: 'CLOB snapshots', sub: 'Order book depth', target: 3245835, val: 0, suffix: '' },
-                { label: 'Resolved windows', sub: 'BTC · ETH · SOL', target: 2734, val: 0, suffix: '' },
-                { label: 'Data uptime', sub: 'WebSocket feed', target: 99.9, val: 0, suffix: '%' },
-            ],
-            start() {
-                if (this.started) return;
-                this.started = true;
-                this.counters.forEach(c => {
-                    const steps = 60;
-                    const inc = c.target / steps;
-                    let i = 0;
-                    const t = setInterval(() => {
-                        i++;
-                        c.val = Math.min(c.target, Math.round(inc * i * 100) / 100);
-                        if (i >= steps) clearInterval(t);
-                    }, 18);
-                });
-            }
-         }"
-         x-intersect="start()">
+<section class="border-y border-[#1f2937]">
     <div class="max-w-7xl mx-auto">
-        <div class="grid grid-cols-2 md:grid-cols-4 divide-x divide-y md:divide-y-0 divide-[#1f2937]">
-            <template x-for="c in counters" :key="c.label">
-                <div class="px-8 py-7 text-center">
-                    <div class="text-2xl sm:text-3xl font-extrabold text-white counter-num mb-1"
-                         x-text="c.val >= 1000000 ? (c.val/1000000).toFixed(1)+'M' : c.val >= 1000 ? (c.val/1000).toFixed(c.val<10000?1:0)+'K' : c.val+c.suffix">
-                    </div>
-                    <div class="text-sm font-medium text-[#e5e5e5] mb-0.5" x-text="c.label"></div>
-                    <div class="text-xs text-[#697d91]" x-text="c.sub"></div>
+        <div class="grid grid-cols-2 lg:grid-cols-4">
+            @foreach([
+                [
+                    'icon' => '<path d="M8 2v4l3 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.4"/>',
+                    'label' => 'Millisecond Oracle Ticks',
+                    'sub'   => 'BTC · ETH · SOL · every Chainlink update',
+                ],
+                [
+                    'icon' => '<path d="M2 10l3-5 3 3 2-4 3 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>',
+                    'label' => '40+ ML Features',
+                    'sub'   => 'Pre-computed per market window',
+                ],
+                [
+                    'icon' => '<rect x="2" y="4" width="12" height="8" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M5 8h6M5 11h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>',
+                    'label' => 'Full CLOB Order Book',
+                    'sub'   => 'Yes/No depth at every oracle tick',
+                ],
+                [
+                    'icon' => '<path d="M2 8h2.5M9.5 8H12M8 2v2.5M8 9.5V12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.4"/><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2" stroke-dasharray="2 2"/>',
+                    'label' => 'Simple REST API',
+                    'sub'   => 'Any language · API key in 60s',
+                ],
+            ] as $i => $item)
+            <div class="flex items-center gap-4 px-8 py-7
+                        border-r border-[#1f2937] last:border-r-0
+                        border-b lg:border-b-0
+                        {{ $i === 1 ? 'border-r-0 lg:border-r' : '' }}">
+                <div class="w-9 h-9 rounded-xl bg-[#0093fd]/10 border border-[#0093fd]/15 flex items-center justify-center flex-shrink-0 text-[#0093fd]">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">{!! $item['icon'] !!}</svg>
                 </div>
-            </template>
+                <div>
+                    <div class="text-sm font-semibold text-white leading-snug">{{ $item['label'] }}</div>
+                    <div class="text-xs text-[#697d91] mt-0.5">{{ $item['sub'] }}</div>
+                </div>
+            </div>
+            @endforeach
         </div>
     </div>
 </section>
 
 
 {{-- ============================================================
-     §3  PROBLEM → SOLUTION
+     §3  VALUE PROPOSITION — BENTO GRID
 ============================================================ --}}
-<section class="py-28">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<section class="py-28 relative overflow-hidden">
 
-        <div class="text-center mb-16">
-            <div class="text-xs font-semibold text-[#0093fd] uppercase tracking-[0.15em] mb-3">The problem</div>
-            <h2 class="text-3xl sm:text-4xl font-bold text-white leading-tight">
-                Building on Polymarket data is hard.<br>
-                <span class="text-[#697d91] font-normal">We did the hard part for you.</span>
+    {{-- Ambient glow --}}
+    <div class="absolute inset-0 pointer-events-none" aria-hidden="true">
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[500px] bg-[#0093fd]/[.03] rounded-full blur-[130px]"></div>
+    </div>
+
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        {{-- Headline --}}
+        <div class="text-center mb-12">
+            <h2 class="text-4xl sm:text-5xl font-extrabold text-white leading-[1.1] tracking-tight">
+                Your bot needs months of data.
             </h2>
+            <p class="text-4xl sm:text-5xl font-extrabold leading-[1.1] tracking-tight mt-1.5"
+               style="background: linear-gradient(90deg, #0093fd 0%, #60b8ff 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                We got you covered.
+            </p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {{-- Bento grid --}}
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
 
-            @foreach([
-                [
-                    'icon' => '<path d="M6 2H10L14 6V14H2V2H6" stroke="#ff6b6b" stroke-width="1.4" stroke-linejoin="round"/><path d="M10 2v4h4" stroke="#ff6b6b" stroke-width="1.4"/><path d="M8 7v4M8 12h.01" stroke="#ff6b6b" stroke-width="1.4" stroke-linecap="round"/>',
-                    'problem' => 'No historical API',
-                    'body' => "Polymarket's official API gives you live markets — not ticks, not snapshots, not features. Recording this yourself takes months of infrastructure work.",
-                    'solution' => 'We\'ve been recording since 2026.',
-                    'color' => '#ff6b6b',
-                ],
-                [
-                    'icon' => '<path d="M2 12L5 5l3 4 2-3 3 6" stroke="#f97316" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="4" r="1.5" stroke="#f97316" stroke-width="1.2"/>',
-                    'problem' => 'Raw prices aren\'t enough',
-                    'body' => 'A price at a timestamp tells you nothing alone. You need TWAPs, volatility, CLOB imbalance, and momentum — computed across the exact window each market was open.',
-                    'solution' => '40+ features. Pre-computed. Per window.',
-                    'color' => '#f97316',
-                ],
-                [
-                    'icon' => '<circle cx="8" cy="8" r="6" stroke="#a78bfa" stroke-width="1.4"/><path d="M8 5v3.5l2.5 1.5" stroke="#a78bfa" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>',
-                    'problem' => 'Scrapers miss 95% of signals',
-                    'body' => 'The Chainlink oracle updates every ~3 seconds. A scraper that runs every minute misses nearly all the price action happening inside each market window.',
-                    'solution' => 'Direct WebSocket. ~3s cadence.',
-                    'color' => '#a78bfa',
-                ],
-            ] as $card)
-            <div class="bg-[#17181c] border border-[#1f2937] rounded-2xl p-7 flex flex-col gap-5 hover:border-[#2e3841] transition-colors">
+            {{-- ── Card 1: Code preview (col-span-2) ─────────────────────── --}}
+            <div class="md:col-span-2 relative rounded-2xl border border-[#1f2937] bg-[#17181c] overflow-hidden hover:border-[#0093fd]/25 transition-colors duration-300 flex flex-col">
+                <div class="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[#0093fd]/50 to-transparent"></div>
 
-                {{-- Icon --}}
-                <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                     style="background: {{ $card['color'] }}15; border: 1px solid {{ $card['color'] }}30;">
-                    <svg width="18" height="18" viewBox="0 0 16 16" fill="none">{!! $card['icon'] !!}</svg>
+                {{-- Code block --}}
+                <div class="p-6 flex-1">
+                    <div class="bg-[#0d0e13] rounded-xl border border-[#1f2937] overflow-hidden h-full">
+                        {{-- Mac window chrome --}}
+                        <div class="flex items-center gap-3 px-4 py-3 border-b border-[#1f2937]">
+                            <div class="flex gap-1.5">
+                                <div class="w-2.5 h-2.5 rounded-full bg-[#ff5f57]"></div>
+                                <div class="w-2.5 h-2.5 rounded-full bg-[#febc2e]"></div>
+                                <div class="w-2.5 h-2.5 rounded-full bg-[#28c840]"></div>
+                            </div>
+                            <span class="text-[11px] text-[#697d91] font-mono">~/strategy</span>
+                        </div>
+                        {{-- Shell --}}
+                        <div class="p-5 font-mono text-xs leading-6 space-y-1">
+                            <div>
+                                <span class="text-[#697d91]">$ </span>
+                                <span class="text-[#e5e5e5]">curl</span>
+                                <span class="text-[#697d91]"> \</span>
+                            </div>
+                            <div class="pl-4 text-[#697d91]">-H <span class="text-[#26a05e]">"Authorization: Bearer sk-••••••••"</span> \</div>
+                            <div class="pl-4 text-[#0093fd]">"https://api.oracledata.io/v1/oracle-ticks?asset=BTC&limit=3"</div>
+                            <div class="mt-3 text-[#697d91]">{</div>
+                            <div class="pl-4 text-[#697d91]">"data": [{</div>
+                            <div class="pl-8"><span class="text-[#8a9ab0]">"asset"</span><span class="text-[#697d91]">: </span><span class="text-[#f97316]">"BTC"</span><span class="text-[#697d91]">,</span></div>
+                            <div class="pl-8"><span class="text-[#8a9ab0]">"price_usd"</span><span class="text-[#697d91]">: </span><span class="text-[#26a05e]">84231.50</span><span class="text-[#697d91]">,</span></div>
+                            <div class="pl-8"><span class="text-[#8a9ab0]">"ts"</span><span class="text-[#697d91]">: </span><span class="text-[#26a05e]">1774770301842</span></div>
+                            <div class="pl-4 text-[#697d91]">}]</div>
+                            <div class="text-[#697d91]">}</div>
+                        </div>
+                    </div>
                 </div>
 
-                <div>
-                    <div class="text-[10px] font-semibold uppercase tracking-widest text-[#697d91] mb-1.5">The problem</div>
-                    <h3 class="text-white font-semibold text-base mb-2">{{ $card['problem'] }}</h3>
-                    <p class="text-[#697d91] text-sm leading-relaxed">{{ $card['body'] }}</p>
-                </div>
-
-                {{-- Solution pill --}}
-                <div class="mt-auto pt-4 border-t border-[#1f2937]">
-                    <div class="inline-flex items-center gap-2 text-xs font-semibold"
-                         style="color: {{ $card['color'] }}">
-                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                            <path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                {{-- Card footer --}}
+                <div class="px-6 pb-6 flex items-center justify-between">
+                    <div>
+                        <div class="text-base font-bold text-white">API key in 60 seconds</div>
+                        <div class="text-sm text-[#697d91] mt-0.5">Any language. No setup required. Free to start.</div>
+                    </div>
+                    <a href="{{ route('register') }}"
+                       class="flex-shrink-0 ml-6 inline-flex items-center gap-1.5 text-xs font-semibold text-[#0093fd] hover:text-white border border-[#0093fd]/30 hover:border-[#0093fd] rounded-lg px-3 py-1.5 transition-colors">
+                        Get started
+                        <svg class="w-3 h-3" viewBox="0 0 12 12" fill="none">
+                            <path d="M2.5 6h7M6.5 3l3 3-3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
-                        {{ $card['solution'] }}
+                    </a>
+                </div>
+            </div>
+
+            {{-- ── Card 2: Oracle ticks + sparkline ────────────────────── --}}
+            <div class="relative rounded-2xl border border-[#1f2937] bg-[#17181c] overflow-hidden hover:border-[#0093fd]/25 transition-colors duration-300 flex flex-col">
+                <div class="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[#0093fd]/30 to-transparent"></div>
+
+                {{-- Sparkline --}}
+                <div class="flex-1 px-5 pt-6 pb-2">
+                    <svg viewBox="0 0 180 90" class="w-full" preserveAspectRatio="none">
+                        <defs>
+                            <linearGradient id="sfill" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#0093fd" stop-opacity="0.25"/>
+                                <stop offset="100%" stop-color="#0093fd" stop-opacity="0"/>
+                            </linearGradient>
+                        </defs>
+                        <line x1="0" y1="25" x2="180" y2="25" stroke="#1f2937" stroke-width="0.5"/>
+                        <line x1="0" y1="50" x2="180" y2="50" stroke="#1f2937" stroke-width="0.5"/>
+                        <line x1="0" y1="75" x2="180" y2="75" stroke="#1f2937" stroke-width="0.5"/>
+                        <path d="M0 72 C10 68 18 62 28 58 S42 48 52 43 S66 35 76 30 S90 22 100 18 S116 13 126 10 S142 7 152 5 S166 4 180 3 L180 90 L0 90 Z"
+                              fill="url(#sfill)"/>
+                        <path d="M0 72 C10 68 18 62 28 58 S42 48 52 43 S66 35 76 30 S90 22 100 18 S116 13 126 10 S142 7 152 5 S166 4 180 3"
+                              fill="none" stroke="#0093fd" stroke-width="1.5" stroke-linecap="round"/>
+                        <circle cx="180" cy="3" r="2.5" fill="#0093fd"/>
+                        <circle cx="180" cy="3" r="5" fill="#0093fd" opacity="0.15"/>
+                    </svg>
+                </div>
+
+                <div class="px-5 pb-6">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="w-1.5 h-1.5 rounded-full bg-[#0093fd] animate-pulse inline-block"></span>
+                        <span class="text-[10px] font-bold text-[#0093fd] uppercase tracking-widest">Live feed</span>
+                    </div>
+                    <div class="text-base font-bold text-white">Real-time oracle ticks</div>
+                    <div class="text-sm text-[#697d91] mt-0.5">BTC · ETH · SOL · every Chainlink update</div>
+                </div>
+            </div>
+
+            {{-- ── Card 3: ML feature tag cloud ────────────────────────── --}}
+            <div class="relative rounded-2xl border border-[#1f2937] bg-[#17181c] overflow-hidden hover:border-[#0093fd]/25 transition-colors duration-300">
+                <div class="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[#697d91]/20 to-transparent"></div>
+
+                <div class="p-5">
+                    <div class="flex flex-wrap gap-1.5 mb-5">
+                        @foreach([
+                            'twap_1m','vol_3m','momentum','clob_imbalance',
+                            'oracle_dist_bp','yes_bid_open','spread_open',
+                            'price_velocity','twap_5m','yes_ask_close',
+                            'vol_1m','market_age',
+                        ] as $tag)
+                        <span class="text-[10px] font-mono bg-[#0a0b10] border border-[#1f2937] text-[#697d91] px-2 py-1 rounded-md">{{ $tag }}</span>
+                        @endforeach
+                        <span class="text-[10px] font-mono bg-[#0093fd]/5 border border-[#0093fd]/20 text-[#0093fd] px-2 py-1 rounded-md">+ 30 more</span>
+                    </div>
+                    <div class="text-base font-bold text-white">40+ ML features</div>
+                    <div class="text-sm text-[#697d91] mt-0.5">Pre-computed per window. Ready to train.</div>
+                </div>
+            </div>
+
+            {{-- ── Card 4: CLOB order book (col-span-2) ────────────────── --}}
+            <div class="md:col-span-2 relative rounded-2xl border border-[#1f2937] bg-[#17181c] overflow-hidden hover:border-[#0093fd]/25 transition-colors duration-300">
+                <div class="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[#26a05e]/30 to-transparent"></div>
+
+                <div class="p-6 flex flex-col sm:flex-row items-center gap-8">
+
+                    {{-- Order book depth bars --}}
+                    <div class="w-full sm:w-72 flex-shrink-0">
+                        <div class="text-[10px] font-semibold text-[#697d91] uppercase tracking-widest mb-3">
+                            Order book snapshot — BTC ↑$84k window
+                        </div>
+                        <div class="space-y-2">
+                            @foreach([
+                                ['side'=>'Yes Ask','pct'=>78,'price'=>'0.52','c'=>'#ff6b6b'],
+                                ['side'=>'Yes Bid','pct'=>64,'price'=>'0.50','c'=>'#26a05e'],
+                                ['side'=>'No Bid', 'pct'=>70,'price'=>'0.49','c'=>'#26a05e'],
+                                ['side'=>'No Ask', 'pct'=>85,'price'=>'0.52','c'=>'#ff6b6b'],
+                            ] as $row)
+                            <div class="flex items-center gap-2.5">
+                                <span class="w-14 text-[10px] font-mono text-[#697d91] text-right flex-shrink-0">{{ $row['side'] }}</span>
+                                <div class="flex-1 h-5 bg-[#0a0b10] rounded-sm overflow-hidden">
+                                    <div class="h-full rounded-sm"
+                                         style="width:{{ $row['pct'] }}%; background:{{ $row['c'] }}18; border-right: 1.5px solid {{ $row['c'] }}60;"></div>
+                                </div>
+                                <span class="w-8 text-[10px] font-mono flex-shrink-0" style="color:{{ $row['c'] }}">{{ $row['price'] }}</span>
+                            </div>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    {{-- Text --}}
+                    <div>
+                        <div class="text-base font-bold text-white mb-1.5">Full CLOB order book</div>
+                        <p class="text-sm text-[#697d91] leading-relaxed">
+                            Yes/No bid-ask depth captured at every oracle tick.
+                            Spread, mid price, and imbalance ratio per market —
+                            the microstructure signal most traders never have.
+                        </p>
                     </div>
                 </div>
             </div>
-            @endforeach
 
         </div>
     </div>
@@ -399,12 +497,13 @@
         {{-- Tab panels --}}
         @foreach([
             'windows' => [
-                'route'  => 'GET /api/v1/windows',
-                'title'  => 'Market Windows & ML Features',
-                'desc'   => 'The core dataset. Every Polymarket binary market window — open/close timestamps, break price, final outcome, and 40+ pre-computed ML-ready features. This is the training data for prediction models.',
-                'use'    => 'Use for: model training · backtesting · feature analysis',
-                'fields' => ['id', 'asset', 'open_ts', 'close_ts', 'break_price_usd', 'outcome', 'oracle_dist_bp_at_1m', 'oracle_dist_bp_at_close', 'yes_bid_open', 'yes_ask_open', 'clob_imbalance_open', 'twap_1m_usd', 'vol_1m', 'momentum_3m', '+ 30 more'],
-                'json'   => [
+                'route'      => 'GET /api/v1/windows',
+                'title'      => 'Market Windows & ML Features',
+                'desc'       => 'The core dataset. Every Polymarket binary market window — open/close timestamps, break price, final outcome, and 40+ pre-computed ML-ready features. This is the training data for prediction models.',
+                'use'        => 'Use for: model training · backtesting · feature analysis',
+                'fields'     => ['id', 'asset', 'open_ts', 'close_ts', 'break_price_usd', 'outcome', 'oracle_dist_bp_at_1m', 'oracle_dist_bp_at_close', 'yes_bid_open', 'yes_ask_open', 'clob_imbalance_open', 'twap_1m_usd', 'vol_1m', 'momentum_3m', '+ 30 more'],
+                'meta_total' => '2734',
+                'json'       => [
                     '"id": <span class="text-[#f97316]">"btc-updown-5m-1774770300"</span>',
                     '"asset": <span class="text-[#f97316]">"BTC"</span>',
                     '"break_price_usd": <span class="text-[#26a05e]">84231.50</span>',
@@ -416,46 +515,49 @@
                 ],
             ],
             'oracle' => [
-                'route'  => 'GET /api/v1/oracle-ticks',
-                'title'  => 'Oracle Price Ticks',
-                'desc'   => 'Raw Chainlink RTDS price recordings at ~3s cadence. Full millisecond-accurate price history for BTC, ETH, and SOL — the ground truth that determines every market outcome.',
-                'use'    => 'Use for: price reconstruction · volatility calc · custom features',
-                'fields' => ['id', 'asset_id', 'asset', 'price_usd', 'price_bp', 'ts'],
-                'json'   => [
+                'route'      => 'GET /api/v1/oracle-ticks',
+                'title'      => 'Oracle Price Ticks',
+                'desc'       => 'Every Chainlink RTDS price update captured in real-time via direct WebSocket. Millisecond-accurate timestamps for BTC, ETH, and SOL — the exact same prices Polymarket uses to settle every market.',
+                'use'        => 'Use for: price reconstruction · volatility calc · custom features',
+                'fields'     => ['id', 'asset_id', 'asset', 'price_usd', 'price_bp', 'ts'],
+                'meta_total' => '188203',
+                'json'       => [
                     '"asset": <span class="text-[#f97316]">"BTC"</span>',
                     '"price_usd": <span class="text-[#26a05e]">84231.50</span>',
                     '"price_bp": <span class="text-[#26a05e]">8423150</span>',
-                    '"ts": <span class="text-[#26a05e]">1774770300000</span>',
+                    '"ts": <span class="text-[#26a05e]">1774770301842</span>',
                 ],
             ],
             'clob' => [
-                'route'  => 'GET /api/v1/clob-snapshots',
-                'title'  => 'CLOB Order Book Snapshots',
-                'desc'   => 'Full Yes/No bid-ask order book state captured from the Polymarket CLOB WebSocket at every oracle tick. Spread, mid price, and imbalance ratio per market window per tick.',
-                'use'    => 'Use for: market microstructure · liquidity analysis · spread modelling',
-                'fields' => ['window_id', 'asset_id', 'yes_bid', 'yes_ask', 'no_bid', 'no_ask', 'ts'],
-                'json'   => [
+                'route'      => 'GET /api/v1/clob-snapshots',
+                'title'      => 'CLOB Order Book Snapshots',
+                'desc'       => 'Full Yes/No bid-ask order book state captured from the Polymarket CLOB WebSocket at every oracle tick. Spread, mid price, and imbalance ratio per market window per tick.',
+                'use'        => 'Use for: market microstructure · liquidity analysis · spread modelling',
+                'fields'     => ['window_id', 'asset_id', 'yes_bid', 'yes_ask', 'no_bid', 'no_ask', 'ts'],
+                'meta_total' => '3245835',
+                'json'       => [
                     '"window_id": <span class="text-[#f97316]">"btc-updown-5m-1774770300"</span>',
                     '"yes_bid": <span class="text-[#26a05e]">0.48</span>',
                     '"yes_ask": <span class="text-[#26a05e]">0.50</span>',
                     '"no_bid": <span class="text-[#26a05e]">0.49</span>',
                     '"no_ask": <span class="text-[#26a05e]">0.52</span>',
-                    '"ts": <span class="text-[#26a05e]">1774770300000</span>',
+                    '"ts": <span class="text-[#26a05e]">1774770301842</span>',
                 ],
             ],
             'candles' => [
-                'route'  => 'GET /api/v1/candles',
-                'title'  => '1-Minute OHLCV Candles',
-                'desc'   => 'Standard 1-minute candlestick data aggregated directly from oracle ticks. OHLCV per asset per minute — ready to plug into any charting library or technical analysis pipeline.',
-                'use'    => 'Use for: technical analysis · chart rendering · momentum signals',
-                'fields' => ['asset_id', 'asset', 'open_usd', 'high_usd', 'low_usd', 'close_usd', 'volume', 'ts'],
-                'json'   => [
+                'route'      => 'GET /api/v1/candles',
+                'title'      => '1-Minute OHLCV Candles',
+                'desc'       => 'Standard 1-minute candlestick data aggregated directly from oracle ticks. OHLCV per asset per minute — ready to plug into any charting library or technical analysis pipeline.',
+                'use'        => 'Use for: technical analysis · chart rendering · momentum signals',
+                'fields'     => ['asset_id', 'asset', 'open_usd', 'high_usd', 'low_usd', 'close_usd', 'volume', 'ts'],
+                'meta_total' => '31420',
+                'json'       => [
                     '"asset": <span class="text-[#f97316]">"BTC"</span>',
                     '"open_usd": <span class="text-[#26a05e]">84100.00</span>',
                     '"high_usd": <span class="text-[#26a05e]">84298.50</span>',
                     '"low_usd": <span class="text-[#26a05e]">84056.10</span>',
                     '"close_usd": <span class="text-[#26a05e]">84231.50</span>',
-                    '"volume": <span class="text-[#26a05e]">0</span>',
+                    '"volume": <span class="text-[#26a05e]">17</span>',
                     '"ts": <span class="text-[#26a05e]">1774770300000</span>',
                 ],
             ],
@@ -500,7 +602,7 @@
                         <div class="pl-8 text-[#697d91]">{!! $line !!},</div>
                         @endforeach
                         <div class="pl-4 text-[#697d91]">}],</div>
-                        <div class="pl-4"><span class="text-[#8a9ab0]">"meta"</span><span class="text-[#697d91]">: {</span><span class="text-[#8a9ab0]">"total"</span><span class="text-[#697d91]">:</span> <span class="text-[#26a05e]">2734</span><span class="text-[#697d91]">, </span><span class="text-[#8a9ab0]">"page"</span><span class="text-[#697d91]">:</span> <span class="text-[#26a05e]">1</span><span class="text-[#697d91]">}</span></div>
+                        <div class="pl-4"><span class="text-[#8a9ab0]">"meta"</span><span class="text-[#697d91]">: {</span><span class="text-[#8a9ab0]">"total"</span><span class="text-[#697d91]">:</span> <span class="text-[#26a05e]">{{ $panel['meta_total'] }}</span><span class="text-[#697d91]">, </span><span class="text-[#8a9ab0]">"page"</span><span class="text-[#697d91]">:</span> <span class="text-[#26a05e]">1</span><span class="text-[#697d91]">}</span></div>
                         <div class="text-[#697d91]">}</div>
                     </div>
                 </div>
@@ -542,7 +644,7 @@
             {{-- Right: data pipeline viz --}}
             <div class="space-y-3">
                 @foreach([
-                    ['Chainlink RTDS', 'wss://ws-live-data.polymarket.com', '~3s price updates', '#0093fd', 'M3 8h10M9 4l4 4-4 4', true],
+                    ['Chainlink RTDS', 'wss://ws-live-data.polymarket.com', 'Real-time price feed', '#0093fd', 'M3 8h10M9 4l4 4-4 4', true],
                     ['Polymarket CLOB', 'wss://ws-subscriptions-clob.polymarket.com', 'Yes/No bid-ask per tick', '#a78bfa', 'M2 5h12M2 9h12M2 13h8', true],
                     ['Gamma API', 'https://gamma-api.polymarket.com', 'Market discovery every 20s', '#26a05e', 'M8 2a6 6 0 100 12A6 6 0 008 2zM5 8h6M8 5v6', true],
                     ['PostgreSQL + TimescaleDB', 'Your queries', 'REST API — any language', '#f97316', 'M3 5h10a1 1 0 011 1v8a1 1 0 01-1 1H3a1 1 0 01-1-1V6a1 1 0 011-1zM7 5V3h2v2', false],
@@ -786,68 +888,98 @@
      §8  FAQ
 ============================================================ --}}
 <section class="border-t border-[#1f2937] py-28">
-    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-14">
-            <div class="text-xs font-semibold text-[#0093fd] uppercase tracking-[0.15em] mb-3">FAQ</div>
-            <h2 class="text-3xl font-bold text-white">Questions we get asked</h2>
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        {{-- Section header --}}
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-14">
+            <div>
+                <div class="text-xs font-semibold text-[#0093fd] uppercase tracking-[0.15em] mb-3">FAQ</div>
+                <h2 class="text-3xl font-bold text-white">Common questions</h2>
+            </div>
+            <a href="mailto:hello@polymarketdata.io"
+               class="flex-shrink-0 inline-flex items-center gap-2 text-sm text-[#697d91] hover:text-[#e5e5e5] border border-[#1f2937] hover:border-[#2e3841] rounded-xl px-4 py-2.5 transition-colors group">
+                <svg class="w-4 h-4" viewBox="0 0 16 16" fill="none">
+                    <path d="M2 4.5A1.5 1.5 0 013.5 3h9A1.5 1.5 0 0114 4.5v7a1.5 1.5 0 01-1.5 1.5h-9A1.5 1.5 0 012 11.5v-7z" stroke="currentColor" stroke-width="1.2"/>
+                    <path d="M2 5l6 4.5L14 5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+                </svg>
+                Ask us anything
+                <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" viewBox="0 0 14 14" fill="none">
+                    <path d="M3 7h8M8 4l3 3-3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </a>
         </div>
 
-        <div class="space-y-2">
+        {{-- FAQ items --}}
+        <div class="divide-y divide-[#1f2937]">
             @foreach([
                 [
+                    'n' => '01',
                     'Q' => 'Where does the data come from?',
-                    'A' => 'We connect directly to three live sources: Chainlink\'s RTDS WebSocket for oracle price feeds (the same prices Polymarket uses), the Polymarket CLOB WebSocket for order book data, and the Gamma API for market metadata and outcomes. Everything is recorded at the source — no secondary scraping.',
+                    'A' => 'We connect directly to three live sources: Chainlink\'s RTDS WebSocket for oracle price feeds (the same prices Polymarket uses to settle markets), the Polymarket CLOB WebSocket for order book data, and the Gamma API for market metadata and outcomes. Everything is timestamped at the socket layer — no secondary scraping.',
                 ],
                 [
+                    'n' => '02',
                     'Q' => 'How far back does history go?',
-                    'A' => 'We started live recording in early 2026. We also have session recordings from before launch that are being backfilled into the API. Free gets 7 days, Builder gets 90 days, Pro gets everything we have.',
+                    'A' => 'We started live recording in early 2026 and are actively backfilling session recordings from before launch. Free tier gets 7 days. Builder gets 90 days. Pro gets the full archive.',
                 ],
                 [
+                    'n' => '03',
                     'Q' => 'What are "window features" exactly?',
-                    'A' => 'A "window" is a single Polymarket binary market — e.g. "Will BTC be above $84,000 in 5 minutes?". For each resolved window we pre-compute 40+ ML-ready features: TWAPs at different intervals, oracle distance from break price, CLOB imbalance ratios, volatility, momentum, and more. These are the features you\'d otherwise spend days computing yourself.',
+                    'A' => 'A window is one Polymarket binary market — e.g. "Will BTC be above $84,000 in 5 minutes?". For each resolved window we pre-compute 40+ ML-ready features: TWAPs at multiple intervals, oracle distance from break price, CLOB imbalance, volatility, momentum, and more. Features you\'d otherwise spend days computing yourself.',
                 ],
                 [
+                    'n' => '04',
                     'Q' => 'How accurate are the timestamps?',
-                    'A' => 'Oracle ticks carry the timestamp from the Chainlink WebSocket message — millisecond accuracy. CLOB snapshots are timestamped when we receive the oracle tick they were captured alongside. There is a small, constant network latency but no batch-processing delay.',
+                    'A' => 'Oracle ticks carry the timestamp from the Chainlink WebSocket message — millisecond precision. CLOB snapshots are timestamped when received alongside the oracle tick. There is a small constant network latency, but no batch-processing delay.',
                 ],
                 [
+                    'n' => '05',
                     'Q' => 'Is this affiliated with Polymarket?',
                     'A' => 'No. This is a completely independent data service. We are not affiliated with, endorsed by, or associated with Polymarket, UMA Protocol, or any of their affiliates.',
                 ],
                 [
+                    'n' => '06',
                     'Q' => 'Can I cancel anytime?',
-                    'A' => 'Yes. Subscriptions are monthly. Cancel anytime from your billing dashboard and you\'ll retain access until the end of your current period. No questions asked.',
+                    'A' => 'Yes. All subscriptions are billed monthly. Cancel from your billing dashboard and you keep access through the end of the current period. No questions, no friction.',
                 ],
             ] as $faq)
-            <div class="bg-[#17181c] border border-[#1f2937] rounded-xl overflow-hidden"
-                 x-data="{ open: false }">
+            <div x-data="{ open: false }" class="group">
                 <button @click="open = !open"
-                        class="w-full flex items-center justify-between px-6 py-4.5 text-left
-                               hover:bg-[#1e2428] transition-colors group">
-                    <span class="text-[#e5e5e5] font-medium text-sm pr-4">{{ $faq['Q'] }}</span>
-                    <div class="flex-shrink-0 w-5 h-5 rounded-md bg-[#0a0b10] border border-[#2e3841]
-                                flex items-center justify-center transition-all group-hover:border-[#697d91]"
-                         :class="open ? 'bg-[#0093fd]/10 border-[#0093fd]/30' : ''">
-                        <svg class="w-3 h-3 text-[#697d91] transition-transform duration-200"
-                             :class="open ? 'rotate-45 text-[#0093fd]' : ''"
-                             viewBox="0 0 12 12" fill="none">
-                            <path d="M6 2v8M2 6h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        class="w-full flex items-start gap-5 py-6 text-left transition-colors">
+
+                    {{-- Number --}}
+                    <span class="flex-shrink-0 font-mono text-xs font-semibold mt-0.5 transition-colors"
+                          :class="open ? 'text-[#0093fd]' : 'text-[#2e3841] group-hover:text-[#697d91]'">
+                        {{ $faq['n'] }}
+                    </span>
+
+                    {{-- Question --}}
+                    <span class="flex-1 text-[#e5e5e5] font-medium text-base leading-snug group-hover:text-white transition-colors pr-4">
+                        {{ $faq['Q'] }}
+                    </span>
+
+                    {{-- Chevron --}}
+                    <div class="flex-shrink-0 mt-0.5 w-7 h-7 rounded-lg border flex items-center justify-center transition-all duration-200"
+                         :class="open
+                            ? 'bg-[#0093fd]/10 border-[#0093fd]/30 text-[#0093fd]'
+                            : 'bg-[#17181c] border-[#2e3841] text-[#697d91] group-hover:border-[#697d91]'">
+                        <svg class="w-3.5 h-3.5 transition-transform duration-300"
+                             :class="open ? 'rotate-180' : ''"
+                             viewBox="0 0 14 14" fill="none">
+                            <path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                     </div>
                 </button>
+
                 <div x-show="open" x-collapse>
-                    <div class="px-6 pb-5 pt-1">
-                        <p class="text-[#697d91] text-sm leading-relaxed">{{ $faq['A'] }}</p>
+                    <div class="pb-6 pl-10 pr-12">
+                        <p class="text-[#8a9ab0] text-sm leading-7">{{ $faq['A'] }}</p>
                     </div>
                 </div>
             </div>
             @endforeach
         </div>
 
-        <div class="mt-8 text-center text-sm text-[#697d91]">
-            Still have questions?
-            <a href="mailto:hello@polymarketdata.io" class="text-[#0093fd] hover:text-[#007fd6] transition-colors ml-1">Email us →</a>
-        </div>
     </div>
 </section>
 
