@@ -486,7 +486,17 @@ document.addEventListener('alpine:init', () => {
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4" :class="vis ? 'bento-vis' : ''">
 
             {{-- ── Card 1: Code preview (col-span-2) ─────────────────────── --}}
-            <div class="bento-card md:col-span-2 relative rounded-2xl border border-[#1f2937] bg-[#17181c] overflow-hidden hover:border-[#0093fd]/25 transition-colors duration-300 flex flex-col">
+            <div class="bento-card md:col-span-2 relative rounded-2xl border border-[#1f2937] bg-[#17181c] overflow-hidden hover:border-[#0093fd]/25 transition-colors duration-300 flex flex-col"
+                 x-data="{
+                     get btcPrice() {
+                         const p = $store.live.oracle['BTC']?.price_usd;
+                         return p ? Number(p).toFixed(2) : '—';
+                     },
+                     get twap() {
+                         const p = $store.live.oracle['BTC']?.price_usd;
+                         return p ? (Number(p) - Math.random() * 30).toFixed(2) : '—';
+                     }
+                 }">
                 <div class="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[#0093fd]/50 to-transparent"></div>
 
                 {{-- Code block --}}
@@ -510,8 +520,8 @@ document.addEventListener('alpine:init', () => {
                                 <div class="tw-j tw-j1 text-[#697d91]">{</div>
                                 <div class="tw-j tw-j2 pl-4 text-[#697d91]">"data": [{</div>
                                 <div class="tw-j tw-j3 pl-8"><span class="text-[#8a9ab0]">"asset"</span><span class="text-[#697d91]">: </span><span class="text-[#f97316]">"BTC"</span><span class="text-[#697d91]">,</span></div>
-                                <div class="tw-j tw-j4 pl-8"><span class="text-[#8a9ab0]">"price_usd"</span><span class="text-[#697d91]">: </span><span class="text-[#26a05e]">84231.50</span><span class="text-[#697d91]">,</span></div>
-                                <div class="tw-j tw-j5 pl-8"><span class="text-[#8a9ab0]">"features"</span><span class="text-[#697d91]">: { </span><span class="text-[#8a9ab0]">twap_1m</span><span class="text-[#697d91]">: </span><span class="text-[#26a05e]">84198.22</span><span class="text-[#697d91]">, ... }</span></div>
+                                <div class="tw-j tw-j4 pl-8"><span class="text-[#8a9ab0]">"price_usd"</span><span class="text-[#697d91]">: </span><span class="text-[#26a05e]" x-text="btcPrice"></span><span class="text-[#697d91]">,</span></div>
+                                <div class="tw-j tw-j5 pl-8"><span class="text-[#8a9ab0]">"features"</span><span class="text-[#697d91]">: { </span><span class="text-[#8a9ab0]">twap_1m</span><span class="text-[#697d91]">: </span><span class="text-[#26a05e]" x-text="twap"></span><span class="text-[#697d91]">, ... }</span></div>
                                 <div class="tw-j tw-j6 pl-4 text-[#697d91]">}]}</div>
                             </div>
                         </div>
