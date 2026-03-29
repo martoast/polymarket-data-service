@@ -363,7 +363,7 @@
 {{-- ============================================================
      §2  LIVE STATS BAR (animated counters)
 ============================================================ --}}
-<section class="border-y border-[#1f2937]">
+<section class="border-y border-[#1f2937] hidden lg:block">
     <div class="max-w-7xl mx-auto">
         <div class="grid grid-cols-2 lg:grid-cols-4">
             @foreach([
