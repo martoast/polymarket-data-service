@@ -169,6 +169,7 @@ class RecorderCommand extends Command
         foreach ($changes as $change) {
             $tokenId = $change['asset_id'] ?? null;
             $price   = isset($change['price']) ? (float) $change['price'] : null;
+            $side    = strtoupper($change['side'] ?? '');  // 'BUY' = bid, 'SELL' = ask
 
             if (!$tokenId || $price === null) {
                 continue;
@@ -186,13 +187,15 @@ class RecorderCommand extends Command
                 continue;
             }
 
+            // Distinguish bid vs ask using the side field; fall back to ask if unknown
+            $isBid = ($side === 'BUY');
             $this->clobBuffer[] = [
                 'window_id' => $windowId,
                 'asset_id'  => $assetId,
-                'yes_ask'   => $isYes ? $price : null,
-                'yes_bid'   => null,
-                'no_ask'    => !$isYes ? $price : null,
-                'no_bid'    => null,
+                'yes_bid'   => ($isYes  && $isBid)  ? $price : null,
+                'yes_ask'   => ($isYes  && !$isBid) ? $price : null,
+                'no_bid'    => (!$isYes && $isBid)  ? $price : null,
+                'no_ask'    => (!$isYes && !$isBid) ? $price : null,
                 'ts'        => $ts,
             ];
         }
