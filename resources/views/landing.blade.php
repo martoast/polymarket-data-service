@@ -1102,8 +1102,8 @@ document.addEventListener('alpine:init', () => {
             @endforeach
         </div>
 
-        {{-- Tab panels — absolute on lg so height is stable; natural on mobile --}}
-        <div class="relative lg:min-h-[420px]">
+        {{-- Tab panels — CSS grid stacking: all panels share [1/1] cell, container height = tallest panel --}}
+        <div class="grid">
         @foreach([
             'windows' => [
                 'route'      => 'GET /api/v1/windows',
@@ -1171,14 +1171,10 @@ document.addEventListener('alpine:init', () => {
                 ],
             ],
         ] as $key => $panel)
-        <div x-show="tab === '{{ $key }}'" x-cloak
-             class="lg:absolute lg:inset-0"
-             x-transition:enter="transition ease-out duration-300"
-             x-transition:enter-start="opacity-0 translate-x-4"
-             x-transition:enter-end="opacity-100 translate-x-0"
-             x-transition:leave="transition ease-in duration-150"
-             x-transition:leave-start="opacity-100"
-             x-transition:leave-end="opacity-0">
+        <div class="[grid-area:1/1] transition-all duration-300"
+             :class="tab === '{{ $key }}'
+                 ? 'opacity-100 translate-x-0 pointer-events-auto'
+                 : 'opacity-0 translate-x-3 pointer-events-none'">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
 
                 {{-- Left: description --}}
