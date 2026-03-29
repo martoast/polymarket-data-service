@@ -150,13 +150,19 @@
 
     {{-- Footer --}}
     <footer class="border-t border-[#1f2937] mt-24 py-8">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-[#697d91]">
-            <span class="font-medium">Polymarket Data — Oracle API</span>
-            <div class="flex items-center gap-6">
-                <a href="{{ route('docs') }}" class="hover:text-[#e5e5e5] transition-colors">Docs</a>
-                <a href="{{ route('billing') }}" class="hover:text-[#e5e5e5] transition-colors">Pricing</a>
-                <a href="https://polymarket.com" target="_blank" class="hover:text-[#e5e5e5] transition-colors">Polymarket</a>
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-[#697d91]">
+                <span class="font-medium">Polymarket Data — Oracle API</span>
+                <div class="flex items-center gap-6 text-sm">
+                    <a href="{{ route('docs') }}" class="hover:text-[#e5e5e5] transition-colors">Docs</a>
+                    <a href="{{ route('billing') }}" class="hover:text-[#e5e5e5] transition-colors">Pricing</a>
+                    <a href="{{ route('terms') }}" class="hover:text-[#e5e5e5] transition-colors">Terms</a>
+                    <a href="{{ route('privacy') }}" class="hover:text-[#e5e5e5] transition-colors">Privacy</a>
+                </div>
             </div>
+            <p class="text-xs text-[#2e3841] text-center sm:text-left">
+                Not affiliated with, endorsed by, or associated with Polymarket or any of its affiliates. Independent third-party data service.
+            </p>
         </div>
     </footer>
 

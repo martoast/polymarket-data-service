@@ -33,6 +33,12 @@
                 View Docs
             </a>
         </div>
+
+        <p class="mt-8 text-xs text-[#2e3841]">
+            Not affiliated with, endorsed by, or associated with Polymarket. Independent third-party data service.
+            <a href="{{ route('terms') }}" class="hover:text-[#697d91] transition-colors ml-1">Terms</a> ·
+            <a href="{{ route('privacy') }}" class="hover:text-[#697d91] transition-colors ml-1">Privacy</a>
+        </p>
     </div>
 
     {{-- Code preview --}}

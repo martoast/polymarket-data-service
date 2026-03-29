@@ -17,6 +17,8 @@ Route::post('/login', [WebAuthController::class, 'login'])->middleware('guest');
 Route::get('/register', [WebAuthController::class, 'showRegister'])->name('register')->middleware('guest');
 Route::post('/register', [WebAuthController::class, 'register'])->middleware('guest');
 Route::get('/docs', fn () => view('docs'))->name('docs');
+Route::get('/terms', fn () => view('terms'))->name('terms');
+Route::get('/privacy', fn () => view('privacy'))->name('privacy');
 
 // Email verification routes
 Route::middleware('auth')->group(function () {
