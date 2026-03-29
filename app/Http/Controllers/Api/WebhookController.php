@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Laravel\Cashier\Cashier;
 
 class WebhookController extends Controller
 {
@@ -17,7 +16,7 @@ class WebhookController extends Controller
         $sigHeader     = $request->header('Stripe-Signature');
 
         try {
-            $event = Cashier::stripe()->webhooks->constructEvent(
+            $event = \Stripe\Webhook::constructEvent(
                 $payload,
                 $sigHeader,
                 $webhookSecret
