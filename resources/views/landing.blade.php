@@ -68,6 +68,60 @@
     to   { opacity: 1; transform: translateY(0); }
 }
 .fade-up { animation: fade-up .6s ease both; }
+
+/* ── Typewriter ── */
+.tw-line { overflow: hidden; white-space: nowrap; width: 0; display: block; }
+.bento-vis .tw-l1 { animation: tw-type 0.25s steps(8, end) 0.7s both; }
+.bento-vis .tw-l2 { animation: tw-type 0.95s steps(43, end) 1.05s both; }
+.bento-vis .tw-l3 { animation: tw-type 1.2s steps(57, end) 2.1s both; }
+.tw-j { opacity: 0; }
+.bento-vis .tw-j1 { animation: tw-fade 0.3s ease 3.5s both; }
+.bento-vis .tw-j2 { animation: tw-fade 0.3s ease 3.65s both; }
+.bento-vis .tw-j3 { animation: tw-fade 0.3s ease 3.8s both; }
+.bento-vis .tw-j4 { animation: tw-fade 0.3s ease 3.95s both; }
+.bento-vis .tw-j5 { animation: tw-fade 0.3s ease 4.1s both; }
+.bento-vis .tw-j6 { animation: tw-fade 0.3s ease 4.25s both; }
+@keyframes ping { 0%{transform:scale(1);opacity:.6} 100%{transform:scale(2.8);opacity:0} }
+@keyframes tw-type { to { width: 100%; } }
+@keyframes tw-fade { to { opacity: 1; } }
+@keyframes cursor-blink { 0%,49%{opacity:1}50%,100%{opacity:0} }
+.cursor-blink { animation: cursor-blink 1s step-end infinite; }
+
+/* ── Bento card entrance ── */
+.bento-card {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity .65s ease, transform .65s ease;
+}
+.bento-vis .bento-card { opacity: 1; transform: translateY(0); }
+.bento-vis .bento-card:nth-child(1) { transition-delay: 0ms; }
+.bento-vis .bento-card:nth-child(2) { transition-delay: 120ms; }
+.bento-vis .bento-card:nth-child(3) { transition-delay: 220ms; }
+.bento-vis .bento-card:nth-child(4) { transition-delay: 340ms; }
+
+/* ── Sparkline draw ── */
+.sparkline-path {
+    stroke-dasharray: 420;
+    stroke-dashoffset: 420;
+    transition: stroke-dashoffset 1.8s ease-out 0.5s;
+}
+.spark-vis .sparkline-path { stroke-dashoffset: 0; }
+
+/* ── CLOB bar fill ── */
+.clob-bar { width: 0 !important; transition: width 1s ease-out; }
+.clob-vis .clob-bar-1 { width: 78% !important; transition-delay: 0.5s; }
+.clob-vis .clob-bar-2 { width: 64% !important; transition-delay: 0.65s; }
+.clob-vis .clob-bar-3 { width: 70% !important; transition-delay: 0.8s; }
+.clob-vis .clob-bar-4 { width: 85% !important; transition-delay: 0.95s; }
+
+/* ── Wave animation ── */
+@keyframes wave-scroll {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+}
+.wave-1 { animation: wave-scroll 22s linear infinite; }
+.wave-2 { animation: wave-scroll 32s linear infinite reverse; }
+.wave-3 { animation: wave-scroll 16s linear infinite; }
 </style>
 @endsection
 
@@ -76,79 +130,87 @@
 {{-- ============================================================
      §1  HERO
 ============================================================ --}}
-<section class="relative overflow-hidden dot-grid min-h-[88vh] flex items-center">
+<section class="relative overflow-hidden dot-grid min-h-screen flex items-center">
 
     {{-- Ambient glows --}}
-    <div class="absolute inset-0 pointer-events-none overflow-hidden">
-        <div class="glow-anim absolute top-[-160px] left-1/2 -translate-x-1/2 w-[900px] h-[600px]
-                    rounded-full bg-[#0093fd]/[.07] blur-[130px]"></div>
-        <div class="absolute top-[60px] left-[8%] w-[380px] h-[380px]
-                    rounded-full bg-[#0093fd]/[.04] blur-[90px]"></div>
-        <div class="absolute bottom-[-80px] right-[10%] w-[300px] h-[300px]
-                    rounded-full bg-[#0093fd]/[.03] blur-[80px]"></div>
-        {{-- Vignette overlay --}}
-        <div class="absolute inset-0 bg-gradient-to-b from-[#0a0b10]/0 via-transparent to-[#0a0b10]"></div>
+    <div class="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
+        <div class="glow-anim absolute top-[-200px] left-1/2 -translate-x-1/2 w-[1000px] h-[600px] rounded-full bg-[#0093fd]/[.06] blur-[140px]"></div>
+        <div class="absolute top-[10%] left-[5%] w-[400px] h-[400px] rounded-full bg-[#0093fd]/[.03] blur-[100px]"></div>
+        <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#0a0b10]"></div>
     </div>
 
-    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-28">
-        <div class="grid grid-cols-1 lg:grid-cols-[1fr_1.1fr] gap-16 items-center">
+    {{-- Animated wave lines — centered vertically, cuts through hero --}}
+    <div class="absolute inset-0 pointer-events-none overflow-hidden flex items-center" aria-hidden="true">
+        <div class="wave-1 absolute" style="width:200%; left:0; top:50%; margin-top:-60px;">
+            <svg viewBox="0 0 2880 120" preserveAspectRatio="none" style="width:100%; height:120px; display:block;">
+                <path d="M0,60 C180,20 360,100 540,60 S900,20 1080,60 S1440,100 1620,60 S1980,20 2160,60 S2520,100 2700,60 S2880,20 2880,60"
+                      fill="none" stroke="#0093fd" stroke-width="1.5" opacity="0.18"/>
+            </svg>
+        </div>
+        <div class="wave-2 absolute" style="width:200%; left:0; top:50%; margin-top:-40px;">
+            <svg viewBox="0 0 2880 120" preserveAspectRatio="none" style="width:100%; height:120px; display:block;">
+                <path d="M0,80 C240,40 480,110 720,70 S1080,30 1320,70 S1680,110 1920,70 S2280,30 2520,70 S2760,110 2880,80"
+                      fill="none" stroke="#0093fd" stroke-width="1" opacity="0.10"/>
+            </svg>
+        </div>
+        <div class="wave-3 absolute" style="width:200%; left:0; top:50%; margin-top:-20px;">
+            <svg viewBox="0 0 2880 120" preserveAspectRatio="none" style="width:100%; height:120px; display:block;">
+                <path d="M0,45 C120,85 360,15 600,55 S960,95 1200,55 S1560,15 1800,55 S2160,95 2400,55 S2700,15 2880,45"
+                      fill="none" stroke="#0093fd" stroke-width="0.75" opacity="0.07"/>
+            </svg>
+        </div>
+    </div>
+
+    <div class="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-0 lg:min-h-screen lg:flex lg:items-center">
+        <div class="grid grid-cols-1 lg:grid-cols-[52%_48%] gap-10 lg:gap-16 items-center w-full">
 
             {{-- ── Left: copy ── --}}
             <div class="fade-up">
 
                 {{-- Live badge --}}
-                <div class="inline-flex items-center gap-2.5 bg-[#0093fd]/[.08] border border-[#0093fd]/25
-                            rounded-full px-4 py-1.5 mb-8">
+                <div class="inline-flex items-center gap-2 bg-[#0093fd]/[.08] border border-[#0093fd]/25 rounded-full px-3.5 py-1.5 mb-8">
                     <span class="relative flex h-2 w-2">
                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#0093fd] opacity-75"></span>
                         <span class="relative inline-flex rounded-full h-2 w-2 bg-[#0093fd]"></span>
                     </span>
-                    <span class="text-[#0093fd] text-xs font-semibold tracking-wide">Recorder live — BTC · ETH · SOL</span>
+                    <span class="text-[#0093fd] text-xs font-semibold tracking-wide">Crypto Up/Down &nbsp;·&nbsp; Production-ready API</span>
                 </div>
 
                 {{-- Headline --}}
-                <h1 class="text-[3.4rem] sm:text-[4rem] font-extrabold leading-[1.06] tracking-[-0.02em] text-white mb-6">
+                <h1 class="font-extrabold leading-[1.04] tracking-[-0.03em] text-white mb-6"
+                    style="font-size: clamp(2.6rem, 6vw, 4.2rem);">
                     The data layer<br>
-                    Polymarket traders<br>
-                    <span class="relative inline-block">
-                        <span class="text-[#0093fd]">actually need</span>
-                        <svg class="absolute -bottom-1 left-0 w-full" height="4" viewBox="0 0 200 4" preserveAspectRatio="none">
-                            <path d="M0 2 Q50 0 100 2 Q150 4 200 2" stroke="#0093fd" stroke-width="1.5" fill="none" opacity=".5"/>
-                        </svg>
-                    </span>
+                    every Polymarket<br>
+                    <span class="text-[#0093fd]">bot needs.</span>
                 </h1>
 
                 {{-- Sub --}}
-                <p class="text-[#8a9ab0] text-[1.1rem] leading-[1.75] mb-10 max-w-[480px]">
-                    Historical Polymarket data via REST API — Chainlink oracle ticks, CLOB order book snapshots, 1-minute OHLCV candles, and 40+ pre-computed ML features per resolved window. Ready for backtesting and algo trading from day one.
+                <p class="text-[#8a9ab0] text-lg leading-relaxed mb-10 max-w-[460px]">
+                    Oracle prices, order book depth, and 40+ ML-ready features — live captured and served via REST. Free to start, no card.
                 </p>
 
                 {{-- CTAs --}}
-                <div class="flex flex-wrap gap-3 mb-9">
+                <div class="flex flex-wrap gap-3 mb-8">
                     <a href="{{ route('register') }}"
-                       class="inline-flex items-center gap-2.5 bg-[#0093fd] hover:bg-[#007fd6] active:bg-[#006bbf]
-                              text-white font-semibold px-7 py-3.5 rounded-xl transition-all duration-150
-                              shadow-[0_0_24px_rgba(0,147,253,.35)] hover:shadow-[0_0_32px_rgba(0,147,253,.5)] text-sm">
-                        Start for free
-                        <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
-                            <path d="M3 7.5h9M8.5 3.5l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                       class="inline-flex items-center gap-2 bg-[#0093fd] hover:bg-[#007fd6]
+                              text-white font-bold px-7 py-3.5 rounded-xl transition-all duration-150 text-sm
+                              shadow-[0_0_28px_rgba(0,147,253,.4)] hover:shadow-[0_0_40px_rgba(0,147,253,.55)]">
+                        Get API Key Free
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                            <path d="M2.5 7h9M8 3.5l3.5 3.5L8 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                     </a>
                     <a href="{{ route('docs') }}"
                        class="inline-flex items-center gap-2 border border-[#2e3841] hover:border-[#4a5e6e]
                               text-[#8a9ab0] hover:text-[#e5e5e5] font-medium px-6 py-3.5 rounded-xl
                               transition-all duration-150 text-sm hover:bg-[#17181c]">
-                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                            <rect x="2" y="1.5" width="10" height="11" rx="1.5" stroke="currentColor" stroke-width="1.2"/>
-                            <path d="M4.5 4.5h5M4.5 7h5M4.5 9.5h3" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/>
-                        </svg>
-                        Read the docs
+                        Read the Docs
                     </a>
                 </div>
 
                 {{-- Trust chips --}}
                 <div class="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-[#697d91]">
-                    @foreach(['No credit card required', 'API key in 60 seconds', 'Any language — REST'] as $chip)
+                    @foreach(['No credit card required', '5 min integration', 'Any language'] as $chip)
                     <span class="flex items-center gap-1.5">
                         <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
                             <circle cx="6" cy="6" r="5" stroke="#26a05e" stroke-width="1"/>
@@ -156,100 +218,143 @@
                         </svg>
                         {{ $chip }}
                     </span>
-                    @if (!$loop->last)<span class="text-[#1f2937]">·</span>@endif
                     @endforeach
                 </div>
             </div>
 
-            {{-- ── Right: code preview ── --}}
-            <div class="relative" x-data="{ lang: 'python' }">
+            {{-- ── Right: product data card ── --}}
+            <div class="hidden lg:block fade-up relative" style="animation-delay:.15s">
 
-                {{-- Outer glow --}}
-                <div class="absolute -inset-6 rounded-3xl bg-[#0093fd]/[.04] blur-2xl pointer-events-none"></div>
+                {{-- Glow behind card --}}
+                <div class="absolute -inset-8 bg-[#0093fd]/[.05] rounded-3xl blur-3xl pointer-events-none"></div>
 
-                {{-- Window chrome --}}
-                <div class="relative rounded-2xl overflow-hidden border border-[#1f2937]
-                            bg-[#0d0e13] shadow-[0_32px_80px_rgba(0,0,0,.6)]">
+                {{-- Card --}}
+                <div class="relative rounded-2xl border border-[#1f2937] bg-[#0d0e13] shadow-[0_40px_100px_rgba(0,0,0,.7)] overflow-hidden">
 
-                    {{-- Title bar --}}
-                    <div class="flex items-center justify-between px-5 py-3.5 bg-[#17181c] border-b border-[#1f2937]">
-                        <div class="flex items-center gap-1.5">
-                            <div class="w-3 h-3 rounded-full bg-[#ff5f57]"></div>
-                            <div class="w-3 h-3 rounded-full bg-[#febc2e]"></div>
-                            <div class="w-3 h-3 rounded-full bg-[#28c840]"></div>
+                    {{-- Card header --}}
+                    <div class="flex items-center justify-between px-5 py-4 bg-[#17181c] border-b border-[#1f2937]">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-lg bg-[#f7931a]/15 border border-[#f7931a]/20 flex items-center justify-center flex-shrink-0">
+                                <span class="text-[#f7931a] font-bold text-sm">₿</span>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-white text-sm font-bold">BTC Up/Down</span>
+                                    <span class="text-[10px] font-semibold text-[#697d91] bg-[#1e2428] border border-[#2e3841] px-1.5 py-0.5 rounded">5m</span>
+                                </div>
+                                <div class="text-[10px] text-[#697d91] font-mono mt-0.5">01:30:00 — 01:35:00 UTC</div>
+                            </div>
                         </div>
-
-                        {{-- Language tabs --}}
-                        <div class="flex items-center gap-0.5 bg-[#0a0b10] rounded-lg p-0.5">
-                            @foreach([['python','Python'],['curl','cURL'],['js','JavaScript']] as [$key,$label])
-                            <button @click="lang = '{{ $key }}'"
-                                    :class="lang === '{{ $key }}' ? 'bg-[#1e2428] text-[#e5e5e5]' : 'text-[#697d91] hover:text-[#8a9ab0]'"
-                                    class="text-xs font-medium px-2.5 py-1 rounded-md transition-all">
-                                {{ $label }}
-                            </button>
-                            @endforeach
-                        </div>
-
-                        {{-- Status --}}
-                        <div class="flex items-center gap-1.5 text-xs text-[#26a05e] font-mono">
-                            <div class="w-1.5 h-1.5 rounded-full bg-[#26a05e] animate-pulse"></div>
-                            200 OK
+                        <div class="flex items-center gap-1.5 text-[10px] font-bold text-[#26a05e]">
+                            <span class="w-1.5 h-1.5 rounded-full bg-[#26a05e] animate-pulse inline-block"></span>
+                            LIVE
                         </div>
                     </div>
 
-                    {{-- Code body --}}
-                    <div class="p-5 min-h-[320px]">
-
-                        {{-- Python --}}
-                        <pre x-show="lang==='python'" class="font-mono text-xs leading-7 text-[#697d91] overflow-x-auto"><span class="text-[#697d91]">import</span> <span class="text-[#e5e5e5]">requests</span>
-
-<span class="text-[#e5e5e5]">API_KEY</span> = <span class="text-[#f97316]">"sk_live_••••••••••"</span>
-
-<span class="text-[#e5e5e5]">resp</span> = <span class="text-[#e5e5e5]">requests</span>.<span class="text-[#0093fd]">get</span>(
-    <span class="text-[#f97316]">"https://api.polymarketdata.io/api/v1/windows"</span>,
-    <span class="text-[#e5e5e5]">headers</span>={<span class="text-[#f97316]">"Authorization"</span>: <span class="text-[#f97316]">f"Bearer {API_KEY}"</span>},
-    <span class="text-[#e5e5e5]">params</span>={<span class="text-[#f97316]">"asset"</span>: <span class="text-[#f97316]">"BTC"</span>, <span class="text-[#f97316]">"limit"</span>: <span class="text-[#26a05e]">50</span>}
-)
-
-<span class="text-[#697d91]"># 40+ ML features per resolved window</span>
-<span class="text-[#e5e5e5]">windows</span> = <span class="text-[#e5e5e5]">resp</span>.<span class="text-[#0093fd]">json</span>()[<span class="text-[#f97316]">"data"</span>]</pre>
-
-                        {{-- cURL --}}
-                        <pre x-show="lang==='curl'" x-cloak class="font-mono text-xs leading-7 text-[#697d91] overflow-x-auto"><span class="text-[#e5e5e5]">curl</span> <span class="text-[#f97316]">"https://api.polymarketdata.io/api/v1/windows"</span> \
-  <span class="text-[#e5e5e5]">-H</span> <span class="text-[#f97316]">"Authorization: Bearer sk_live_••••••••••"</span> \
-  <span class="text-[#e5e5e5]">-G</span> \
-  <span class="text-[#e5e5e5]">--data-urlencode</span> <span class="text-[#f97316]">"asset=BTC"</span> \
-  <span class="text-[#e5e5e5]">--data-urlencode</span> <span class="text-[#f97316]">"limit=50"</span></pre>
-
-                        {{-- JavaScript --}}
-                        <pre x-show="lang==='js'" x-cloak class="font-mono text-xs leading-7 text-[#697d91] overflow-x-auto"><span class="text-[#697d91]">const</span> <span class="text-[#e5e5e5]">res</span> = <span class="text-[#697d91]">await</span> <span class="text-[#0093fd]">fetch</span>(
-  <span class="text-[#f97316]">"https://api.polymarketdata.io/api/v1/windows?asset=BTC&limit=50"</span>,
-  { <span class="text-[#e5e5e5]">headers</span>: { <span class="text-[#f97316]">"Authorization"</span>: <span class="text-[#f97316]">"Bearer sk_live_••••"</span> } }
-)
-
-<span class="text-[#697d91]">const</span> { <span class="text-[#e5e5e5]">data</span> } = <span class="text-[#697d91]">await</span> <span class="text-[#e5e5e5]">res</span>.<span class="text-[#0093fd]">json</span>()</pre>
-
-                        {{-- JSON response (always visible) --}}
-                        <div class="mt-4 pt-4 border-t border-[#1f2937] font-mono text-xs leading-6">
-                            <div class="text-[#697d91]">{</div>
-                            <div class="pl-4"><span class="text-[#8a9ab0]">"data"</span><span class="text-[#697d91]">: [{</span></div>
-                            <div class="pl-8 space-y-0.5">
-                                <div><span class="text-[#8a9ab0]">"id"</span><span class="text-[#697d91]">:</span> <span class="text-[#f97316]">"btc-updown-5m-1774770300"</span><span class="text-[#697d91]">,</span></div>
-                                <div><span class="text-[#8a9ab0]">"break_price_usd"</span><span class="text-[#697d91]">:</span> <span class="text-[#26a05e]">84231.50</span><span class="text-[#697d91]">,</span></div>
-                                <div><span class="text-[#8a9ab0]">"outcome"</span><span class="text-[#697d91]">:</span> <span class="text-[#0093fd]">"YES"</span><span class="text-[#697d91]">,</span></div>
-                                <div><span class="text-[#8a9ab0]">"oracle_dist_bp_at_1m"</span><span class="text-[#697d91]">:</span> <span class="text-[#26a05e]">142</span><span class="text-[#697d91]">,</span></div>
-                                <div><span class="text-[#8a9ab0]">"yes_bid_open"</span><span class="text-[#697d91]">:</span> <span class="text-[#26a05e]">0.48</span><span class="text-[#697d91]">,</span></div>
-                                <div><span class="text-[#8a9ab0]">"clob_imbalance_open"</span><span class="text-[#697d91]">:</span> <span class="text-[#26a05e]">0.062</span><span class="text-[#697d91]">,</span></div>
-                                <div><span class="text-[#8a9ab0]">"twap_1m_usd"</span><span class="text-[#697d91]">:</span> <span class="text-[#26a05e]">84198.40</span></div>
-                            </div>
-                            <div class="pl-4 text-[#697d91]">}],</div>
-                            <div class="pl-4"><span class="text-[#8a9ab0]">"meta"</span><span class="text-[#697d91]">: {</span><span class="text-[#8a9ab0]">"total"</span><span class="text-[#697d91]">:</span> <span class="text-[#26a05e]">2734</span><span class="text-[#697d91]">}</span></div>
-                            <div class="text-[#697d91]">}</div>
+                    {{-- Oracle reference price --}}
+                    <div class="flex items-center justify-between px-5 py-3 border-b border-[#1f2937]">
+                        <span class="text-[10px] font-semibold text-[#697d91] uppercase tracking-widest">Oracle Reference</span>
+                        <div class="text-right">
+                            <span class="text-white font-bold text-sm font-mono">$84,231.50</span>
+                            <span class="text-[#26a05e] text-xs font-semibold ml-2">+0.42%</span>
                         </div>
+                    </div>
+
+                    {{-- UP / DOWN sparklines --}}
+                    <div class="grid grid-cols-2 border-b border-[#1f2937]">
+
+                        {{-- YES --}}
+                        <div class="p-4 border-r border-[#1f2937]">
+                            <div class="flex items-center gap-1.5 mb-2">
+                                <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 8l3-5 3 3" stroke="#26a05e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                <span class="text-[10px] font-bold text-[#26a05e] uppercase tracking-wider">YES</span>
+                                <span class="ml-auto text-[#26a05e] font-bold text-lg font-mono">0.58</span>
+                            </div>
+                            <svg viewBox="0 0 120 44" class="w-full" preserveAspectRatio="none">
+                                <defs>
+                                    <linearGradient id="yFill" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stop-color="#26a05e" stop-opacity="0.25"/>
+                                        <stop offset="100%" stop-color="#26a05e" stop-opacity="0"/>
+                                    </linearGradient>
+                                </defs>
+                                <path d="M0,38 L14,34 L28,30 L40,26 L54,20 L66,22 L78,15 L92,11 L106,8 L120,6 L120,44 L0,44 Z" fill="url(#yFill)"/>
+                                <path d="M0,38 L14,34 L28,30 L40,26 L54,20 L66,22 L78,15 L92,11 L106,8 L120,6" fill="none" stroke="#26a05e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            <div class="flex justify-between mt-1">
+                                <span class="text-[9px] text-[#697d91]">H: 0.61</span>
+                                <span class="text-[9px] text-[#697d91]">L: 0.44</span>
+                            </div>
+                        </div>
+
+                        {{-- NO --}}
+                        <div class="p-4">
+                            <div class="flex items-center gap-1.5 mb-2">
+                                <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 2l3 5 3-3" stroke="#ff6b6b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                <span class="text-[10px] font-bold text-[#ff6b6b] uppercase tracking-wider">NO</span>
+                                <span class="ml-auto text-[#ff6b6b] font-bold text-lg font-mono">0.42</span>
+                            </div>
+                            <svg viewBox="0 0 120 44" class="w-full" preserveAspectRatio="none">
+                                <defs>
+                                    <linearGradient id="nFill" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stop-color="#ff6b6b" stop-opacity="0.2"/>
+                                        <stop offset="100%" stop-color="#ff6b6b" stop-opacity="0"/>
+                                    </linearGradient>
+                                </defs>
+                                <path d="M0,8 L14,12 L28,16 L40,20 L54,26 L66,24 L78,30 L92,34 L106,36 L120,38 L120,44 L0,44 Z" fill="url(#nFill)"/>
+                                <path d="M0,8 L14,12 L28,16 L40,20 L54,26 L66,24 L78,30 L92,34 L106,36 L120,38" fill="none" stroke="#ff6b6b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            <div class="flex justify-between mt-1">
+                                <span class="text-[9px] text-[#697d91]">H: 0.56</span>
+                                <span class="text-[9px] text-[#697d91]">L: 0.39</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Order book --}}
+                    <div class="px-5 py-3 border-b border-[#1f2937]">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-[10px] font-bold text-[#697d91] uppercase tracking-widest">Order Book — YES Token</span>
+                            <span class="text-[10px] font-semibold text-[#0093fd]">0.01 spread</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3 text-[10px] font-mono">
+                            <div>
+                                <div class="text-[#26a05e] font-bold mb-1.5 uppercase tracking-wider">Bids</div>
+                                @foreach([[2450,'0.57',85],[3800,'0.56',70],[1900,'0.55',55]] as [$size,$price,$w])
+                                <div class="flex items-center gap-2 mb-1.5 relative">
+                                    <div class="absolute inset-y-0 left-0 rounded-sm" style="width:{{ $w }}%; background:#26a05e18;"></div>
+                                    <span class="relative text-[#697d91] w-10">{{ number_format($size) }}</span>
+                                    <span class="relative text-[#26a05e] ml-auto">{{ $price }}</span>
+                                </div>
+                                @endforeach
+                            </div>
+                            <div>
+                                <div class="text-[#ff6b6b] font-bold mb-1.5 uppercase tracking-wider text-right">Asks</div>
+                                @foreach([[1800,'0.58',80],[2900,'0.59',68],[3100,'0.60',52]] as [$size,$price,$w])
+                                <div class="flex items-center gap-2 mb-1.5 relative">
+                                    <div class="absolute inset-y-0 right-0 rounded-sm" style="width:{{ $w }}%; background:#ff6b6b18;"></div>
+                                    <span class="relative text-[#ff6b6b]">{{ $price }}</span>
+                                    <span class="relative text-[#697d91] w-10 text-right ml-auto">{{ number_format($size) }}</span>
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Footer stats --}}
+                    <div class="flex items-center justify-between px-5 py-3 text-[10px] text-[#697d91]">
+                        <span class="flex items-center gap-1.5">
+                            <svg width="9" height="9" viewBox="0 0 9 9" fill="none"><circle cx="4.5" cy="4.5" r="4" stroke="#0093fd" stroke-width="0.8"/><path d="M4.5 2.5v2l1.2 1" stroke="#0093fd" stroke-width="0.8" stroke-linecap="round"/></svg>
+                            Oracle ticks <span class="text-[#e5e5e5] font-semibold ml-0.5">188K+</span>
+                        </span>
+                        <span>⚡ Features <span class="text-[#e5e5e5] font-semibold">40+</span></span>
+                        <span class="flex items-center gap-1">
+                            <span class="w-1 h-1 rounded-full bg-[#26a05e] animate-pulse inline-block"></span>
+                            Real-time
+                        </span>
                     </div>
                 </div>
-
             </div>
+
         </div>
     </div>
 </section>
@@ -304,7 +409,9 @@
 {{-- ============================================================
      §3  VALUE PROPOSITION — BENTO GRID
 ============================================================ --}}
-<section class="py-28 relative overflow-hidden">
+<section class="py-32 relative overflow-hidden"
+    x-data="{ vis: false, spark: false, clob: false }"
+    x-intersect.once="vis = true; setTimeout(() => spark = true, 300); setTimeout(() => clob = true, 400)">
 
     {{-- Ambient glow --}}
     <div class="absolute inset-0 pointer-events-none" aria-hidden="true">
@@ -325,10 +432,10 @@
         </div>
 
         {{-- Bento grid --}}
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4" :class="vis ? 'bento-vis' : ''">
 
             {{-- ── Card 1: Code preview (col-span-2) ─────────────────────── --}}
-            <div class="md:col-span-2 relative rounded-2xl border border-[#1f2937] bg-[#17181c] overflow-hidden hover:border-[#0093fd]/25 transition-colors duration-300 flex flex-col">
+            <div class="bento-card md:col-span-2 relative rounded-2xl border border-[#1f2937] bg-[#17181c] overflow-hidden hover:border-[#0093fd]/25 transition-colors duration-300 flex flex-col">
                 <div class="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[#0093fd]/50 to-transparent"></div>
 
                 {{-- Code block --}}
@@ -343,22 +450,19 @@
                             </div>
                             <span class="text-[11px] text-[#697d91] font-mono">~/strategy</span>
                         </div>
-                        {{-- Shell --}}
-                        <div class="p-5 font-mono text-xs leading-6 space-y-1">
-                            <div>
-                                <span class="text-[#697d91]">$ </span>
-                                <span class="text-[#e5e5e5]">curl</span>
-                                <span class="text-[#697d91]"> \</span>
+                        {{-- Shell with typewriter --}}
+                        <div class="p-5 font-mono text-xs leading-7">
+                            <span class="tw-line tw-l1 text-[#697d91]">$ curl \</span>
+                            <span class="tw-line tw-l2 pl-4 text-[#697d91]">-H <span class="text-[#26a05e]">"Authorization: Bearer sk-••••••••"</span> \</span>
+                            <span class="tw-line tw-l3 pl-4 text-[#0093fd]">"https://api.polymarketdata.io/v1/oracle-ticks?asset=BTC"<span class="cursor-blink text-[#697d91]">█</span></span>
+                            <div class="mt-3 space-y-0.5">
+                                <div class="tw-j tw-j1 text-[#697d91]">{</div>
+                                <div class="tw-j tw-j2 pl-4 text-[#697d91]">"data": [{</div>
+                                <div class="tw-j tw-j3 pl-8"><span class="text-[#8a9ab0]">"asset"</span><span class="text-[#697d91]">: </span><span class="text-[#f97316]">"BTC"</span><span class="text-[#697d91]">,</span></div>
+                                <div class="tw-j tw-j4 pl-8"><span class="text-[#8a9ab0]">"price_usd"</span><span class="text-[#697d91]">: </span><span class="text-[#26a05e]">84231.50</span><span class="text-[#697d91]">,</span></div>
+                                <div class="tw-j tw-j5 pl-8"><span class="text-[#8a9ab0]">"features"</span><span class="text-[#697d91]">: { </span><span class="text-[#8a9ab0]">twap_1m</span><span class="text-[#697d91]">: </span><span class="text-[#26a05e]">84198.22</span><span class="text-[#697d91]">, ... }</span></div>
+                                <div class="tw-j tw-j6 pl-4 text-[#697d91]">}]}</div>
                             </div>
-                            <div class="pl-4 text-[#697d91]">-H <span class="text-[#26a05e]">"Authorization: Bearer sk-••••••••"</span> \</div>
-                            <div class="pl-4 text-[#0093fd]">"https://api.oracledata.io/v1/oracle-ticks?asset=BTC&limit=3"</div>
-                            <div class="mt-3 text-[#697d91]">{</div>
-                            <div class="pl-4 text-[#697d91]">"data": [{</div>
-                            <div class="pl-8"><span class="text-[#8a9ab0]">"asset"</span><span class="text-[#697d91]">: </span><span class="text-[#f97316]">"BTC"</span><span class="text-[#697d91]">,</span></div>
-                            <div class="pl-8"><span class="text-[#8a9ab0]">"price_usd"</span><span class="text-[#697d91]">: </span><span class="text-[#26a05e]">84231.50</span><span class="text-[#697d91]">,</span></div>
-                            <div class="pl-8"><span class="text-[#8a9ab0]">"ts"</span><span class="text-[#697d91]">: </span><span class="text-[#26a05e]">1774770301842</span></div>
-                            <div class="pl-4 text-[#697d91]">}]</div>
-                            <div class="text-[#697d91]">}</div>
                         </div>
                     </div>
                 </div>
@@ -379,104 +483,398 @@
                 </div>
             </div>
 
-            {{-- ── Card 2: Oracle ticks + sparkline ────────────────────── --}}
-            <div class="relative rounded-2xl border border-[#1f2937] bg-[#17181c] overflow-hidden hover:border-[#0093fd]/25 transition-colors duration-300 flex flex-col">
+            {{-- ── Card 2: Oracle ticks — live price chart ─────────────── --}}
+            <div class="bento-card relative rounded-2xl border border-[#1f2937] bg-[#17181c] overflow-hidden hover:border-[#0093fd]/25 transition-colors duration-300 flex flex-col"
+                 :class="spark ? 'spark-vis' : ''"
+                 x-data="{
+                     asset: 0,
+                     assets: [
+                         { name:'BTC', price:'$84,231', chg:'+0.42%', col:'#0093fd', ey:3,  path:'M0 68 C6 62 10 74 16 66 S22 50 28 54 S34 42 40 46 S46 34 52 37 S58 50 64 43 S70 30 76 33 S82 44 88 36 S94 22 100 26 S106 38 112 30 S118 18 124 21 S130 30 136 22 S142 10 148 14 S154 22 160 15 S166 6 172 8 S176 4 180 3' },
+                         { name:'ETH', price:'$3,182',  chg:'+1.1%',  col:'#818cf8', ey:14, path:'M0 72 C6 68 12 60 18 63 S24 74 30 67 S36 55 42 58 S48 66 54 59 S60 46 66 50 S72 60 78 52 S84 40 90 44 S96 54 102 46 S108 34 114 38 S120 48 126 40 S132 28 138 32 S144 42 150 34 S156 20 162 24 S168 32 174 26 S178 18 180 14' },
+                         { name:'SOL', price:'$142.80', chg:'+2.3%',  col:'#34d399', ey:8,  path:'M0 75 C8 70 14 78 20 71 S26 58 32 62 S38 72 44 64 S50 52 56 56 S62 66 68 57 S74 44 80 48 S86 58 92 49 S98 36 104 40 S110 52 116 43 S122 30 128 34 S134 44 140 35 S146 22 152 27 S158 36 164 28 S170 14 176 18 S179 10 180 8' },
+                     ]
+                 }"
+                 x-init="setInterval(() => asset = (asset+1)%3, 3000)">
                 <div class="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[#0093fd]/30 to-transparent"></div>
 
-                {{-- Sparkline --}}
-                <div class="flex-1 px-5 pt-6 pb-2">
-                    <svg viewBox="0 0 180 90" class="w-full" preserveAspectRatio="none">
-                        <defs>
-                            <linearGradient id="sfill" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stop-color="#0093fd" stop-opacity="0.25"/>
-                                <stop offset="100%" stop-color="#0093fd" stop-opacity="0"/>
-                            </linearGradient>
-                        </defs>
-                        <line x1="0" y1="25" x2="180" y2="25" stroke="#1f2937" stroke-width="0.5"/>
-                        <line x1="0" y1="50" x2="180" y2="50" stroke="#1f2937" stroke-width="0.5"/>
-                        <line x1="0" y1="75" x2="180" y2="75" stroke="#1f2937" stroke-width="0.5"/>
-                        <path d="M0 72 C10 68 18 62 28 58 S42 48 52 43 S66 35 76 30 S90 22 100 18 S116 13 126 10 S142 7 152 5 S166 4 180 3 L180 90 L0 90 Z"
-                              fill="url(#sfill)"/>
-                        <path d="M0 72 C10 68 18 62 28 58 S42 48 52 43 S66 35 76 30 S90 22 100 18 S116 13 126 10 S142 7 152 5 S166 4 180 3"
-                              fill="none" stroke="#0093fd" stroke-width="1.5" stroke-linecap="round"/>
-                        <circle cx="180" cy="3" r="2.5" fill="#0093fd"/>
-                        <circle cx="180" cy="3" r="5" fill="#0093fd" opacity="0.15"/>
+                {{-- Asset tabs --}}
+                <div class="flex gap-1 px-4 pt-4">
+                    <template x-for="(a,i) in assets" :key="i">
+                        <button @click="asset=i"
+                            class="text-[10px] font-bold px-2.5 py-1 rounded-md transition-all"
+                            :style="asset===i ? 'background:'+a.col+'22; color:'+a.col+'; border:1px solid '+a.col+'44' : ''"
+                            :class="asset===i ? '' : 'text-[#2e3841] border border-transparent hover:text-[#697d91]'"
+                            x-text="a.name"></button>
+                    </template>
+                </div>
+
+                {{-- Price display --}}
+                <div class="px-4 pt-3 pb-1 flex items-baseline gap-2">
+                    <span class="text-2xl font-bold text-white font-mono" x-text="assets[asset].price"></span>
+                    <span class="text-sm font-semibold text-[#26a05e]" x-text="assets[asset].chg"></span>
+                </div>
+
+                {{-- Chart --}}
+                <div class="flex-1 px-3 pb-2" style="min-height:110px">
+                    <svg viewBox="0 0 180 90" class="w-full h-full" preserveAspectRatio="none" style="display:block;min-height:110px">
+                        <line x1="0" y1="30" x2="180" y2="30" stroke="#1f2937" stroke-width="0.5"/>
+                        <line x1="0" y1="60" x2="180" y2="60" stroke="#1f2937" stroke-width="0.5"/>
+                        {{-- Fill area --}}
+                        <path :d="assets[asset].path + ' L180 90 L0 90 Z'"
+                              :fill="assets[asset].col" opacity="0.10"/>
+                        {{-- Line --}}
+                        <path :d="assets[asset].path"
+                              fill="none"
+                              :stroke="assets[asset].col"
+                              stroke-width="2"
+                              stroke-linecap="round"
+                              class="sparkline-path"/>
+                        {{-- Live dot --}}
+                        <circle cx="180" :cy="assets[asset].ey" r="3.5" :fill="assets[asset].col"/>
+                        <circle cx="180" :cy="assets[asset].ey" r="7" :fill="assets[asset].col" opacity="0.2" style="animation: ping 1.5s ease-out infinite"/>
                     </svg>
                 </div>
 
-                <div class="px-5 pb-6">
-                    <div class="flex items-center gap-2 mb-2">
+                <div class="px-4 pb-5">
+                    <div class="flex items-center gap-2 mb-1">
                         <span class="w-1.5 h-1.5 rounded-full bg-[#0093fd] animate-pulse inline-block"></span>
-                        <span class="text-[10px] font-bold text-[#0093fd] uppercase tracking-widest">Live feed</span>
+                        <span class="text-[10px] font-bold text-[#0093fd] uppercase tracking-widest">Live oracle feed</span>
                     </div>
-                    <div class="text-base font-bold text-white">Real-time oracle ticks</div>
-                    <div class="text-sm text-[#697d91] mt-0.5">BTC · ETH · SOL · every Chainlink update</div>
+                    <div class="text-sm text-[#697d91]">Every Chainlink tick · Millisecond timestamps</div>
                 </div>
             </div>
 
-            {{-- ── Card 3: ML feature tag cloud ────────────────────────── --}}
-            <div class="relative rounded-2xl border border-[#1f2937] bg-[#17181c] overflow-hidden hover:border-[#0093fd]/25 transition-colors duration-300">
-                <div class="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[#697d91]/20 to-transparent"></div>
+            {{-- ── Card 3: ML feature spotlight ─────────────────────────── --}}
+            <div class="bento-card relative rounded-2xl border border-[#1f2937] bg-[#17181c] overflow-hidden hover:border-[#0093fd]/25 transition-colors duration-300"
+                 x-data="{
+                     hi: 0,
+                     tags: [
+                         {n:'twap_1m',    v:'84198.22'},
+                         {n:'vol_3m',     v:'312.45'},
+                         {n:'momentum',   v:'0.0041'},
+                         {n:'clob_imbal', v:'0.62'},
+                         {n:'oracle_dist',v:'33.1 bp'},
+                         {n:'yes_bid',    v:'0.58'},
+                         {n:'spread',     v:'0.018'},
+                         {n:'velocity',   v:'+0.0012'},
+                         {n:'twap_5m',    v:'84177.80'},
+                         {n:'vol_1m',     v:'89.3'},
+                         {n:'yes_ask',    v:'0.60'},
+                         {n:'market_age', v:'183s'},
+                     ]
+                 }"
+                 x-init="setInterval(() => hi = (hi+1) % 12, 950)">
+                <div class="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[#0093fd]/30 to-transparent"></div>
 
-                <div class="p-5">
-                    <div class="flex flex-wrap gap-1.5 mb-5">
-                        @foreach([
-                            'twap_1m','vol_3m','momentum','clob_imbalance',
-                            'oracle_dist_bp','yes_bid_open','spread_open',
-                            'price_velocity','twap_5m','yes_ask_close',
-                            'vol_1m','market_age',
-                        ] as $tag)
-                        <span class="text-[10px] font-mono bg-[#0a0b10] border border-[#1f2937] text-[#697d91] px-2 py-1 rounded-md">{{ $tag }}</span>
-                        @endforeach
+                <div class="p-5 flex flex-col h-full">
+                    {{-- Tag grid --}}
+                    <div class="flex flex-wrap gap-1.5 mb-4 flex-1">
+                        <template x-for="(t,i) in tags" :key="i">
+                            <span class="text-[10px] font-mono px-2 py-1 rounded-md border transition-all duration-300 cursor-default"
+                                  :class="hi===i
+                                      ? 'border-[#0093fd]/60 text-[#0093fd] bg-[#0093fd]/10 shadow-[0_0_12px_#0093fd33]'
+                                      : 'border-[#1f2937] text-[#697d91] bg-[#0a0b10]'"
+                                  x-text="t.n"></span>
+                        </template>
                         <span class="text-[10px] font-mono bg-[#0093fd]/5 border border-[#0093fd]/20 text-[#0093fd] px-2 py-1 rounded-md">+ 30 more</span>
                     </div>
+
+                    {{-- Live computed value --}}
+                    <div class="bg-[#0d0e13] border border-[#1f2937] rounded-xl px-3 py-2.5 flex items-center justify-between mb-4">
+                        <span class="text-[10px] text-[#697d91] font-mono" x-text="tags[hi].n + ':'"></span>
+                        <span class="text-sm font-bold font-mono text-[#0093fd]" x-text="tags[hi].v"></span>
+                    </div>
+
                     <div class="text-base font-bold text-white">40+ ML features</div>
                     <div class="text-sm text-[#697d91] mt-0.5">Pre-computed per window. Ready to train.</div>
                 </div>
             </div>
 
-            {{-- ── Card 4: CLOB order book (col-span-2) ────────────────── --}}
-            <div class="md:col-span-2 relative rounded-2xl border border-[#1f2937] bg-[#17181c] overflow-hidden hover:border-[#0093fd]/25 transition-colors duration-300">
+            {{-- ── Card 4: CLOB order book — live animated ──────────────── --}}
+            <div class="bento-card md:col-span-2 relative rounded-2xl border border-[#1f2937] bg-[#17181c] overflow-hidden hover:border-[#26a05e]/20 transition-colors duration-300"
+                 x-data="{
+                     flash: -1,
+                     rows: [
+                         { s:'Yes Ask', pct:74, p:0.52, vol:3800, c:'#ff4d4d' },
+                         { s:'Yes Bid', pct:61, p:0.50, vol:2900, c:'#26a05e' },
+                         { s:'No Bid',  pct:68, p:0.49, vol:1900, c:'#26a05e' },
+                         { s:'No Ask',  pct:82, p:0.51, vol:3100, c:'#ff4d4d' },
+                     ]
+                 }"
+                 x-init="setInterval(() => {
+                     let i = Math.floor(Math.random()*4);
+                     rows[i] = {...rows[i],
+                         pct: Math.round(Math.max(12, Math.min(94, rows[i].pct + (Math.random()*14-7)))),
+                         vol: Math.round(Math.max(500, rows[i].vol + (Math.random()*400-200)))
+                     };
+                     flash = i;
+                     setTimeout(() => flash = -1, 350);
+                 }, 1300)">
                 <div class="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[#26a05e]/30 to-transparent"></div>
 
-                <div class="p-6 flex flex-col sm:flex-row items-center gap-8">
+                <div class="p-6 flex flex-col sm:flex-row gap-8 items-center">
 
-                    {{-- Order book depth bars --}}
-                    <div class="w-full sm:w-72 flex-shrink-0">
-                        <div class="text-[10px] font-semibold text-[#697d91] uppercase tracking-widest mb-3">
-                            Order book snapshot — BTC ↑$84k window
+                    {{-- Live order book --}}
+                    <div class="w-full sm:w-[55%] flex-shrink-0">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="text-[10px] font-semibold text-[#697d91] uppercase tracking-widest">Order book — BTC ↑$84k</span>
+                            <span class="flex items-center gap-1.5 text-[10px] text-[#26a05e] font-semibold">
+                                <span class="w-1.5 h-1.5 rounded-full bg-[#26a05e] animate-pulse inline-block"></span>
+                                LIVE
+                            </span>
                         </div>
+
+                        {{-- Header row --}}
+                        <div class="flex items-center gap-2 mb-2 text-[9px] text-[#2e3841] font-mono uppercase tracking-wider">
+                            <span class="w-16 text-right flex-shrink-0">Side</span>
+                            <span class="flex-1 pl-1">Depth</span>
+                            <span class="w-10 text-right flex-shrink-0">Price</span>
+                            <span class="w-12 text-right flex-shrink-0">Vol</span>
+                        </div>
+
                         <div class="space-y-2">
-                            @foreach([
-                                ['side'=>'Yes Ask','pct'=>78,'price'=>'0.52','c'=>'#ff6b6b'],
-                                ['side'=>'Yes Bid','pct'=>64,'price'=>'0.50','c'=>'#26a05e'],
-                                ['side'=>'No Bid', 'pct'=>70,'price'=>'0.49','c'=>'#26a05e'],
-                                ['side'=>'No Ask', 'pct'=>85,'price'=>'0.52','c'=>'#ff6b6b'],
-                            ] as $row)
-                            <div class="flex items-center gap-2.5">
-                                <span class="w-14 text-[10px] font-mono text-[#697d91] text-right flex-shrink-0">{{ $row['side'] }}</span>
-                                <div class="flex-1 h-5 bg-[#0a0b10] rounded-sm overflow-hidden">
-                                    <div class="h-full rounded-sm"
-                                         style="width:{{ $row['pct'] }}%; background:{{ $row['c'] }}18; border-right: 1.5px solid {{ $row['c'] }}60;"></div>
+                            <template x-for="(r,i) in rows" :key="i">
+                                <div class="flex items-center gap-2 rounded-lg px-1 py-0.5 transition-all duration-300"
+                                     :class="flash===i ? (r.c==='#26a05e' ? 'bg-[#26a05e]/10' : 'bg-[#ff4d4d]/10') : ''">
+                                    <span class="w-16 text-[10px] font-mono text-right flex-shrink-0 transition-colors"
+                                          :style="flash===i ? 'color:'+r.c : ''"
+                                          :class="flash===i ? '' : 'text-[#697d91]'"
+                                          x-text="r.s"></span>
+                                    <div class="flex-1 h-6 bg-[#0a0b10] rounded overflow-hidden">
+                                        <div class="h-full rounded transition-all duration-500 ease-out"
+                                             :style="'width:'+r.pct+'%; background:'+r.c+'22; border-right:2px solid '+r.c+'80'"></div>
+                                    </div>
+                                    <span class="w-10 text-[10px] font-mono text-right flex-shrink-0 tabular-nums"
+                                          :style="'color:'+r.c"
+                                          x-text="r.p.toFixed(2)"></span>
+                                    <span class="w-12 text-[10px] font-mono text-right flex-shrink-0 text-[#697d91] tabular-nums"
+                                          x-text="r.vol.toLocaleString()"></span>
                                 </div>
-                                <span class="w-8 text-[10px] font-mono flex-shrink-0" style="color:{{ $row['c'] }}">{{ $row['price'] }}</span>
-                            </div>
-                            @endforeach
+                            </template>
                         </div>
                     </div>
 
                     {{-- Text --}}
                     <div>
-                        <div class="text-base font-bold text-white mb-1.5">Full CLOB order book</div>
+                        <div class="text-base font-bold text-white mb-2">Full CLOB order book</div>
                         <p class="text-sm text-[#697d91] leading-relaxed">
                             Yes/No bid-ask depth captured at every oracle tick.
-                            Spread, mid price, and imbalance ratio per market —
-                            the microstructure signal most traders never have.
+                            Spread, mid price, and imbalance ratio —
+                            the microstructure signal most traders never see.
                         </p>
+                        <div class="mt-4 flex flex-wrap gap-2">
+                            @foreach(['Bid/ask depth','Imbalance ratio','Mid price','Spread'] as $chip)
+                            <span class="text-[10px] text-[#697d91] border border-[#1f2937] rounded-full px-2.5 py-1">{{ $chip }}</span>
+                            @endforeach
+                        </div>
                     </div>
                 </div>
             </div>
 
+        </div>
+
+        {{-- CTA --}}
+        <div class="text-center mt-16 pt-12 border-t border-[#1f2937]">
+            <h3 class="text-2xl sm:text-3xl font-bold text-white mb-2">Ready to see the data yourself?</h3>
+            <p class="text-[#697d91] text-sm mb-8 max-w-lg mx-auto">
+                Free tier · No credit card · Works with Cursor, Claude Code, OpenClaw, Codex, v0, and any tool you build with
+            </p>
+            <a href="{{ route('register') }}"
+               class="inline-flex items-center gap-2 bg-[#0093fd] hover:bg-[#0080e0] text-white font-semibold px-8 py-3 rounded-xl transition-colors text-sm">
+                Start Free
+                <svg class="w-4 h-4" viewBox="0 0 16 16" fill="none">
+                    <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </a>
+        </div>
+
+    </div>
+</section>
+
+
+{{-- ============================================================
+     §3b  HOW IT WORKS — animated steps
+============================================================ --}}
+<section class="border-t border-[#1f2937] py-24"
+    x-data="{
+        step: 1,
+        progress: 0,
+        started: false,
+        timer: null,
+        start() {
+            if (this.started) return;
+            this.started = true;
+            this.tick();
+        },
+        tick() {
+            this.timer = setInterval(() => {
+                this.progress += 1.5;
+                if (this.progress >= 100) {
+                    this.progress = 0;
+                    this.step = this.step >= 3 ? 1 : this.step + 1;
+                }
+            }, 45);
+        },
+        setStep(n) {
+            this.step = n;
+            this.progress = 0;
+        }
+    }"
+    x-intersect.once="start()">
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        {{-- Section header --}}
+        <div class="text-center mb-16">
+            <div class="text-xs font-semibold text-[#0093fd] uppercase tracking-[0.15em] mb-3">Get started in minutes</div>
+            <h2 class="text-3xl sm:text-4xl font-bold text-white">Three steps to live data.</h2>
+            <p class="text-[#697d91] mt-3">No setup headaches. API key in 60 seconds.</p>
+        </div>
+
+        {{-- Desktop: timeline left + visual right | Mobile: stacked --}}
+        <div class="flex flex-col lg:flex-row gap-12 lg:gap-20 items-start">
+
+            {{-- LEFT: Steps timeline --}}
+            <div class="w-full lg:w-[44%] flex flex-col gap-0">
+
+                @foreach ([
+                    ['n'=>1, 'icon'=>'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z', 'label'=>'Create free account', 'sub'=>'Sign up with your email — no card required. Your API key is provisioned instantly.'],
+                    ['n'=>2, 'icon'=>'M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z', 'label'=>'Copy your API key', 'sub'=>'One key. Works with curl, Python, JS — anything that speaks HTTP. Paste it in and you\'re live.'],
+                    ['n'=>3, 'icon'=>'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z', 'label'=>'Start pulling data', 'sub'=>'Hit any endpoint. Oracle ticks, CLOB snapshots, 40+ ML features — all timestamped, clean JSON, ready to plug into your strategy.'],
+                ] as $s)
+                <div class="flex gap-5 cursor-pointer group" @click="setStep({{ $s['n'] }})">
+
+                    {{-- Icon + connector line column --}}
+                    <div class="flex flex-col items-center">
+                        {{-- Step circle --}}
+                        <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-300 border-2"
+                             :class="step === {{ $s['n'] }} ? 'bg-[#0093fd] border-[#0093fd] shadow-[0_0_16px_#0093fd44]' : (step > {{ $s['n'] }} ? 'bg-[#0093fd]/20 border-[#0093fd]/40' : 'bg-[#17181c] border-[#2e3841] group-hover:border-[#0093fd]/40')">
+                            <svg class="w-4 h-4 transition-colors duration-300"
+                                 :class="step >= {{ $s['n'] }} ? 'text-white' : 'text-[#697d91]'"
+                                 fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="{{ $s['icon'] }}"/>
+                            </svg>
+                        </div>
+
+                        {{-- Connector line (only between steps) --}}
+                        @if ($s['n'] < 3)
+                        <div class="w-px flex-1 my-1 min-h-[64px] relative overflow-hidden bg-[#1f2937]">
+                            <div class="absolute top-0 left-0 w-full bg-[#0093fd] transition-all duration-300 ease-out rounded-full"
+                                 :style="step > {{ $s['n'] }} ? 'height:100%' : (step === {{ $s['n'] }} ? 'height:' + progress + '%' : 'height:0%')"></div>
+                        </div>
+                        @endif
+                    </div>
+
+                    {{-- Step content --}}
+                    <div class="pb-10 pt-1.5 flex-1">
+                        <div class="flex items-center gap-2 mb-1.5">
+                            <span class="text-[10px] font-bold font-mono tracking-widest transition-colors duration-300"
+                                  :class="step >= {{ $s['n'] }} ? 'text-[#0093fd]' : 'text-[#2e3841]'">0{{ $s['n'] }}</span>
+                            <h3 class="text-sm font-bold transition-colors duration-300"
+                                :class="step === {{ $s['n'] }} ? 'text-white' : 'text-[#697d91]'">{{ $s['label'] }}</h3>
+                        </div>
+                        <p class="text-[13px] leading-relaxed transition-colors duration-300"
+                           :class="step === {{ $s['n'] }} ? 'text-[#8a9ab0]' : 'text-[#2e3841]'">{{ $s['sub'] }}</p>
+
+                        {{-- Progress bar (only on active step) --}}
+                        <div class="mt-3 h-0.5 bg-[#1f2937] rounded-full overflow-hidden transition-opacity duration-300"
+                             :class="step === {{ $s['n'] }} ? 'opacity-100' : 'opacity-0'">
+                            <div class="h-full bg-[#0093fd] rounded-full transition-none"
+                                 :style="step === {{ $s['n'] }} ? 'width:' + progress + '%' : 'width:0%'"></div>
+                        </div>
+                    </div>
+                </div>
+                @endforeach
+
+            </div>
+
+            {{-- RIGHT: Visual panel — swaps per step --}}
+            <div class="w-full lg:w-[56%] lg:sticky lg:top-24">
+
+                {{-- Step 1 — Account / API key card --}}
+                <div x-show="step === 1" x-transition:enter="transition ease-out duration-400" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
+                    <div class="bg-[#17181c] border border-[#1f2937] rounded-2xl overflow-hidden">
+                        <div class="px-5 py-3 border-b border-[#1f2937] flex items-center gap-2">
+                            <div class="w-2.5 h-2.5 rounded-full bg-[#ff5f56]"></div>
+                            <div class="w-2.5 h-2.5 rounded-full bg-[#febc2e]"></div>
+                            <div class="w-2.5 h-2.5 rounded-full bg-[#28c840]"></div>
+                            <span class="ml-2 text-xs text-[#697d91] font-mono">sign up</span>
+                        </div>
+                        <div class="p-6 space-y-4">
+                            <div>
+                                <div class="text-xs text-[#697d91] mb-1.5">Email</div>
+                                <div class="bg-[#0d0e13] border border-[#2e3841] rounded-lg px-3 py-2.5 text-sm text-[#8a9ab0] font-mono">you@example.com</div>
+                            </div>
+                            <div>
+                                <div class="text-xs text-[#697d91] mb-1.5">Password</div>
+                                <div class="bg-[#0d0e13] border border-[#2e3841] rounded-lg px-3 py-2.5 text-sm text-[#8a9ab0] font-mono tracking-widest">••••••••••</div>
+                            </div>
+                            <div class="bg-[#0093fd] rounded-lg py-2.5 text-center text-sm font-semibold text-white">Create free account →</div>
+                            <div class="flex items-center gap-2 pt-2">
+                                <div class="w-2 h-2 rounded-full bg-[#26a05e] animate-pulse"></div>
+                                <span class="text-xs text-[#697d91]">API key provisioned instantly — no card required</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Step 2 — API key + curl --}}
+                <div x-show="step === 2" x-transition:enter="transition ease-out duration-400" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
+                    <div class="bg-[#17181c] border border-[#1f2937] rounded-2xl overflow-hidden">
+                        <div class="px-5 py-3 border-b border-[#1f2937] flex items-center gap-2">
+                            <div class="w-2.5 h-2.5 rounded-full bg-[#ff5f56]"></div>
+                            <div class="w-2.5 h-2.5 rounded-full bg-[#febc2e]"></div>
+                            <div class="w-2.5 h-2.5 rounded-full bg-[#28c840]"></div>
+                            <span class="ml-2 text-xs text-[#697d91] font-mono">dashboard — API key</span>
+                        </div>
+                        <div class="p-6 space-y-4">
+                            <div>
+                                <div class="text-xs text-[#697d91] mb-1.5 uppercase tracking-wider">Your API Key</div>
+                                <div class="bg-[#0d0e13] border border-[#0093fd]/30 rounded-lg px-3 py-2.5 flex items-center justify-between gap-3">
+                                    <span class="text-sm text-[#0093fd] font-mono tracking-tight">pmd_live_sk_a7f3b9c2e1d845...</span>
+                                    <span class="text-xs text-[#697d91] flex-shrink-0 border border-[#2e3841] rounded px-1.5 py-0.5">Copy</span>
+                                </div>
+                            </div>
+                            <div class="bg-[#0d0e13] border border-[#1f2937] rounded-lg p-4">
+                                <div class="text-xs text-[#697d91] mb-2 font-mono">Quick test</div>
+                                <pre class="text-xs font-mono leading-relaxed text-[#e5e5e5] overflow-x-auto whitespace-pre-wrap"><span class="text-[#697d91]">$</span> curl https://polymarketdata.io/api/v1/windows \
+  <span class="text-[#697d91]">-H</span> <span class="text-[#26a05e]">"Authorization: Bearer pmd_live_sk_a7f3..."</span></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Step 3 — JSON response --}}
+                <div x-show="step === 3" x-transition:enter="transition ease-out duration-400" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
+                    <div class="bg-[#17181c] border border-[#1f2937] rounded-2xl overflow-hidden">
+                        <div class="px-5 py-3 border-b border-[#1f2937] flex items-center gap-2">
+                            <div class="w-2.5 h-2.5 rounded-full bg-[#ff5f56]"></div>
+                            <div class="w-2.5 h-2.5 rounded-full bg-[#febc2e]"></div>
+                            <div class="w-2.5 h-2.5 rounded-full bg-[#28c840]"></div>
+                            <span class="ml-2 text-xs text-[#697d91] font-mono">response.json</span>
+                            <span class="ml-auto text-xs text-[#26a05e] font-mono">200 OK</span>
+                        </div>
+                        <div class="p-5">
+                            <pre class="text-xs font-mono leading-relaxed text-[#e5e5e5] overflow-x-auto"><span class="text-[#697d91]">{</span>
+  <span class="text-[#0093fd]">"data"</span><span class="text-[#697d91]">:</span> <span class="text-[#697d91]">[{</span>
+    <span class="text-[#0093fd]">"asset"</span><span class="text-[#697d91]">:</span> <span class="text-[#26a05e]">"BTC"</span><span class="text-[#697d91]">,</span>
+    <span class="text-[#0093fd]">"direction"</span><span class="text-[#697d91]">:</span> <span class="text-[#26a05e]">"UP"</span><span class="text-[#697d91]">,</span>
+    <span class="text-[#0093fd]">"break_price_usd"</span><span class="text-[#697d91]">:</span> <span class="text-[#f0a500]">84231.50</span><span class="text-[#697d91]">,</span>
+    <span class="text-[#0093fd]">"outcome"</span><span class="text-[#697d91]">:</span> <span class="text-[#26a05e]">"YES"</span><span class="text-[#697d91]">,</span>
+    <span class="text-[#0093fd]">"features"</span><span class="text-[#697d91]">:</span> <span class="text-[#697d91]">{</span>
+      <span class="text-[#0093fd]">"twap_1m"</span><span class="text-[#697d91]">:</span> <span class="text-[#f0a500]">84198.22</span><span class="text-[#697d91]">,</span>
+      <span class="text-[#0093fd]">"vol_3m"</span><span class="text-[#697d91]">:</span> <span class="text-[#f0a500]">312.45</span><span class="text-[#697d91]">,</span>
+      <span class="text-[#0093fd]">"clob_imbalance"</span><span class="text-[#697d91]">:</span> <span class="text-[#f0a500]">0.62</span><span class="text-[#697d91]">,</span>
+      <span class="text-[#0093fd]">"momentum"</span><span class="text-[#697d91]">:</span> <span class="text-[#f0a500]">0.0041</span>
+    <span class="text-[#697d91]">}</span>
+  <span class="text-[#697d91]">}]</span><span class="text-[#697d91]">,</span>
+  <span class="text-[#0093fd]">"meta"</span><span class="text-[#697d91]">:</span> <span class="text-[#697d91]">{</span> <span class="text-[#0093fd]">"total"</span><span class="text-[#697d91]">:</span> <span class="text-[#f0a500]">2734</span> <span class="text-[#697d91]">}</span>
+<span class="text-[#697d91]">}</span></pre>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
         </div>
     </div>
 </section>
@@ -486,10 +884,38 @@
      §4  FEATURE DEEP DIVE (tabbed)
 ============================================================ --}}
 <section class="border-t border-[#1f2937] py-28"
-         x-data="{ tab: 'windows' }">
+    x-data="{
+        tab: 'windows',
+        tabs: ['windows','oracle','clob','candles'],
+        vis: false,
+        pinned: false,
+        progress: 0,
+        _timer: null,
+        startCycle() {
+            this._timer = setInterval(() => {
+                if (this.pinned) { clearInterval(this._timer); return; }
+                this.progress += 1.8;
+                if (this.progress >= 100) {
+                    this.progress = 0;
+                    let i = this.tabs.indexOf(this.tab);
+                    this.tab = this.tabs[(i + 1) % this.tabs.length];
+                }
+            }, 60);
+        },
+        pick(t) {
+            this.tab = t;
+            this.pinned = true;
+            this.progress = 0;
+            clearInterval(this._timer);
+        }
+    }"
+    x-intersect.once="vis = true; startCycle()">
+
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        <div class="text-center mb-12">
+        {{-- Header --}}
+        <div class="text-center mb-12 transition-all duration-700"
+             :class="vis ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'">
             <div class="text-xs font-semibold text-[#0093fd] uppercase tracking-[0.15em] mb-3">Endpoints</div>
             <h2 class="text-3xl sm:text-4xl font-bold text-white">Everything in one API</h2>
             <p class="text-[#697d91] mt-3 max-w-xl mx-auto">Four endpoints. Every signal that matters for trading Polymarket binary markets.</p>
@@ -497,19 +923,24 @@
 
         {{-- Tab bar --}}
         <div class="flex items-center justify-center gap-1 mb-12 bg-[#17181c] border border-[#1f2937]
-                    rounded-xl p-1.5 w-fit mx-auto">
+                    rounded-xl p-1.5 w-fit mx-auto transition-all duration-700 delay-150"
+             :class="vis ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'">
             @foreach([
                 ['windows', 'Windows'],
                 ['oracle',  'Oracle Ticks'],
                 ['clob',    'CLOB Snapshots'],
                 ['candles', '1m Candles'],
             ] as [$key, $label])
-            <button @click="tab = '{{ $key }}'"
+            <button @click="pick('{{ $key }}')"
+                    class="relative text-xs sm:text-sm font-medium px-4 py-2 rounded-lg transition-all duration-200 overflow-hidden"
                     :class="tab === '{{ $key }}'
                         ? 'bg-[#0a0b10] text-[#e5e5e5] border border-[#2e3841] shadow-sm'
-                        : 'text-[#697d91] hover:text-[#8a9ab0]'"
-                    class="text-xs sm:text-sm font-medium px-4 py-2 rounded-lg transition-all duration-150">
+                        : 'text-[#697d91] hover:text-[#8a9ab0]'">
                 {{ $label }}
+                {{-- Progress bar at bottom of active tab --}}
+                <span x-show="tab === '{{ $key }}' && !pinned"
+                      class="absolute bottom-0 left-0 h-0.5 bg-[#0093fd] rounded-full transition-none"
+                      :style="tab === '{{ $key }}' ? 'width:' + progress + '%' : 'width:0'"></span>
             </button>
             @endforeach
         </div>
@@ -583,9 +1014,12 @@
             ],
         ] as $key => $panel)
         <div x-show="tab === '{{ $key }}'" x-cloak
-             x-transition:enter="transition ease-out duration-200"
-             x-transition:enter-start="opacity-0 translate-y-2"
-             x-transition:enter-end="opacity-1 translate-y-0">
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 translate-x-4"
+             x-transition:enter-end="opacity-100 translate-x-0"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
 
                 {{-- Left: description --}}
@@ -630,6 +1064,184 @@
         </div>
         @endforeach
 
+    </div>
+</section>
+
+
+{{-- ============================================================
+     §4b  USE CASES
+============================================================ --}}
+<section class="border-t border-[#1f2937] py-24"
+    x-data="{
+        active: 0,
+        vis: false,
+        cases: [
+            {
+                icon: 'M3 3v16a2 2 0 002 2h16M19 9l-5 5-4-4-3 3',
+                label: 'Algo Traders',
+                sub: 'Validate before you risk capital',
+                accent: '#0093fd',
+                title: 'Algo Traders',
+                desc: 'Backtest entry and exit signals against real Chainlink oracle ticks and CLOB snapshots. Replay months of BTC, ETH, and SOL Up/Down markets — measure your edge before risking a single dollar.',
+                metrics: [
+                    { label: 'Strategy', val: 'Mean Reversion', green: false },
+                    { label: 'Timeframe', val: '5m BTC Up/Down', green: false },
+                    { label: 'Windows', val: '2,734', green: false },
+                    { label: 'Win Rate', val: '68.3%', green: true },
+                    { label: 'Sharpe', val: '2.14', green: true },
+                    { label: 'Max DD', val: '-6.2%', green: false },
+                ]
+            },
+            {
+                icon: 'M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18',
+                label: 'Bot Builders',
+                sub: 'Real data, any language, ship fast',
+                accent: '#0093fd',
+                title: 'Bot Builders',
+                desc: 'Your bot needs oracle prices and CLOB depth on every tick. One API key, four endpoints, clean JSON. Works with Python, JavaScript, curl — anything with HTTP. No setup headaches, API key in 60 seconds.',
+                metrics: [
+                    { label: 'Endpoint', val: '/oracle-ticks', green: false },
+                    { label: 'Latency', val: 'Real-time', green: true },
+                    { label: 'Auth', val: 'Bearer token', green: false },
+                    { label: 'Format', val: 'JSON', green: false },
+                    { label: 'SDKs', val: 'Any HTTP client', green: false },
+                    { label: 'Free tier', val: '100 req/day', green: true },
+                ]
+            },
+            {
+                icon: 'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z',
+                label: 'ML Researchers',
+                sub: 'Real labels, real financial stakes',
+                accent: '#0093fd',
+                title: 'ML Researchers',
+                desc: '188K+ labeled binary outcomes from Polymarket\'s 5-minute Up/Down markets. 40+ pre-computed features per window — TWAPs, volatility, momentum, CLOB imbalance. Real financial stakes, millisecond timestamps. Novel dataset for prediction research.',
+                metrics: [
+                    { label: 'Records', val: '188,203', green: false },
+                    { label: 'Label type', val: 'Binary YES/NO', green: false },
+                    { label: 'Features', val: '40+', green: true },
+                    { label: 'Assets', val: 'BTC · ETH · SOL', green: false },
+                    { label: 'Timestamps', val: 'Millisecond', green: true },
+                    { label: 'Source', val: 'Chainlink RTDS', green: false },
+                ]
+            },
+            {
+                icon: 'M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4',
+                label: 'App Developers',
+                sub: 'Ship prediction market products fast',
+                accent: '#0093fd',
+                title: 'App Developers',
+                desc: 'Build Polymarket dashboards, analytics tools, or trading apps on top of a clean REST API. Four endpoints. Consistent JSON schema. Free tier to prototype, Pro when you\'re ready to ship to users.',
+                metrics: [
+                    { label: 'Endpoints', val: '4 total', green: false },
+                    { label: 'Auth', val: 'API key header', green: false },
+                    { label: 'Schema', val: 'Stable JSON', green: true },
+                    { label: 'Pagination', val: 'Cursor-based', green: false },
+                    { label: 'Free tier', val: 'Forever', green: true },
+                    { label: 'Uptime', val: '99.9% SLA', green: false },
+                ]
+            },
+        ]
+    }"
+    x-intersect.once="vis = true">
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        {{-- Header --}}
+        <div class="text-center mb-12">
+            <div class="text-xs font-semibold text-[#0093fd] uppercase tracking-[0.15em] mb-3">Use cases</div>
+            <h2 class="text-3xl sm:text-4xl font-bold text-white">Built for builders who move fast.</h2>
+            <p class="text-[#697d91] mt-3">From first-time prediction market traders to production quant systems.</p>
+        </div>
+
+        {{-- 5-col grid: 2 left nav + 3 right detail --}}
+        <div class="grid gap-4 lg:grid-cols-5 lg:gap-6 items-start">
+
+            {{-- LEFT: use case nav cards --}}
+            <div class="lg:col-span-2 grid grid-cols-2 sm:grid-cols-1 gap-2">
+                <template x-for="(c, i) in cases" :key="i">
+                    <button @click="active = i"
+                        class="w-full text-left rounded-xl border p-3 sm:p-4 transition-all duration-200 relative overflow-hidden"
+                        :class="active === i
+                            ? 'bg-[#17181c] border-[#0093fd]/40 shadow-[0_0_20px_#0093fd0a]'
+                            : 'bg-[#17181c]/40 border-transparent hover:bg-[#17181c]/70 hover:border-[#1f2937]'">
+
+                        <div class="flex items-center gap-3">
+                            {{-- Icon --}}
+                            <div class="flex w-9 h-9 flex-shrink-0 items-center justify-center rounded-lg transition-colors"
+                                 :class="active === i ? 'bg-[#0093fd]/10' : 'bg-[#1f2937]'">
+                                <svg class="w-4 h-4 transition-colors" :class="active === i ? 'text-[#0093fd]' : 'text-[#697d91]'"
+                                     fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path :d="c.icon"/>
+                                </svg>
+                            </div>
+
+                            {{-- Text --}}
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm font-bold transition-colors" :class="active === i ? 'text-white' : 'text-[#8a9ab0]'" x-text="c.label"></span>
+                                    <svg class="w-3.5 h-3.5 transition-all" :class="active === i ? 'text-[#0093fd] rotate-90' : 'text-[#2e3841] rotate-0'"
+                                         fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 18l6-6-6-6"/>
+                                    </svg>
+                                </div>
+                                <p class="text-[11px] mt-0.5 hidden sm:block transition-colors"
+                                   :class="active === i ? 'text-[#697d91]' : 'text-[#2e3841]'"
+                                   x-text="c.sub"></p>
+                            </div>
+                        </div>
+                    </button>
+                </template>
+            </div>
+
+            {{-- RIGHT: detail panel --}}
+            <div class="lg:col-span-3">
+                <div class="rounded-2xl border border-[#1f2937] bg-[#17181c] p-5 sm:p-7 min-h-[300px] sm:min-h-[340px] flex flex-col relative overflow-hidden">
+                    <div class="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[#0093fd]/40 to-transparent"></div>
+
+                    <template x-for="(c, i) in cases" :key="i">
+                        <div x-show="active === i"
+                             x-transition:enter="transition ease-out duration-300"
+                             x-transition:enter-start="opacity-0 translate-y-3"
+                             x-transition:enter-end="opacity-100 translate-y-0"
+                             class="flex-1 flex flex-col h-full">
+
+                            {{-- Title --}}
+                            <div class="flex items-center gap-2.5 mb-3">
+                                <div class="w-7 h-7 flex items-center justify-center rounded-lg bg-[#0093fd]/10">
+                                    <svg class="w-3.5 h-3.5 text-[#0093fd]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path :d="c.icon"/>
+                                    </svg>
+                                </div>
+                                <h3 class="text-base font-bold text-white" x-text="c.title"></h3>
+                            </div>
+
+                            {{-- Description --}}
+                            <p class="text-sm text-[#697d91] leading-relaxed mb-6" x-text="c.desc"></p>
+
+                            {{-- Sample output metrics --}}
+                            <div class="mt-auto">
+                                <div class="flex items-center gap-1.5 mb-3">
+                                    <div class="w-1.5 h-1.5 rounded-full bg-[#0093fd]"></div>
+                                    <span class="text-[10px] font-semibold uppercase tracking-wider text-[#697d91]">Sample output</span>
+                                </div>
+                                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                    <template x-for="(m, j) in c.metrics" :key="j">
+                                        <div class="rounded-lg border bg-[#0d0e13] px-3 py-2.5 transition-colors"
+                                             :class="m.green ? 'border-[#0093fd]/25' : 'border-[#1f2937]'">
+                                            <div class="text-[9px] text-[#697d91] uppercase tracking-wider" x-text="m.label"></div>
+                                            <div class="text-sm font-bold font-mono mt-0.5 transition-colors"
+                                                 :class="m.green ? 'text-[#0093fd]' : 'text-white'"
+                                                 x-text="m.val"></div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+        </div>
     </div>
 </section>
 
