@@ -23,22 +23,16 @@ class PublicLiveController extends Controller
 
     private function build(): array
     {
-        // Latest price tick per asset (3 rows max after dedup)
-        $ticks = OracleTick::with('asset')
-            ->orderByDesc('ts')
-            ->limit(30)
-            ->get()
-            ->unique(fn ($t) => $t->asset->symbol ?? $t->asset_id)
-            ->take(3)
-            ->values();
-
-        $oracle = $ticks->mapWithKeys(function ($tick) {
-            $symbol = $tick->asset->symbol ?? 'BTC';
-            return [$symbol => [
+        // Latest tick per asset — one targeted query per symbol so BTC is always present
+        $oracle = collect(['BTC', 'ETH', 'SOL'])->mapWithKeys(function (string $symbol) {
+            $tick = OracleTick::whereHas('asset', fn ($q) => $q->where('symbol', $symbol))
+                ->orderByDesc('ts')
+                ->first();
+            return $tick ? [$symbol => [
                 'price_usd' => (float) $tick->price_usd,
                 'ts'        => (int)   $tick->ts,
-            ]];
-        });
+            ]] : [];
+        })->filter();
 
         // Find the active BTC window with the most recent CLOB snapshot
         $nowMs      = (int) (microtime(true) * 1000);

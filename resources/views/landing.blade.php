@@ -453,7 +453,12 @@ document.addEventListener('alpine:init', () => {
                 if (!r.ok) return;
                 const d = await r.json();
                 this.latency = Date.now() - t0;
-                if (d.oracle && Object.keys(d.oracle).length) this.oracle = d.oracle;
+                // Merge per-asset so a partial response never wipes existing values
+                if (d.oracle) {
+                    Object.entries(d.oracle).forEach(([sym, val]) => {
+                        this.oracle[sym] = val;
+                    });
+                }
                 if (d.clob) this.clob = d.clob;
             } catch(e) {}
         }
