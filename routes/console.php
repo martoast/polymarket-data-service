@@ -8,4 +8,4 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-Schedule::command('ingest:sync --once')->everyFiveMinutes();
+// Recorder runs as a persistent supervisor process (recorder:start) — no schedule needed here.

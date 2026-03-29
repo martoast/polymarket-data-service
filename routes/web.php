@@ -3,6 +3,7 @@
 use App\Http\Controllers\Web\WebAuthController;
 use App\Http\Controllers\Web\DashboardController;
 use App\Http\Controllers\Web\BillingWebController;
+use App\Http\Controllers\Web\RecorderController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -26,6 +27,12 @@ Route::middleware('auth')->group(function () {
         $request->user()->sendEmailVerificationNotification();
         return back()->with('status', 'Verification link sent!');
     })->middleware('throttle:6,1')->name('verification.send');
+});
+
+// Admin routes
+Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
+    Route::get('/recorder', [RecorderController::class, 'index'])->name('admin.recorder');
+    Route::get('/recorder/status', [RecorderController::class, 'status'])->name('admin.recorder.status');
 });
 
 // Authenticated web routes
