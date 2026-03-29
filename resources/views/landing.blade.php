@@ -406,6 +406,30 @@
 </section>
 
 
+{{-- Live data store — polls /api/public/live every 5s --}}
+<script>
+document.addEventListener('alpine:init', () => {
+    Alpine.store('live', {
+        latency: null,
+        oracle: {},
+        clob: null,
+        async poll() {
+            const t0 = Date.now();
+            try {
+                const r = await fetch('/api/public/live');
+                if (!r.ok) return;
+                const d = await r.json();
+                this.latency = Date.now() - t0;
+                if (d.oracle && Object.keys(d.oracle).length) this.oracle = d.oracle;
+                if (d.clob) this.clob = d.clob;
+            } catch(e) {}
+        }
+    });
+    Alpine.store('live').poll();
+    setInterval(() => Alpine.store('live').poll(), 5000);
+});
+</script>
+
 {{-- ============================================================
      §3  VALUE PROPOSITION — BENTO GRID
 ============================================================ --}}
@@ -489,10 +513,16 @@
                  x-data="{
                      asset: 0,
                      assets: [
-                         { name:'BTC', price:'$84,231', chg:'+0.42%', col:'#0093fd', ey:3,  path:'M0 68 C6 62 10 74 16 66 S22 50 28 54 S34 42 40 46 S46 34 52 37 S58 50 64 43 S70 30 76 33 S82 44 88 36 S94 22 100 26 S106 38 112 30 S118 18 124 21 S130 30 136 22 S142 10 148 14 S154 22 160 15 S166 6 172 8 S176 4 180 3' },
-                         { name:'ETH', price:'$3,182',  chg:'+1.1%',  col:'#818cf8', ey:14, path:'M0 72 C6 68 12 60 18 63 S24 74 30 67 S36 55 42 58 S48 66 54 59 S60 46 66 50 S72 60 78 52 S84 40 90 44 S96 54 102 46 S108 34 114 38 S120 48 126 40 S132 28 138 32 S144 42 150 34 S156 20 162 24 S168 32 174 26 S178 18 180 14' },
-                         { name:'SOL', price:'$142.80', chg:'+2.3%',  col:'#34d399', ey:8,  path:'M0 75 C8 70 14 78 20 71 S26 58 32 62 S38 72 44 64 S50 52 56 56 S62 66 68 57 S74 44 80 48 S86 58 92 49 S98 36 104 40 S110 52 116 43 S122 30 128 34 S134 44 140 35 S146 22 152 27 S158 36 164 28 S170 14 176 18 S179 10 180 8' },
-                     ]
+                         { name:'BTC', col:'#0093fd', ey:3,  path:'M0 68 C6 62 10 74 16 66 S22 50 28 54 S34 42 40 46 S46 34 52 37 S58 50 64 43 S70 30 76 33 S82 44 88 36 S94 22 100 26 S106 38 112 30 S118 18 124 21 S130 30 136 22 S142 10 148 14 S154 22 160 15 S166 6 172 8 S176 4 180 3' },
+                         { name:'ETH', col:'#818cf8', ey:14, path:'M0 72 C6 68 12 60 18 63 S24 74 30 67 S36 55 42 58 S48 66 54 59 S60 46 66 50 S72 60 78 52 S84 40 90 44 S96 54 102 46 S108 34 114 38 S120 48 126 40 S132 28 138 32 S144 42 150 34 S156 20 162 24 S168 32 174 26 S178 18 180 14' },
+                         { name:'SOL', col:'#34d399', ey:8,  path:'M0 75 C8 70 14 78 20 71 S26 58 32 62 S38 72 44 64 S50 52 56 56 S62 66 68 57 S74 44 80 48 S86 58 92 49 S98 36 104 40 S110 52 116 43 S122 30 128 34 S134 44 140 35 S146 22 152 27 S158 36 164 28 S170 14 176 18 S179 10 180 8' },
+                     ],
+                     get livePrice() {
+                         const sym = this.assets[this.asset].name;
+                         const p = $store.live.oracle[sym]?.price_usd;
+                         if (!p) return '—';
+                         return '$' + Number(p).toLocaleString('en-US', { minimumFractionDigits: p < 10 ? 2 : 0, maximumFractionDigits: p < 10 ? 4 : 0 });
+                     }
                  }"
                  x-init="setInterval(() => asset = (asset+1)%3, 3000)">
                 <div class="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[#0093fd]/30 to-transparent"></div>
@@ -510,8 +540,8 @@
 
                 {{-- Price display --}}
                 <div class="px-4 pt-3 pb-1 flex items-baseline gap-2">
-                    <span class="text-2xl font-bold text-white font-mono" x-text="assets[asset].price"></span>
-                    <span class="text-sm font-semibold text-[#26a05e]" x-text="assets[asset].chg"></span>
+                    <span class="text-2xl font-bold text-white font-mono" x-text="livePrice"></span>
+                    <span class="text-xs font-mono text-[#2e3841]" x-text="$store.live.latency ? $store.live.latency + 'ms' : ''" x-show="$store.live.latency"></span>
                 </div>
 
                 {{-- Chart --}}
@@ -536,9 +566,14 @@
                 </div>
 
                 <div class="px-4 pb-5">
-                    <div class="flex items-center gap-2 mb-1">
-                        <span class="w-1.5 h-1.5 rounded-full bg-[#0093fd] animate-pulse inline-block"></span>
-                        <span class="text-[10px] font-bold text-[#0093fd] uppercase tracking-widest">Live oracle feed</span>
+                    <div class="flex items-center justify-between mb-1">
+                        <div class="flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-[#0093fd] animate-pulse inline-block"></span>
+                            <span class="text-[10px] font-bold text-[#0093fd] uppercase tracking-widest">Live oracle feed</span>
+                        </div>
+                        <span x-show="$store.live.latency"
+                              class="text-[10px] font-mono text-[#697d91] bg-[#0a0b10] border border-[#1f2937] px-2 py-0.5 rounded-md"
+                              x-text="$store.live.latency + 'ms'"></span>
                     </div>
                     <div class="text-sm text-[#697d91]">Every Chainlink tick · Millisecond timestamps</div>
                 </div>
@@ -595,11 +630,15 @@
                  x-data="{
                      flash: -1,
                      rows: [
-                         { s:'Yes Ask', pct:74, p:0.52, vol:3800, c:'#ff4d4d' },
-                         { s:'Yes Bid', pct:61, p:0.50, vol:2900, c:'#26a05e' },
-                         { s:'No Bid',  pct:68, p:0.49, vol:1900, c:'#26a05e' },
-                         { s:'No Ask',  pct:82, p:0.51, vol:3100, c:'#ff4d4d' },
-                     ]
+                         { s:'Yes Ask', pct:74, vol:3800, c:'#ff4d4d', key:'yes_ask', fallback:0.52 },
+                         { s:'Yes Bid', pct:61, vol:2900, c:'#26a05e', key:'yes_bid', fallback:0.50 },
+                         { s:'No Bid',  pct:68, vol:1900, c:'#26a05e', key:'no_bid',  fallback:0.49 },
+                         { s:'No Ask',  pct:82, vol:3100, c:'#ff4d4d', key:'no_ask',  fallback:0.51 },
+                     ],
+                     price(row) {
+                         const v = $store.live.clob?.[row.key];
+                         return v != null ? v : row.fallback;
+                     }
                  }"
                  x-init="setInterval(() => {
                      let i = Math.floor(Math.random()*4);
@@ -646,7 +685,7 @@
                                     </div>
                                     <span class="w-10 text-[10px] font-mono text-right flex-shrink-0 tabular-nums"
                                           :style="'color:'+r.c"
-                                          x-text="r.p.toFixed(2)"></span>
+                                          x-text="price(r).toFixed(2)"></span>
                                     <span class="w-12 text-[10px] font-mono text-right flex-shrink-0 text-[#697d91] tabular-nums"
                                           x-text="r.vol.toLocaleString()"></span>
                                 </div>

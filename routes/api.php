@@ -33,6 +33,8 @@ Route::post('/auth/reset-password', [AuthController::class, 'resetPassword']);
 
 Route::post('/webhooks/stripe', [WebhookController::class, 'handle']);
 Route::get('/health', [HealthController::class, 'check']);
+Route::get('/public/live', \App\Http\Controllers\Api\PublicLiveController::class)
+    ->middleware('throttle:public-live');
 
 /*
 |--------------------------------------------------------------------------

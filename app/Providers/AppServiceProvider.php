@@ -18,6 +18,10 @@ class AppServiceProvider extends ServiceProvider
 
     protected function configureRateLimiting(): void
     {
+        RateLimiter::for('public-live', function (Request $request) {
+            return Limit::perMinute(20)->by($request->ip());
+        });
+
         RateLimiter::for('api-tier', function (Request $request) {
             $user = $request->user();
 
