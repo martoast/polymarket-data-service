@@ -156,33 +156,5 @@
         </div>
     </div>
 
-    {{-- Data status --}}
-    <div class="bg-[#17181c] border border-[#1f2937] rounded-2xl p-6">
-        <h2 class="text-sm font-semibold text-[#e5e5e5] mb-4">Feed status</h2>
-        @if ($lastOracleTs)
-            @php
-                $ts = \Carbon\Carbon::createFromTimestampMs($lastOracleTs);
-                $diffMinutes = $ts->diffInMinutes(now());
-                $isStale = $diffMinutes > 10;
-            @endphp
-            <div class="flex items-center gap-3 mb-2">
-                <div class="flex items-center gap-2.5">
-                    <div class="w-2 h-2 rounded-full {{ $isStale ? 'bg-amber-400' : 'bg-[#26a05e] animate-pulse' }}"></div>
-                    <span class="text-sm font-medium {{ $isStale ? 'text-amber-400' : 'text-[#26a05e]' }}">
-                        {{ $isStale ? 'Stale — last tick '.$diffMinutes.' min ago' : 'Live' }}
-                    </span>
-                </div>
-            </div>
-            <div class="text-xs text-[#697d91] font-mono">
-                Last oracle tick: {{ $ts->format('Y-m-d H:i:s') }} UTC · {{ $ts->diffForHumans() }}
-            </div>
-        @else
-            <div class="flex items-center gap-2.5 text-sm text-[#697d91]">
-                <div class="w-2 h-2 rounded-full bg-[#2e3841]"></div>
-                No oracle data yet
-            </div>
-        @endif
-    </div>
-
 </div>
 @endsection

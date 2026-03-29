@@ -5,7 +5,8 @@
 - **PHP 8.4**, PostgreSQL 16 + TimescaleDB, Redis 7
 - **Laravel Sanctum** — Bearer token auth (API) + session auth (web)
 - **Laravel Cashier** — Stripe billing
-- **Supervisor** — manages PHP serve, queue worker, scheduler, ingest-sync inside the container
+- **ReactPHP + ratchet/pawl** — long-running WebSocket recorder (`recorder:start`)
+- **Supervisor** — manages PHP serve, queue worker, scheduler, and recorder inside the container
 - **Mailgun** — transactional email via `mg.fullstacklabs.org`
 
 ## Local dev
@@ -30,7 +31,7 @@ Local `.env` uses `DB_CONNECTION=sqlite`, `QUEUE_CONNECTION=sync`, `CACHE_STORE=
 ```bash
 # 1. Copy and fill in secrets
 cp .env.example .env
-# Edit .env — fill in APP_KEY, DB_PASSWORD, STRIPE_*, MAILGUN_SECRET, RECORDER_SQLITE_FILE
+# Edit .env — fill in APP_KEY, DB_PASSWORD, STRIPE_*, MAILGUN_SECRET
 
 # 2. Generate app key if blank
 docker compose run --rm app php artisan key:generate --show
@@ -51,9 +52,9 @@ docker compose up -d --build
 | Process | Command | Purpose |
 |---|---|---|
 | `php` | `artisan serve --host=0.0.0.0 --port=80` | HTTP |
-| `queue-worker` | `artisan queue:work` | Jobs (ingest, resolution, etc.) |
-| `scheduler` | `artisan schedule:run` every 60s | Cron tasks |
-| `ingest-sync` | `artisan ingest:sync --once` every 30s | Recorder SQLite → DB |
+| `queue-worker` | `artisan queue:work` | Jobs |
+| `scheduler` | `artisan schedule:run` every 60s | Cron tasks (includes backfill-windows every 5m) |
+| `recorder` | `artisan recorder:start` | Long-running ReactPHP WS recorder |
 
 ### On every container start (entrypoint.sh)
 1. `php artisan config:cache`
@@ -70,29 +71,16 @@ docker compose up -d --build
 ```
 Migrations and cache busting run automatically via entrypoint.sh.
 
-### Recorder SQLite integration
-The recorder writes to a SQLite file. The app container reads it via the `recorder_data` Docker volume mounted at `/var/data`. Set in `.env`:
-```
-RECORDER_SQLITE_FILE=/var/data/polymarket.db
-```
-If the recorder runs on the host (not in Docker), bind-mount the file instead:
-```yaml
-# in docker-compose.yml under app.volumes:
-- /path/to/recorder/data/polymarket.db:/var/data/polymarket.db:ro
-```
-
 ### Useful commands
 ```bash
 # View all logs
 docker compose logs -f app
 
-# Run artisan commands
-docker compose exec app php artisan tinker
-docker compose exec app php artisan ingest:sync --once
-docker compose exec app php artisan backfill:recordings --path=/var/data/recordings
+# Restart the recorder process (supervisorctl has no socket — kill it and supervisord restarts it)
+docker compose exec app pkill -f 'recorder:start'
 
-# Restart a single supervisor process
-docker compose exec app supervisorctl restart ingest-sync
+# Run backfill manually (fills break_price_usd from oracle_ticks + outcomes from Gamma)
+docker compose exec app php artisan recorder:backfill-windows
 
 # Check supervisor status
 docker compose exec app supervisorctl status
@@ -108,13 +96,56 @@ DB_HOST=pgsql
 CACHE_STORE=redis
 QUEUE_CONNECTION=redis
 REDIS_HOST=redis
-RECORDER_SQLITE_FILE=/var/data/polymarket.db
 ```
+
+## Recorder architecture
+
+The recorder runs as a persistent Laravel artisan command (`recorder:start`) using ReactPHP's event loop. No separate process or service needed.
+
+### Data flow
+```
+Chainlink RTDS WS (wss://ws-live-data.polymarket.com)
+  → OracleFeedService → oracle_ticks table + CandleService → candles_1m table
+
+Polymarket CLOB WS (wss://ws-subscriptions-clob.polymarket.com/ws/market)
+  → ClobFeedService → clob_snapshots table (buffered, flushed every 1s)
+  → resolution events → windows.outcome updated
+
+Gamma API (https://gamma-api.polymarket.com)
+  → MarketDiscoveryService (every 20s) → windows table upserted
+  → break_price_usd set from oracle_ticks at open_ts
+```
+
+### Key files
+| File | Purpose |
+|---|---|
+| `app/Console/Commands/RecorderCommand.php` | Boots event loop, wires all services |
+| `app/Recorder/OracleFeedService.php` | Chainlink RTDS WebSocket (single shared connection) |
+| `app/Recorder/ClobFeedService.php` | Polymarket CLOB WebSocket (token subscriptions) |
+| `app/Recorder/MarketDiscoveryService.php` | Gamma API market discovery + window upserts |
+| `app/Recorder/CandleService.php` | In-memory 1m OHLCV candle aggregation |
+| `app/Recorder/RecorderState.php` | Writes stats to Redis key `recorder:status` (TTL 120s) |
+| `app/Recorder/AssetConfig.php` | BTC/ETH/SOL config — slug prefixes, Chainlink symbols |
+| `app/Console/Commands/BackfillWindowsCommand.php` | Backfills break_price_usd + outcomes for expired windows |
+
+### RTDS subscription format (critical — wrong format = silent no-data)
+```json
+{"action":"subscribe","subscriptions":[{"topic":"crypto_prices_chainlink","type":"*","filters":""}]}
+```
+Messages arrive as: `{"topic":"crypto_prices_chainlink","type":"update","payload":{"symbol":"btc/usd","value":66877.11,"timestamp":1774756878000},...}`
+
+### Admin dashboard
+`/admin/recorder` — live status page (polls every 3s). Requires `is_admin = true` on the user.
+
+### Data quality rules
+- `GET /windows` only returns windows where `break_price_usd > 0` AND (`outcome` is not null OR `close_ts` is in the future)
+- `recorder:backfill-windows` runs every 5 minutes via scheduler to resolve any windows that expired between CLOB events
 
 ## Key architecture notes
 - `ForceJsonResponse` middleware is **API-only** — web routes return HTML
 - Exception handlers in `bootstrap/app.php` check `$request->expectsJson()` before returning JSON vs redirect
 - Email verification is required before users can hit any `/api/v1/*` endpoint (`verified` middleware)
+- `trustProxies(at: '*')` is set in `bootstrap/app.php` — required because Cloudflare terminates SSL; without it signed URLs (email verification) break with 403 Invalid Signature
 - **API key provisioning**: the plain Sanctum token is stored in `users.api_key` so it's always visible on the dashboard — no "show once" session flash. On login/register, existing tokens are revoked and a new one is created + saved. Regenerate button does the same on demand.
 - Tier logic lives in `app/Models/User.php` — `dailyRateLimit()` and `historyLimitDays()`
 - Rate limiter is defined in `app/Providers/AppServiceProvider.php` as `api-tier`

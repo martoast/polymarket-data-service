@@ -67,14 +67,15 @@ class OracleFeedService
         $this->status          = 'connected';
         echo '[oracle] Connected' . PHP_EOL;
 
-        // Subscribe to all enabled asset symbols in one pass
-        foreach (AssetConfig::chainlinkSymbols() as $symbol) {
-            $ws->send(json_encode([
-                'type'    => 'subscribe',
-                'channel' => 'crypto_prices_chainlink',
-                'data'    => ['symbol' => $symbol],
-            ]));
-        }
+        // Subscribe to all crypto_prices_chainlink symbols in one message
+        $ws->send(json_encode([
+            'action'        => 'subscribe',
+            'subscriptions' => [[
+                'topic'   => 'crypto_prices_chainlink',
+                'type'    => '*',
+                'filters' => '',
+            ]],
+        ]));
 
         $ws->on('message', fn ($msg) => $this->onMessage((string) $msg));
         $ws->on('close', fn ($code, $reason) => $this->onClose($code, $reason));
@@ -85,19 +86,33 @@ class OracleFeedService
 
     private function onMessage(string $raw): void
     {
+        // Update staleness timestamp on every frame (ping responses, confirmations, etc.)
+        $this->lastTickMs = $this->nowMs();
+
+        // Only price messages contain 'payload' — skip everything else
+        if (!str_contains($raw, 'payload')) {
+            return;
+        }
+
         $msg = json_decode($raw, true);
         if (!is_array($msg)) {
             return;
         }
 
-        if (($msg['type'] ?? '') !== 'event') {
+        $topic = $msg['topic'] ?? '';
+        $type  = $msg['type']  ?? '';
+
+        if ($topic !== 'crypto_prices_chainlink') {
+            return;
+        }
+        if ($type !== 'update' && $type !== 'snapshot') {
             return;
         }
 
-        $data   = $msg['data'] ?? [];
-        $symbol = $data['symbol'] ?? '';
-        $price  = isset($data['price']) ? (float) $data['price'] : null;
-        $ts     = isset($data['timestamp']) ? (int) $data['timestamp'] : $this->nowMs();
+        $payload = $msg['payload'] ?? [];
+        $symbol  = $payload['symbol'] ?? '';
+        $price   = isset($payload['value']) ? (float) $payload['value'] : null;
+        $ts      = isset($payload['timestamp']) ? (int) $payload['timestamp'] : $this->nowMs();
 
         if (!$symbol || $price === null || $price <= 0) {
             return;
@@ -108,7 +123,6 @@ class OracleFeedService
             return;
         }
 
-        $this->lastTickMs = $this->nowMs();
         $this->ticksReceived++;
 
         ($this->onTick)($asset, $price, $ts);

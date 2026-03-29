@@ -160,6 +160,17 @@ class MarketDiscoveryService
 
         $existing = DB::table('windows')->where('id', $slug)->first();
         if (!$existing) {
+            // Use oracle tick closest to open_ts as break price (within 5 min)
+            $oracleTick = DB::table('oracle_ticks')
+                ->where('asset_id', $assetId)
+                ->orderByRaw('ABS(ts - ?)', [$openTs])
+                ->limit(1)
+                ->first(['price_usd', 'ts']);
+
+            if ($oracleTick && abs($oracleTick->ts - $openTs) <= 300_000) {
+                $breakPriceUsd = (float) $oracleTick->price_usd;
+            }
+
             DB::table('windows')->insertOrIgnore([
                 'id'              => $slug,
                 'asset_id'        => $assetId,

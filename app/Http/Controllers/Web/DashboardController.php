@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
-use App\Models\OracleTick;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -18,13 +17,7 @@ class DashboardController extends Controller
             'daily_limit' => $user->dailyRateLimit(),
         ];
 
-        try {
-            $lastOracleTs = OracleTick::max('ts');
-        } catch (\Throwable $e) {
-            $lastOracleTs = null;
-        }
-
-        return view('dashboard', compact('user', 'tierInfo', 'lastOracleTs'));
+        return view('dashboard', compact('user', 'tierInfo'));
     }
 
     public function regenerateKey(Request $request): RedirectResponse

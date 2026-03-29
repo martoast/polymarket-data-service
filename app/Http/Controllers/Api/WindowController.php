@@ -15,7 +15,12 @@ class WindowController extends Controller
         $user      = $request->user();
         $limitDays = $user->historyLimitDays();
 
+        $nowMs = now()->timestamp * 1000;
+
         $query = Window::with('asset')
+            // Only complete windows: resolved ones, or still-active ones with a known break price
+            ->where('break_price_usd', '>', 0)
+            ->where(fn ($q) => $q->whereNotNull('outcome')->orWhere('close_ts', '>', $nowMs))
             ->when($request->asset, fn ($q) => $q->whereHas('asset', fn ($q2) => $q2->where('symbol', strtoupper($request->asset))))
             ->when($request->duration, fn ($q) => $q->where('duration_sec', $request->duration))
             ->when($request->outcome, fn ($q) => $q->where('outcome', $request->outcome))
