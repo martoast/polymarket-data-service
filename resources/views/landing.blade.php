@@ -1102,8 +1102,8 @@ document.addEventListener('alpine:init', () => {
             @endforeach
         </div>
 
-        {{-- Tab panels — absolute positioned so container height never changes --}}
-        <div class="relative min-h-[520px] lg:min-h-[420px]">
+        {{-- Tab panels — absolute on lg so height is stable; natural on mobile --}}
+        <div class="relative lg:min-h-[420px]">
         @foreach([
             'windows' => [
                 'route'      => 'GET /api/v1/windows',
@@ -1172,7 +1172,7 @@ document.addEventListener('alpine:init', () => {
             ],
         ] as $key => $panel)
         <div x-show="tab === '{{ $key }}'" x-cloak
-             class="absolute inset-0"
+             class="lg:absolute lg:inset-0"
              x-transition:enter="transition ease-out duration-300"
              x-transition:enter-start="opacity-0 translate-x-4"
              x-transition:enter-end="opacity-100 translate-x-0"
