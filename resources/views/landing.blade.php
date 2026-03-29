@@ -234,8 +234,14 @@
                      get yesAsk() { return $store.live.clob?.yes_ask ?? 0.60; },
                      get noAsk()  { return $store.live.clob?.no_ask  ?? 0.44; },
                      get spread() {
-                         if (!$store.live.clob) return '0.01';
-                         return ($store.live.clob.yes_ask - $store.live.clob.yes_bid).toFixed(2);
+                         const c = $store.live.clob;
+                         if (!c?.spread) return '—';
+                         return Number(c.spread).toFixed(2);
+                     },
+                     step(base, n) {
+                         // Use 1% of base as step size, clamped to [0.01, 1.00]
+                         const s = Math.max(0.01, Math.min(0.05, +(base * 0.01).toFixed(2)));
+                         return Math.max(0.01, Math.min(0.99, +(base + n * s).toFixed(2)));
                      },
                      fmt(v) { return Number(v).toFixed(2); }
                  }">
@@ -339,9 +345,9 @@
                             <div>
                                 <div class="text-[#26a05e] font-bold mb-1.5 uppercase tracking-wider">Bids</div>
                                 <template x-for="(row, i) in [
-                                    { size: 2450, price: yesBid,        w: 85 },
-                                    { size: 3800, price: yesBid - 0.01, w: 70 },
-                                    { size: 1900, price: yesBid - 0.02, w: 55 },
+                                    { size: 2450, price: step(yesBid,  0), w: 85 },
+                                    { size: 3800, price: step(yesBid, -1), w: 70 },
+                                    { size: 1900, price: step(yesBid, -2), w: 55 },
                                 ]" :key="i">
                                     <div class="flex items-center gap-2 mb-1.5 relative">
                                         <div class="absolute inset-y-0 left-0 rounded-sm" :style="'width:' + row.w + '%; background:#26a05e18'"></div>
@@ -353,9 +359,9 @@
                             <div>
                                 <div class="text-[#ff6b6b] font-bold mb-1.5 uppercase tracking-wider text-right">Asks</div>
                                 <template x-for="(row, i) in [
-                                    { size: 1800, price: yesAsk,        w: 80 },
-                                    { size: 2900, price: yesAsk + 0.01, w: 68 },
-                                    { size: 3100, price: yesAsk + 0.02, w: 52 },
+                                    { size: 1800, price: step(yesAsk, 0), w: 80 },
+                                    { size: 2900, price: step(yesAsk, 1), w: 68 },
+                                    { size: 3100, price: step(yesAsk, 2), w: 52 },
                                 ]" :key="i">
                                     <div class="flex items-center gap-2 mb-1.5 relative">
                                         <div class="absolute inset-y-0 right-0 rounded-sm" :style="'width:' + row.w + '%; background:#ff6b6b18'"></div>
