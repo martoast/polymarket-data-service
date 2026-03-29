@@ -13,11 +13,15 @@
 <meta property="og:title" content="Polymarket Data API — Historical CLOB, Oracle Ticks & ML Features">
 <meta property="og:description" content="Chainlink oracle ticks, full CLOB order book snapshots, and 40+ pre-computed ML features for Polymarket algo traders. Free tier available.">
 <meta property="og:site_name" content="Polymarket Data API">
+<meta property="og:image" content="{{ url('/og-image.png') }}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 
 {{-- Twitter Card --}}
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Polymarket Data API — Historical CLOB, Oracle Ticks & ML Features">
 <meta name="twitter:description" content="Chainlink oracle ticks, full CLOB order book snapshots, and 40+ pre-computed ML features for Polymarket algo traders. Free tier available.">
+<meta name="twitter:image" content="{{ url('/og-image.png') }}">
 
 <style>
 /* ── Dot-grid background ── */
