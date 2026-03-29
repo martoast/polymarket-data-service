@@ -23,7 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->trustProxies(at: '*');
 
-        $middleware->api(append: [ForceJsonResponse::class]);
+        $middleware->api(append: [ForceJsonResponse::class, \App\Http\Middleware\LogApiRequest::class]);
 
         $middleware->redirectGuestsTo('/login');
         $middleware->redirectUsersTo('/dashboard');

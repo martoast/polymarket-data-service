@@ -50,7 +50,12 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function isFreeTier(): bool
     {
-        return $this->tier === 'free';
+        return !$this->is_admin && $this->tier === 'free';
+    }
+
+    public function isAdmin(): bool
+    {
+        return (bool) $this->is_admin;
     }
 
     /**
@@ -59,6 +64,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function historyLimitDays(): ?int
     {
+        if ($this->is_admin) return null;
         return match ($this->tier) {
             'pro'     => null,
             'builder' => 90,
@@ -71,6 +77,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function dailyRateLimit(): int
     {
+        if ($this->is_admin) return 100000;
         return match ($this->tier) {
             'pro'     => 100000,
             'builder' => 10000,

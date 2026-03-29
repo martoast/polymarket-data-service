@@ -4,6 +4,8 @@ use App\Http\Controllers\Web\WebAuthController;
 use App\Http\Controllers\Web\DashboardController;
 use App\Http\Controllers\Web\BillingWebController;
 use App\Http\Controllers\Web\RecorderController;
+use App\Http\Controllers\Web\Admin\UsersAdminController;
+use App\Http\Controllers\Web\Admin\RequestsAdminController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -33,6 +35,8 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::get('/recorder', [RecorderController::class, 'index'])->name('admin.recorder');
     Route::get('/recorder/status', [RecorderController::class, 'status'])->name('admin.recorder.status');
+    Route::get('/users', [UsersAdminController::class, 'index'])->name('admin.users');
+    Route::get('/requests', [RequestsAdminController::class, 'index'])->name('admin.requests');
 });
 
 // Authenticated web routes

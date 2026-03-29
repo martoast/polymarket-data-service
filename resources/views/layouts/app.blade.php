@@ -86,9 +86,21 @@
                         <a href="{{ route('dashboard') }}" class="text-[#697d91] hover:text-[#e5e5e5] transition-colors px-3 py-2 rounded-lg hover:bg-[#17181c] text-sm font-medium">
                             Dashboard
                         </a>
+                        @if (auth()->user()->is_admin)
+                            <a href="{{ route('admin.users') }}" class="text-[#697d91] hover:text-[#e5e5e5] transition-colors px-3 py-2 rounded-lg hover:bg-[#17181c] text-sm font-medium">
+                                Users
+                            </a>
+                            <a href="{{ route('admin.requests') }}" class="text-[#697d91] hover:text-[#e5e5e5] transition-colors px-3 py-2 rounded-lg hover:bg-[#17181c] text-sm font-medium">
+                                Requests
+                            </a>
+                            <a href="{{ route('admin.recorder') }}" class="text-[#697d91] hover:text-[#e5e5e5] transition-colors px-3 py-2 rounded-lg hover:bg-[#17181c] text-sm font-medium">
+                                Recorder
+                            </a>
+                        @else
                         <a href="{{ route('billing') }}" class="text-[#697d91] hover:text-[#e5e5e5] transition-colors px-3 py-2 rounded-lg hover:bg-[#17181c] text-sm font-medium">
                             Billing
                         </a>
+                        @endif
                         <form method="POST" action="{{ route('logout') }}" class="inline ml-1">
                             @csrf
                             <button type="submit" class="text-[#697d91] hover:text-[#e5e5e5] transition-colors px-3 py-2 rounded-lg hover:bg-[#17181c] text-sm font-medium">

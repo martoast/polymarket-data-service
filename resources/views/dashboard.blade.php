@@ -13,7 +13,9 @@
         </div>
 
         {{-- Tier badge --}}
-        @if ($user->tier === 'pro')
+        @if ($user->is_admin)
+            <span class="bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-semibold px-3 py-1.5 rounded-full uppercase tracking-wider">Admin</span>
+        @elseif ($user->tier === 'pro')
             <span class="bg-purple-500/10 border border-purple-500/30 text-purple-300 text-xs font-semibold px-3 py-1.5 rounded-full uppercase tracking-wider">Pro</span>
         @elseif ($user->tier === 'builder')
             <span class="bg-[#0093fd]/10 border border-[#0093fd]/30 text-[#0093fd] text-xs font-semibold px-3 py-1.5 rounded-full uppercase tracking-wider">Builder</span>
@@ -83,6 +85,11 @@
             <a href="{{ route('billing') }}" class="flex-shrink-0 bg-[#0093fd] hover:bg-[#0080e0] text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors">
                 Upgrade
             </a>
+        </div>
+    @elseif ($user->is_admin)
+        <div class="bg-amber-500/5 border border-amber-500/20 rounded-2xl p-4 mb-4 flex items-center gap-3">
+            <div class="w-2 h-2 rounded-full bg-amber-400 flex-shrink-0"></div>
+            <div class="text-xs text-[#697d91]">Admin account — unlimited access, all data, no rate limits displayed below are defaults.</div>
         </div>
     @endif
 
