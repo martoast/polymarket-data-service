@@ -25,11 +25,13 @@ class RecorderController extends Controller
         $state['clob']['snapshots_written']   = DB::table('clob_snapshots')->count();
         $state['candles_written']             = DB::table('candles_1m')->count();
 
-        // Active markets list for the table
+        // Active markets list for the table — only already-opened windows (break price known)
         $state['active_markets'] = DB::table('windows')
             ->join('assets', 'assets.id', '=', 'windows.asset_id')
             ->whereNull('windows.outcome')
             ->where('windows.close_ts', '>', $nowMs)
+            ->where('windows.open_ts', '<=', $nowMs)
+            ->where('windows.break_price_usd', '>', 0)
             ->select('windows.id', 'assets.symbol', 'windows.duration_sec', 'windows.break_price_usd', 'windows.open_ts', 'windows.close_ts')
             ->orderBy('windows.close_ts')
             ->get()
