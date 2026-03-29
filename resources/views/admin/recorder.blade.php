@@ -168,6 +168,34 @@ function render(d) {
     document.getElementById('clob-subscribed').textContent = fmt(d.clob?.subscribed ?? 0);
     document.getElementById('clob-snapshots').textContent  = fmt(d.clob?.snapshots_written ?? 0);
 
+    // Markets table
+    const marketsTable = document.getElementById('markets-table');
+    if (d.active_markets && d.active_markets.length) {
+        marketsTable.innerHTML = `
+            <table class="w-full text-xs">
+                <thead>
+                    <tr class="text-[#2e3841] uppercase tracking-wider">
+                        <th class="text-left pb-2">Market</th>
+                        <th class="text-left pb-2">Duration</th>
+                        <th class="text-right pb-2">Break price</th>
+                        <th class="text-right pb-2">Closes in</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-[#1f2937]">
+                    ${d.active_markets.map(m => `
+                        <tr>
+                            <td class="py-1.5 text-[#e5e5e5] font-medium">${m.asset}</td>
+                            <td class="py-1.5 text-[#697d91]">${m.duration}</td>
+                            <td class="py-1.5 text-right mono text-[#e5e5e5]">$${Number(m.break_price_usd).toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+                            <td class="py-1.5 text-right mono ${m.closes_in_ms < 60000 ? 'text-amber-400' : 'text-[#697d91]'}">${msToCountdown(m.closes_in_ms)}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>`;
+    } else {
+        marketsTable.innerHTML = '<div class="text-[#697d91]">No active markets</div>';
+    }
+
     // Last updated
     if (d.last_updated) {
         document.getElementById('last-updated').textContent = 'last updated ' + new Date(d.last_updated * 1000).toLocaleTimeString();
@@ -189,6 +217,13 @@ function ago(tsMs) {
     if (s < 5)  return 'just now';
     if (s < 60) return `${s}s ago`;
     return `${Math.floor(s/60)}m ago`;
+}
+
+function msToCountdown(ms) {
+    if (ms <= 0) return 'closing…';
+    const s = Math.floor(ms / 1000);
+    if (s < 60) return `${s}s`;
+    return `${Math.floor(s / 60)}m ${s % 60}s`;
 }
 
 fetchStatus();
