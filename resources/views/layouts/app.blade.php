@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@yield('title', 'Polymarket Data') — Oracle API</title>
+    <title>@yield('title', 'Polymarket Data API')</title>
 
     {{-- Inter font (Polymarket's UI font) --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -77,7 +77,7 @@
                         </svg>
                     </div>
                     <span class="text-[#e5e5e5] font-semibold text-sm tracking-tight group-hover:text-white transition-colors">
-                        Polymarket Data
+                        Polymarket Data API
                     </span>
                 </a>
 
@@ -157,7 +157,7 @@
     <footer class="border-t border-[#1f2937] mt-24 py-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
             <div class="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-[#697d91]">
-                <span class="font-medium">Polymarket Data — Oracle API</span>
+                <span class="font-medium">Polymarket Data API</span>
                 <div class="flex items-center gap-6 text-sm">
                     <a href="{{ route('docs') }}" class="hover:text-[#e5e5e5] transition-colors">Docs</a>
                     <a href="{{ route('billing') }}" class="hover:text-[#e5e5e5] transition-colors">Pricing</a>

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Polymarket Data API — Oracle Ticks, CLOB Snapshots & ML Features')
+@section('title', 'Polymarket Data API — Oracle Ticks, CLOB Snapshots & ML Features for Algo Traders')
 
 @section('head')
 <style>

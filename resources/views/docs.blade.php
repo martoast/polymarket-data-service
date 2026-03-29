@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>API Reference — Polymarket Data</title>
+    <title>API Reference — Polymarket Data API</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -227,7 +227,7 @@ $sections = [
         <div class="w-6 h-6 rounded-md bg-[#0093fd] flex items-center justify-center">
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1L13 4.5V9.5L7 13L1 9.5V4.5L7 1Z" fill="white" fill-opacity="0.9"/></svg>
         </div>
-        <span class="text-white font-semibold text-sm hidden sm:block">Polymarket Data</span>
+        <span class="text-white font-semibold text-sm hidden sm:block">Polymarket Data API</span>
     </a>
     <span class="text-[#2e3841] hidden sm:block">/</span>
     <span class="text-[#697d91] text-sm font-medium hidden sm:block">API Reference</span>
