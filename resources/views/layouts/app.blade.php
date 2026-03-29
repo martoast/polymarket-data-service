@@ -65,63 +65,100 @@
 <body class="h-full bg-[#0a0b10] text-[#e5e5e5] antialiased">
 
     {{-- Nav --}}
-    <nav class="border-b border-[#1f2937] bg-[#0a0b10]/95 backdrop-blur-sm sticky top-0 z-50">
+    <nav x-data="{ open: false }" class="border-b border-[#1f2937] bg-[#0a0b10]/95 backdrop-blur-sm sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-14">
 
                 {{-- Logo --}}
-                <a href="{{ route('home') }}" class="flex items-center gap-2 group">
+                <a href="{{ route('home') }}" class="flex items-center gap-2 group flex-shrink-0">
                     <div class="w-6 h-6 rounded-md bg-[#0093fd] flex items-center justify-center">
                         <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                             <path d="M7 1L13 4.5V9.5L7 13L1 9.5V4.5L7 1Z" fill="white" fill-opacity="0.9"/>
                         </svg>
                     </div>
-                    <span class="text-[#e5e5e5] font-semibold text-sm tracking-tight group-hover:text-white transition-colors">
+                    <span class="hidden sm:block text-[#e5e5e5] font-semibold text-sm tracking-tight group-hover:text-white transition-colors">
                         Polymarket Data API
                     </span>
                 </a>
 
-                {{-- Nav links --}}
-                <div class="flex items-center gap-1 text-sm">
-                    <a href="{{ route('docs') }}" class="text-[#697d91] hover:text-[#e5e5e5] transition-colors px-3 py-2 rounded-lg hover:bg-[#17181c] text-sm font-medium">
-                        Docs
-                    </a>
-
+                {{-- Desktop nav links --}}
+                <div class="hidden md:flex items-center gap-1 text-sm">
+                    <a href="{{ route('docs') }}" class="text-[#697d91] hover:text-[#e5e5e5] transition-colors px-3 py-2 rounded-lg hover:bg-[#17181c] text-sm font-medium">Docs</a>
                     @auth
-                        <a href="{{ route('dashboard') }}" class="text-[#697d91] hover:text-[#e5e5e5] transition-colors px-3 py-2 rounded-lg hover:bg-[#17181c] text-sm font-medium">
-                            Dashboard
-                        </a>
+                        <a href="{{ route('dashboard') }}" class="text-[#697d91] hover:text-[#e5e5e5] transition-colors px-3 py-2 rounded-lg hover:bg-[#17181c] text-sm font-medium">Dashboard</a>
                         @if (auth()->user()->is_admin)
-                            <a href="{{ route('admin.users') }}" class="text-[#697d91] hover:text-[#e5e5e5] transition-colors px-3 py-2 rounded-lg hover:bg-[#17181c] text-sm font-medium">
-                                Users
-                            </a>
-                            <a href="{{ route('admin.requests') }}" class="text-[#697d91] hover:text-[#e5e5e5] transition-colors px-3 py-2 rounded-lg hover:bg-[#17181c] text-sm font-medium">
-                                Requests
-                            </a>
-                            <a href="{{ route('admin.recorder') }}" class="text-[#697d91] hover:text-[#e5e5e5] transition-colors px-3 py-2 rounded-lg hover:bg-[#17181c] text-sm font-medium">
-                                Recorder
-                            </a>
+                            <a href="{{ route('admin.users') }}" class="text-[#697d91] hover:text-[#e5e5e5] transition-colors px-3 py-2 rounded-lg hover:bg-[#17181c] text-sm font-medium">Users</a>
+                            <a href="{{ route('admin.requests') }}" class="text-[#697d91] hover:text-[#e5e5e5] transition-colors px-3 py-2 rounded-lg hover:bg-[#17181c] text-sm font-medium">Requests</a>
+                            <a href="{{ route('admin.recorder') }}" class="text-[#697d91] hover:text-[#e5e5e5] transition-colors px-3 py-2 rounded-lg hover:bg-[#17181c] text-sm font-medium">Recorder</a>
                         @else
-                        <a href="{{ route('billing') }}" class="text-[#697d91] hover:text-[#e5e5e5] transition-colors px-3 py-2 rounded-lg hover:bg-[#17181c] text-sm font-medium">
-                            Billing
-                        </a>
+                            <a href="{{ route('billing') }}" class="text-[#697d91] hover:text-[#e5e5e5] transition-colors px-3 py-2 rounded-lg hover:bg-[#17181c] text-sm font-medium">Billing</a>
                         @endif
                         <form method="POST" action="{{ route('logout') }}" class="inline ml-1">
                             @csrf
-                            <button type="submit" class="text-[#697d91] hover:text-[#e5e5e5] transition-colors px-3 py-2 rounded-lg hover:bg-[#17181c] text-sm font-medium">
-                                Sign out
-                            </button>
+                            <button type="submit" class="text-[#697d91] hover:text-[#e5e5e5] transition-colors px-3 py-2 rounded-lg hover:bg-[#17181c] text-sm font-medium">Sign out</button>
                         </form>
                     @else
-                        <a href="{{ route('login') }}" class="text-[#697d91] hover:text-[#e5e5e5] transition-colors px-3 py-2 rounded-lg hover:bg-[#17181c] text-sm font-medium">
-                            Sign in
-                        </a>
-                        <a href="{{ route('register') }}"
-                           class="ml-1 bg-[#0093fd] hover:bg-[#0080e0] text-white font-semibold px-4 py-2 rounded-lg text-sm transition-colors">
-                            Get started
-                        </a>
+                        <a href="{{ route('login') }}" class="text-[#697d91] hover:text-[#e5e5e5] transition-colors px-3 py-2 rounded-lg hover:bg-[#17181c] text-sm font-medium">Sign in</a>
+                        <a href="{{ route('register') }}" class="ml-1 bg-[#0093fd] hover:bg-[#0080e0] text-white font-semibold px-4 py-2 rounded-lg text-sm transition-colors">Get started</a>
                     @endauth
                 </div>
+
+                {{-- Mobile: right side --}}
+                <div class="flex md:hidden items-center gap-2">
+                    @guest
+                        <a href="{{ route('register') }}" class="bg-[#0093fd] hover:bg-[#0080e0] text-white font-semibold px-3.5 py-1.5 rounded-lg text-xs transition-colors">
+                            Get started
+                        </a>
+                    @endguest
+
+                    {{-- Hamburger --}}
+                    <button @click="open = !open"
+                            class="w-8 h-8 flex items-center justify-center rounded-lg text-[#697d91] hover:text-[#e5e5e5] hover:bg-[#17181c] transition-colors">
+                        <svg x-show="!open" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                        <svg x-show="open" x-cloak class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        {{-- Mobile menu --}}
+        <div x-show="open" x-cloak
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 -translate-y-2"
+             x-transition:enter-end="opacity-100 translate-y-0"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100 translate-y-0"
+             x-transition:leave-end="opacity-0 -translate-y-2"
+             class="md:hidden border-t border-[#1f2937] bg-[#0a0b10]">
+            <div class="px-4 py-4 space-y-1">
+                <a href="{{ route('docs') }}" class="flex items-center px-3 py-2.5 rounded-lg text-sm font-medium text-[#697d91] hover:text-[#e5e5e5] hover:bg-[#17181c] transition-colors">Docs</a>
+                @auth
+                    <a href="{{ route('dashboard') }}" class="flex items-center px-3 py-2.5 rounded-lg text-sm font-medium text-[#697d91] hover:text-[#e5e5e5] hover:bg-[#17181c] transition-colors">Dashboard</a>
+                    @if (auth()->user()->is_admin)
+                        <a href="{{ route('admin.users') }}" class="flex items-center px-3 py-2.5 rounded-lg text-sm font-medium text-[#697d91] hover:text-[#e5e5e5] hover:bg-[#17181c] transition-colors">Users</a>
+                        <a href="{{ route('admin.requests') }}" class="flex items-center px-3 py-2.5 rounded-lg text-sm font-medium text-[#697d91] hover:text-[#e5e5e5] hover:bg-[#17181c] transition-colors">Requests</a>
+                        <a href="{{ route('admin.recorder') }}" class="flex items-center px-3 py-2.5 rounded-lg text-sm font-medium text-[#697d91] hover:text-[#e5e5e5] hover:bg-[#17181c] transition-colors">Recorder</a>
+                    @else
+                        <a href="{{ route('billing') }}" class="flex items-center px-3 py-2.5 rounded-lg text-sm font-medium text-[#697d91] hover:text-[#e5e5e5] hover:bg-[#17181c] transition-colors">Billing</a>
+                    @endif
+                    <div class="pt-2 border-t border-[#1f2937] mt-2">
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" class="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium text-[#697d91] hover:text-[#e5e5e5] hover:bg-[#17181c] transition-colors">Sign out</button>
+                        </form>
+                    </div>
+                @else
+                    <a href="{{ route('login') }}" class="flex items-center px-3 py-2.5 rounded-lg text-sm font-medium text-[#697d91] hover:text-[#e5e5e5] hover:bg-[#17181c] transition-colors">Sign in</a>
+                    <div class="pt-2 border-t border-[#1f2937] mt-2">
+                        <a href="{{ route('register') }}" class="flex items-center justify-center w-full bg-[#0093fd] hover:bg-[#0080e0] text-white font-semibold px-4 py-2.5 rounded-xl text-sm transition-colors">
+                            Get started free →
+                        </a>
+                    </div>
+                @endauth
             </div>
         </div>
     </nav>

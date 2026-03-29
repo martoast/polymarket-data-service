@@ -945,7 +945,8 @@
             @endforeach
         </div>
 
-        {{-- Tab panels --}}
+        {{-- Tab panels — absolute positioned so container height never changes --}}
+        <div class="relative min-h-[520px] lg:min-h-[420px]">
         @foreach([
             'windows' => [
                 'route'      => 'GET /api/v1/windows',
@@ -1014,6 +1015,7 @@
             ],
         ] as $key => $panel)
         <div x-show="tab === '{{ $key }}'" x-cloak
+             class="absolute inset-0"
              x-transition:enter="transition ease-out duration-300"
              x-transition:enter-start="opacity-0 translate-x-4"
              x-transition:enter-end="opacity-100 translate-x-0"
@@ -1063,6 +1065,7 @@
             </div>
         </div>
         @endforeach
+        </div>{{-- /relative wrapper --}}
 
     </div>
 </section>
@@ -1075,6 +1078,25 @@
     x-data="{
         active: 0,
         vis: false,
+        pinned: false,
+        progress: 0,
+        _timer: null,
+        startCycle() {
+            this._timer = setInterval(() => {
+                if (this.pinned) { clearInterval(this._timer); return; }
+                this.progress += 1.6;
+                if (this.progress >= 100) {
+                    this.progress = 0;
+                    this.active = (this.active + 1) % 4;
+                }
+            }, 60);
+        },
+        pick(i) {
+            this.active = i;
+            this.pinned = true;
+            this.progress = 0;
+            clearInterval(this._timer);
+        },
         cases: [
             {
                 icon: 'M3 3v16a2 2 0 002 2h16M19 9l-5 5-4-4-3 3',
@@ -1142,12 +1164,13 @@
             },
         ]
     }"
-    x-intersect.once="vis = true">
+    x-intersect.once="vis = true; startCycle()">
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {{-- Header --}}
-        <div class="text-center mb-12">
+        <div class="text-center mb-12 transition-all duration-700"
+             :class="vis ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'">
             <div class="text-xs font-semibold text-[#0093fd] uppercase tracking-[0.15em] mb-3">Use cases</div>
             <h2 class="text-3xl sm:text-4xl font-bold text-white">Built for builders who move fast.</h2>
             <p class="text-[#697d91] mt-3">From first-time prediction market traders to production quant systems.</p>
@@ -1159,8 +1182,9 @@
             {{-- LEFT: use case nav cards --}}
             <div class="lg:col-span-2 grid grid-cols-2 sm:grid-cols-1 gap-2">
                 <template x-for="(c, i) in cases" :key="i">
-                    <button @click="active = i"
-                        class="w-full text-left rounded-xl border p-3 sm:p-4 transition-all duration-200 relative overflow-hidden"
+                    <button @click="pick(i)"
+                        class="w-full text-left rounded-xl border p-3 sm:p-4 transition-all duration-300 relative overflow-hidden"
+                        :style="vis ? 'opacity:1;transform:translateX(0);transition-delay:' + (i*80) + 'ms' : 'opacity:0;transform:translateX(-16px)'"
                         :class="active === i
                             ? 'bg-[#17181c] border-[#0093fd]/40 shadow-[0_0_20px_#0093fd0a]'
                             : 'bg-[#17181c]/40 border-transparent hover:bg-[#17181c]/70 hover:border-[#1f2937]'">
@@ -1189,21 +1213,30 @@
                                    x-text="c.sub"></p>
                             </div>
                         </div>
+
+                        {{-- Progress bar --}}
+                        <span x-show="active === i && !pinned"
+                              class="absolute bottom-0 left-0 h-0.5 bg-[#0093fd] rounded-full transition-none"
+                              :style="'width:' + (active === i ? progress : 0) + '%'"></span>
                     </button>
                 </template>
             </div>
 
             {{-- RIGHT: detail panel --}}
-            <div class="lg:col-span-3">
-                <div class="rounded-2xl border border-[#1f2937] bg-[#17181c] p-5 sm:p-7 min-h-[300px] sm:min-h-[340px] flex flex-col relative overflow-hidden">
+            <div class="lg:col-span-3 transition-all duration-700 delay-300"
+                 :class="vis ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-6'">
+                <div class="rounded-2xl border border-[#1f2937] bg-[#17181c] min-h-[360px] relative overflow-hidden">
                     <div class="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[#0093fd]/40 to-transparent"></div>
 
                     <template x-for="(c, i) in cases" :key="i">
                         <div x-show="active === i"
                              x-transition:enter="transition ease-out duration-300"
-                             x-transition:enter-start="opacity-0 translate-y-3"
-                             x-transition:enter-end="opacity-100 translate-y-0"
-                             class="flex-1 flex flex-col h-full">
+                             x-transition:enter-start="opacity-0 translate-x-4"
+                             x-transition:enter-end="opacity-100 translate-x-0"
+                             x-transition:leave="transition ease-in duration-150"
+                             x-transition:leave-start="opacity-100"
+                             x-transition:leave-end="opacity-0"
+                             class="absolute inset-0 flex flex-col p-5 sm:p-7">
 
                             {{-- Title --}}
                             <div class="flex items-center gap-2.5 mb-3">
@@ -1226,7 +1259,8 @@
                                 </div>
                                 <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
                                     <template x-for="(m, j) in c.metrics" :key="j">
-                                        <div class="rounded-lg border bg-[#0d0e13] px-3 py-2.5 transition-colors"
+                                        <div class="rounded-lg border bg-[#0d0e13] px-3 py-2.5 transition-all duration-300"
+                                             :style="'transition-delay:' + (j * 60) + 'ms'"
                                              :class="m.green ? 'border-[#0093fd]/25' : 'border-[#1f2937]'">
                                             <div class="text-[9px] text-[#697d91] uppercase tracking-wider" x-text="m.label"></div>
                                             <div class="text-sm font-bold font-mono mt-0.5 transition-colors"
@@ -1247,67 +1281,124 @@
 
 
 {{-- ============================================================
-     §5  WHY WE BUILT THIS  (founder story / credibility)
+     §5  WHY WE BUILT THIS
 ============================================================ --}}
-<section class="border-t border-[#1f2937] py-28 relative overflow-hidden">
-    <div class="absolute right-0 top-0 w-[500px] h-[500px] bg-[#0093fd]/[.025] rounded-full blur-[120px] pointer-events-none"></div>
+<style>
+@keyframes flow-down {
+    0%   { top: 0%;   opacity: 0; }
+    15%  { opacity: 1; }
+    85%  { opacity: 1; }
+    100% { top: 100%; opacity: 0; }
+}
+.flow-packet { animation: flow-down 1.8s ease-in-out infinite; }
+.flow-packet-2 { animation: flow-down 1.8s ease-in-out 0.6s infinite; }
+.flow-packet-3 { animation: flow-down 1.8s ease-in-out 1.2s infinite; }
+</style>
+<section class="border-t border-[#1f2937] py-24 relative overflow-hidden"
+    x-data="{ vis: false }"
+    x-intersect.once="vis = true">
+
+    <div class="absolute right-0 top-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#0093fd]/[.025] rounded-full blur-[130px] pointer-events-none"></div>
+
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
 
-            {{-- Left --}}
-            <div>
-                <div class="text-xs font-semibold text-[#0093fd] uppercase tracking-[0.15em] mb-3">Why we built this</div>
-                <h2 class="text-3xl sm:text-4xl font-bold text-white mb-6 leading-tight">
-                    We were tired of<br>building the same<br>data pipeline twice.
+            {{-- Left: simplified copy --}}
+            <div class="transition-all duration-700" :class="vis ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8'">
+                <div class="text-xs font-semibold text-[#0093fd] uppercase tracking-[0.15em] mb-4">Why we built this</div>
+                <h2 class="text-3xl sm:text-4xl font-bold text-white leading-tight mb-6">
+                    Stop rebuilding<br>the same pipeline.
                 </h2>
-                <div class="space-y-4 text-[#697d91] text-base leading-relaxed">
-                    <p>
-                        Every time we wanted to run a new Polymarket strategy, we started the same way: scrape the Gamma API, try to reconstruct oracle prices, realise the timestamps didn't line up, start over.
-                    </p>
-                    <p>
-                        So we built a proper recorder — connected directly to Chainlink's RTDS WebSocket and the Polymarket CLOB feed — and started capturing everything at source.
-                    </p>
-                    <p>
-                        Now we're making that infrastructure available as an API, so you can spend your time on the interesting part: building strategies that actually work.
-                    </p>
+                <p class="text-[#697d91] text-base leading-relaxed mb-8">
+                    Every strategy starts the same way — scrape, reconstruct, misalign, start over. We wired directly into the sources and built the recorder ourselves.
+                </p>
+
+                <div class="space-y-3 mb-8">
+                    @foreach([
+                        ['Oracle prices with millisecond timestamps', '#0093fd'],
+                        ['Full CLOB order book at every oracle tick', '#a78bfa'],
+                        ['40+ ML features, pre-computed per window', '#26a05e'],
+                    ] as [$point, $col])
+                    <div class="flex items-center gap-3">
+                        <div class="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style="background:{{ $col }}18; border:1px solid {{ $col }}40">
+                            <svg class="w-2.5 h-2.5" viewBox="0 0 10 10" fill="none">
+                                <path d="M2 5l2.5 2.5L8 3" stroke="{{ $col }}" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <span class="text-sm text-[#8a9ab0]">{{ $point }}</span>
+                    </div>
+                    @endforeach
+                </div>
+
+                <p class="text-sm text-[#697d91] border-l-2 border-[#0093fd]/40 pl-4 italic">
+                    We built the recorder. Now it's your API.
+                </p>
+            </div>
+
+            {{-- Right: animated data pipeline --}}
+            <div class="transition-all duration-700 delay-200" :class="vis ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'">
+                @php
+                $pipeline = [
+                    ['Chainlink RTDS',        'wss://ws-live-data.polymarket.com',          'Real-time oracle prices',      '#0093fd', 'M5 3h6M3 7h10M5 11h6', true],
+                    ['Polymarket CLOB',       'wss://ws-subscriptions-clob.polymarket.com', 'Yes/No order book per tick',   '#a78bfa', 'M2 4h12M2 8h12M2 12h8',true],
+                    ['Gamma API',             'https://gamma-api.polymarket.com',            'Market discovery every 20s',   '#26a05e', 'M8 2a6 6 0 100 12A6 6 0 008 2zm0 4v4m0 0l-2-2m2 2l2-2', true],
+                    ['REST API',              'api.polymarketdata.io/v1/*',                  'Your language. Your queries.', '#f97316', 'M2 6h12v8H2zM6 6V4h4v2',false],
+                ];
+                @endphp
+
+                <div class="space-y-0">
+                    @foreach($pipeline as $i => [$name, $url, $detail, $color, $icon, $live])
+                    <div class="transition-all duration-500"
+                         :style="vis ? 'opacity:1;transform:translateY(0);transition-delay:{{ $i * 100 }}ms' : 'opacity:0;transform:translateY(16px)'">
+
+                        <div class="flex items-start gap-4 bg-[#17181c] border rounded-xl p-4 transition-all duration-300 hover:shadow-[0_0_20px_rgba(0,0,0,.4)]"
+                             style="border-color: {{ $color }}22"
+                             onmouseenter="this.style.borderColor='{{ $color }}55'"
+                             onmouseleave="this.style.borderColor='{{ $color }}22'">
+
+                            {{-- Icon --}}
+                            <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
+                                 style="background:{{ $color }}12; border:1px solid {{ $color }}30">
+                                <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
+                                    <path d="{{ $icon }}" stroke="{{ $color }}" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+
+                            {{-- Content --}}
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center justify-between gap-2 mb-0.5">
+                                    <span class="text-sm font-semibold text-white">{{ $name }}</span>
+                                    @if($live)
+                                    <div class="flex items-center gap-1.5 flex-shrink-0">
+                                        <span class="relative flex h-2 w-2">
+                                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style="background:{{ $color }}"></span>
+                                            <span class="relative inline-flex rounded-full h-2 w-2" style="background:{{ $color }}"></span>
+                                        </span>
+                                        <span class="text-[9px] font-bold uppercase tracking-wider" style="color:{{ $color }}">Live</span>
+                                    </div>
+                                    @else
+                                    <span class="text-[9px] font-bold uppercase tracking-wider text-[#697d91]">Output</span>
+                                    @endif
+                                </div>
+                                <div class="text-[11px] font-mono text-[#697d91] truncate mb-0.5">{{ $url }}</div>
+                                <div class="text-xs text-[#697d91]">{{ $detail }}</div>
+                            </div>
+                        </div>
+
+                        {{-- Animated connector between cards --}}
+                        @if($i < 3)
+                        <div class="flex justify-center my-1">
+                            <div class="relative w-px h-8 bg-[#1f2937] overflow-hidden rounded-full">
+                                <div class="flow-packet absolute w-px rounded-full" style="height:40%;background:{{ $color }};left:0"></div>
+                                <div class="flow-packet-2 absolute w-px rounded-full" style="height:40%;background:{{ $color }};left:0"></div>
+                            </div>
+                        </div>
+                        @endif
+                    </div>
+                    @endforeach
                 </div>
             </div>
 
-            {{-- Right: data pipeline viz --}}
-            <div class="space-y-3">
-                @foreach([
-                    ['Chainlink RTDS', 'wss://ws-live-data.polymarket.com', 'Real-time price feed', '#0093fd', 'M3 8h10M9 4l4 4-4 4', true],
-                    ['Polymarket CLOB', 'wss://ws-subscriptions-clob.polymarket.com', 'Yes/No bid-ask per tick', '#a78bfa', 'M2 5h12M2 9h12M2 13h8', true],
-                    ['Gamma API', 'https://gamma-api.polymarket.com', 'Market discovery every 20s', '#26a05e', 'M8 2a6 6 0 100 12A6 6 0 008 2zM5 8h6M8 5v6', true],
-                    ['PostgreSQL + TimescaleDB', 'Your queries', 'REST API — any language', '#f97316', 'M3 5h10a1 1 0 011 1v8a1 1 0 01-1 1H3a1 1 0 01-1-1V6a1 1 0 011-1zM7 5V3h2v2', false],
-                ] as [$name, $url, $detail, $color, $icon, $live])
-                <div class="flex items-start gap-4 bg-[#17181c] border border-[#1f2937] rounded-xl p-4 hover:border-[#2e3841] transition-colors">
-                    <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                         style="background: {{ $color }}15; border: 1px solid {{ $color }}25;">
-                        <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-                            <path d="{{ $icon }}" stroke="{{ $color }}" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <div class="flex items-center justify-between gap-2 mb-0.5">
-                            <span class="text-sm font-semibold text-[#e5e5e5]">{{ $name }}</span>
-                            @if($live)
-                            <span class="flex-shrink-0 w-1.5 h-1.5 rounded-full animate-pulse" style="background: {{ $color }}"></span>
-                            @endif
-                        </div>
-                        <div class="text-xs font-mono text-[#697d91] truncate mb-0.5">{{ $url }}</div>
-                        <div class="text-xs text-[#697d91]">{{ $detail }}</div>
-                    </div>
-                </div>
-                @if($live)
-                <div class="flex justify-start pl-8">
-                    <svg width="8" height="12" viewBox="0 0 8 12" fill="none" class="opacity-30">
-                        <path d="M4 0v12M0 8l4 4 4-4" stroke="#697d91" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </div>
-                @endif
-                @endforeach
-            </div>
         </div>
     </div>
 </section>
