@@ -158,34 +158,44 @@ class RecorderCommand extends Command
 
     private function onClobPrice(array $msg): void
     {
-        $tokenId = $msg['asset_id'] ?? null;
-        $price   = isset($msg['price']) ? (float) $msg['price'] : null;
-
-        if (!$tokenId || $price === null) {
+        // Actual format: {event_type, market, price_changes: [{asset_id, price}, ...], timestamp}
+        $changes = $msg['price_changes'] ?? [];
+        if (empty($changes)) {
             return;
         }
 
-        $entry = $this->tokenMap[$tokenId] ?? null;
-        if (!$entry) {
-            return;
-        }
+        $ts = isset($msg['timestamp']) ? (int) $msg['timestamp'] : (int) (microtime(true) * 1000);
 
-        $windowId = $entry['window_id'];
-        $isYes    = $entry['is_yes'];
-        $assetId  = $this->getAssetIdByWindow($windowId);
-        if (!$assetId) {
-            return;
-        }
+        foreach ($changes as $change) {
+            $tokenId = $change['asset_id'] ?? null;
+            $price   = isset($change['price']) ? (float) $change['price'] : null;
 
-        $this->clobBuffer[] = [
-            'window_id' => $windowId,
-            'asset_id'  => $assetId,
-            'yes_ask'   => $isYes ? $price : null,
-            'yes_bid'   => null,
-            'no_ask'    => !$isYes ? $price : null,
-            'no_bid'    => null,
-            'ts'        => (int) (microtime(true) * 1000),
-        ];
+            if (!$tokenId || $price === null) {
+                continue;
+            }
+
+            $entry = $this->tokenMap[$tokenId] ?? null;
+            if (!$entry) {
+                continue;
+            }
+
+            $windowId = $entry['window_id'];
+            $isYes    = $entry['is_yes'];
+            $assetId  = $this->getAssetIdByWindow($windowId);
+            if (!$assetId) {
+                continue;
+            }
+
+            $this->clobBuffer[] = [
+                'window_id' => $windowId,
+                'asset_id'  => $assetId,
+                'yes_ask'   => $isYes ? $price : null,
+                'yes_bid'   => null,
+                'no_ask'    => !$isYes ? $price : null,
+                'no_bid'    => null,
+                'ts'        => $ts,
+            ];
+        }
 
         if (count($this->clobBuffer) >= 100) {
             $this->flushClobBuffer();
