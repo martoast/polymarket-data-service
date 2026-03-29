@@ -28,6 +28,7 @@ return new class extends Migration
         });
 
         if (DB::getDriverName() === 'pgsql') {
+            DB::statement("ALTER TABLE candles_1m DROP CONSTRAINT candles_1m_pkey");
             DB::statement("SELECT create_hypertable('candles_1m', 'ts', chunk_time_interval => 2592000000, if_not_exists => TRUE)");
         }
     }

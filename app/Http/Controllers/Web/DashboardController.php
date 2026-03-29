@@ -12,14 +12,10 @@ class DashboardController extends Controller
 {
     public function index(Request $request): View
     {
-        $user        = $request->user();
-        $apiToken    = session('api_token'); // Only available right after login/register
-        $limitDays   = $user->historyLimitDays();
-        $dailyLimit  = $user->dailyRateLimit();
-
+        $user     = $request->user();
         $tierInfo = [
-            'limit_days'  => $limitDays,
-            'daily_limit' => $dailyLimit,
+            'limit_days'  => $user->historyLimitDays(),
+            'daily_limit' => $user->dailyRateLimit(),
         ];
 
         try {
@@ -28,16 +24,16 @@ class DashboardController extends Controller
             $lastOracleTs = null;
         }
 
-        return view('dashboard', compact('user', 'apiToken', 'tierInfo', 'lastOracleTs'));
+        return view('dashboard', compact('user', 'tierInfo', 'lastOracleTs'));
     }
 
     public function regenerateKey(Request $request): RedirectResponse
     {
         $user = $request->user();
         $user->tokens()->delete();
-        $token = $user->createToken('web-session')->plainTextToken;
-        session(['api_token' => $token]);
+        $plain = $user->createToken('api')->plainTextToken;
+        $user->update(['api_key' => $plain]);
 
-        return redirect()->route('dashboard')->with('success', 'API key regenerated successfully.');
+        return redirect()->route('dashboard')->with('success', 'API key regenerated.');
     }
 }

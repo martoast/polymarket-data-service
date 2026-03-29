@@ -38,10 +38,10 @@ class WebAuthController extends Controller
         }
 
         $user = Auth::user();
-        // Revoke all existing tokens and create a fresh one
+        // Revoke all existing tokens and issue a fresh one
         $user->tokens()->delete();
-        $token = $user->createToken('web-session')->plainTextToken;
-        session(['api_token' => $token]);
+        $plain = $user->createToken('api')->plainTextToken;
+        $user->update(['api_key' => $plain]);
 
         $request->session()->regenerate();
 
@@ -65,14 +65,16 @@ class WebAuthController extends Controller
             'is_active' => true,
         ]);
 
-        $token = $user->createToken('web-session')->plainTextToken;
-        session(['api_token' => $token]);
+        $plain = $user->createToken('api')->plainTextToken;
+        $user->update(['api_key' => $plain]);
 
         Auth::login($user);
 
+        $user->sendEmailVerificationNotification();
+
         $request->session()->regenerate();
 
-        return redirect()->route('dashboard');
+        return redirect()->route('verification.notice');
     }
 
     public function logout(Request $request): RedirectResponse

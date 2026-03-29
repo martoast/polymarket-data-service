@@ -83,4 +83,16 @@ return Application::configure(basePath: dirname(__DIR__))
             }
             return null;
         });
+
+        $exceptions->render(function (\Symfony\Component\HttpKernel\Exception\HttpException $e, Request $request) {
+            if ($e->getStatusCode() === 403 && $request->expectsJson()) {
+                return response()->json([
+                    'error' => $e->getMessage() ?: 'Forbidden.',
+                    'code'  => str_contains($e->getMessage(), 'verified')
+                        ? 'EMAIL_NOT_VERIFIED'
+                        : 'FORBIDDEN',
+                ], 403);
+            }
+            return null;
+        });
     })->create();

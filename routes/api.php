@@ -57,8 +57,8 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
     Route::get('/billing/portal', [BillingController::class, 'portal']);
     Route::get('/billing/subscription', [BillingController::class, 'subscription']);
 
-    // Data endpoints — rate limited by tier
-    Route::middleware(['throttle:api-tier'])->prefix('v1')->group(function () {
+    // Data endpoints — rate limited by tier, email must be verified
+    Route::middleware(['verified', 'throttle:api-tier'])->prefix('v1')->group(function () {
         Route::get('/windows', [WindowController::class, 'index']);
         Route::get('/windows/{id}', [WindowController::class, 'show']);
 

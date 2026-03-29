@@ -4,7 +4,6 @@ LABEL maintainer="polymarket-data-service"
 
 ARG WWWGROUP=1000
 ARG WWWUSER=1000
-ARG NODE_VERSION=22
 
 WORKDIR /var/www/html
 
@@ -47,14 +46,29 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 RUN groupadd --force -g $WWWGROUP sail \
     && useradd -ms /bin/bash --no-user-group -g $WWWGROUP -u $WWWUSER sail
 
+# Supervisor config
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
+# Entrypoint
+COPY docker/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+# App code
 COPY --chown=sail:sail . /var/www/html
 
-RUN composer install --no-dev --optimize-autoloader --no-interaction \
-    && php artisan config:clear \
-    && php artisan route:clear
+# Install dependencies (no env needed at build time)
+RUN composer install --no-dev --optimize-autoloader --no-interaction
+
+# Storage dirs writable by sail
+RUN mkdir -p /var/www/html/storage/logs \
+             /var/www/html/storage/framework/cache \
+             /var/www/html/storage/framework/sessions \
+             /var/www/html/storage/framework/views \
+             /var/data \
+    && chown -R sail:sail /var/www/html/storage /var/data \
+    && mkdir -p /var/log/supervisor \
+    && chown -R sail:sail /var/log/supervisor
 
 EXPOSE 80
 
-CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+ENTRYPOINT ["/entrypoint.sh"]

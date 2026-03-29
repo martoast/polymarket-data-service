@@ -28,7 +28,9 @@ return new class extends Migration
         });
 
         if (DB::getDriverName() === 'pgsql') {
+            DB::statement("ALTER TABLE clob_snapshots DROP CONSTRAINT clob_snapshots_pkey");
             DB::statement("SELECT create_hypertable('clob_snapshots', 'ts', chunk_time_interval => 2592000000, if_not_exists => TRUE)");
+            DB::statement("ALTER TABLE clob_snapshots SET (timescaledb.compress, timescaledb.compress_orderby = 'ts DESC')");
             DB::statement("SELECT add_compression_policy('clob_snapshots', BIGINT '604800000', if_not_exists => TRUE)");
         }
     }

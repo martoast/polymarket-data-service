@@ -5,139 +5,180 @@
 @section('content')
 <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
 
-    {{-- Page header --}}
-    <div class="mb-10">
-        <h1 class="text-2xl font-mono font-bold text-white">Dashboard</h1>
-        <p class="text-gray-500 font-mono text-sm mt-1">Welcome back, {{ $user->name }}</p>
+    {{-- Header --}}
+    <div class="flex items-center justify-between mb-10">
+        <div>
+            <h1 class="text-2xl font-bold text-white">Dashboard</h1>
+            <p class="text-[#697d91] text-sm mt-1">Welcome back, {{ $user->name }}</p>
+        </div>
+
+        {{-- Tier badge --}}
+        @if ($user->tier === 'pro')
+            <span class="bg-purple-500/10 border border-purple-500/30 text-purple-300 text-xs font-semibold px-3 py-1.5 rounded-full uppercase tracking-wider">Pro</span>
+        @elseif ($user->tier === 'builder')
+            <span class="bg-[#0093fd]/10 border border-[#0093fd]/30 text-[#0093fd] text-xs font-semibold px-3 py-1.5 rounded-full uppercase tracking-wider">Builder</span>
+        @else
+            <span class="bg-[#1e2428] border border-[#2e3841] text-[#697d91] text-xs font-semibold px-3 py-1.5 rounded-full uppercase tracking-wider">Free</span>
+        @endif
     </div>
 
-    {{-- API Key Section --}}
-    <div class="bg-gray-900/50 border border-gray-800 rounded-lg p-6 mb-6">
-        <h2 class="text-sm font-mono text-[#22c55e] uppercase tracking-widest mb-4">API Key</h2>
-
-        @if ($apiToken)
-            {{-- Show full token right after login/register --}}
-            <div x-data="{ copied: false }" class="space-y-3">
-                <div class="bg-[#0f0f0f] border border-[#22c55e]/30 rounded p-3 flex items-center justify-between gap-3">
-                    <code class="text-[#22c55e] text-xs font-mono break-all flex-1">{{ $apiToken }}</code>
-                    <button
-                        @click="navigator.clipboard.writeText('{{ $apiToken }}'); copied = true; setTimeout(() => copied = false, 2000)"
-                        class="flex-shrink-0 border border-gray-700 text-xs font-mono px-3 py-1.5 rounded hover:border-[#22c55e] transition-colors"
-                        :class="copied ? 'text-[#22c55e] border-[#22c55e]' : 'text-gray-400'"
-                    >
-                        <span x-text="copied ? 'copied!' : 'copy'"></span>
-                    </button>
-                </div>
-                <div class="flex items-start gap-2 text-xs font-mono text-yellow-400/80 bg-yellow-900/10 border border-yellow-500/20 rounded p-3">
-                    <span class="mt-0.5">!</span>
-                    <span>Save this key — it won't be shown again. Store it securely.</span>
-                </div>
-            </div>
-        @else
-            {{-- Masked placeholder with regenerate option --}}
-            <div class="bg-[#0f0f0f] border border-gray-800 rounded p-3 flex items-center justify-between gap-3 mb-3">
-                <code class="text-gray-500 text-xs font-mono">sk_live_••••••••••••••••••••••••••••••••••••</code>
-                <span class="text-xs font-mono text-gray-600">hidden</span>
-            </div>
+    {{-- API Key --}}
+    <div class="bg-[#17181c] border border-[#1f2937] rounded-2xl p-6 mb-4">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-sm font-semibold text-[#e5e5e5]">API Key</h2>
             <form method="POST" action="{{ route('dashboard.regenerate') }}">
                 @csrf
                 <button
                     type="submit"
                     onclick="return confirm('This will invalidate your current API key. Continue?')"
-                    class="text-xs font-mono text-gray-400 border border-gray-700 px-3 py-1.5 rounded hover:border-red-500/50 hover:text-red-400 transition-colors"
+                    class="text-xs font-medium text-[#697d91] border border-[#2e3841] px-3 py-1.5 rounded-lg hover:border-red-500/40 hover:text-red-400 transition-colors"
                 >
-                    Regenerate Key
+                    Regenerate
                 </button>
             </form>
+        </div>
+
+        @if (session('success'))
+            <div class="bg-[#26a05e]/10 border border-[#26a05e]/20 text-[#26a05e] text-xs rounded-xl p-3 mb-3">
+                {{ session('success') }}
+            </div>
         @endif
+
+        <div x-data="{ copied: false }" class="bg-[#0a0b10] border border-[#1f2937] rounded-xl p-3.5 flex items-center gap-3">
+            <code class="text-[#0093fd] text-xs font-mono break-all flex-1 leading-relaxed">{{ $user->api_key }}</code>
+            <button
+                @click="navigator.clipboard.writeText('{{ $user->api_key }}'); copied = true; setTimeout(() => copied = false, 2000)"
+                class="flex-shrink-0 text-xs font-medium px-3 py-1.5 rounded-lg border transition-colors"
+                :class="copied ? 'bg-[#0093fd]/10 border-[#0093fd]/40 text-[#0093fd]' : 'bg-[#1e2428] border-[#2e3841] text-[#697d91] hover:text-[#e5e5e5] hover:border-[#697d91]'"
+            >
+                <span x-text="copied ? 'Copied!' : 'Copy'"></span>
+            </button>
+        </div>
     </div>
 
-    {{-- Plan Info --}}
-    <div class="bg-gray-900/50 border border-gray-800 rounded-lg p-6 mb-6">
-        <div class="flex items-center justify-between mb-4">
-            <h2 class="text-sm font-mono text-[#22c55e] uppercase tracking-widest">Your Plan</h2>
-            <a href="{{ route('billing') }}" class="text-xs font-mono text-gray-500 hover:text-gray-300 transition-colors">manage &rarr;</a>
+    {{-- Plan stats --}}
+    <div class="grid grid-cols-2 gap-4 mb-4">
+        <div class="bg-[#17181c] border border-[#1f2937] rounded-2xl p-5">
+            <div class="text-xs text-[#697d91] mb-2">Daily requests</div>
+            <div class="text-2xl font-bold text-white">{{ number_format($tierInfo['daily_limit']) }}</div>
+            <div class="text-xs text-[#697d91] mt-1">per day</div>
         </div>
-
-        <div class="flex items-center gap-3 mb-5">
-            @if ($user->tier === 'pro')
-                <span class="bg-purple-500/20 border border-purple-500/40 text-purple-300 text-xs font-mono font-bold px-3 py-1 rounded-full uppercase tracking-widest">Pro</span>
-            @elseif ($user->tier === 'builder')
-                <span class="bg-blue-500/20 border border-blue-500/40 text-blue-300 text-xs font-mono font-bold px-3 py-1 rounded-full uppercase tracking-widest">Builder</span>
-            @else
-                <span class="bg-gray-700/50 border border-gray-600 text-gray-300 text-xs font-mono font-bold px-3 py-1 rounded-full uppercase tracking-widest">Free</span>
-            @endif
-        </div>
-
-        <div class="grid grid-cols-2 gap-4">
-            <div class="bg-[#0f0f0f] rounded p-3">
-                <div class="text-xs font-mono text-gray-500 mb-1">Daily requests</div>
-                <div class="text-white font-mono font-semibold text-sm">{{ number_format($tierInfo['daily_limit']) }}</div>
+        <div class="bg-[#17181c] border border-[#1f2937] rounded-2xl p-5">
+            <div class="text-xs text-[#697d91] mb-2">History access</div>
+            <div class="text-2xl font-bold text-white">
+                @if ($tierInfo['limit_days'] === null) ∞ @else {{ $tierInfo['limit_days'] }} @endif
             </div>
-            <div class="bg-[#0f0f0f] rounded p-3">
-                <div class="text-xs font-mono text-gray-500 mb-1">History access</div>
-                <div class="text-white font-mono font-semibold text-sm">
-                    @if ($tierInfo['limit_days'] === null)
-                        Unlimited
-                    @else
-                        {{ $tierInfo['limit_days'] }} days
-                    @endif
+            <div class="text-xs text-[#697d91] mt-1">
+                @if ($tierInfo['limit_days'] === null) unlimited @else days @endif
+            </div>
+        </div>
+    </div>
+
+    @if ($user->isFreeTier())
+        <div class="bg-[#0093fd]/5 border border-[#0093fd]/20 rounded-2xl p-4 mb-4 flex items-center justify-between">
+            <div>
+                <div class="text-sm font-medium text-[#e5e5e5]">Unlock more data</div>
+                <div class="text-xs text-[#697d91] mt-0.5">Upgrade to Builder for 10,000 req/day and 90 days history</div>
+            </div>
+            <a href="{{ route('billing') }}" class="flex-shrink-0 bg-[#0093fd] hover:bg-[#0080e0] text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors">
+                Upgrade
+            </a>
+        </div>
+    @endif
+
+    {{-- Quick start --}}
+    <div
+        x-data="{
+            apiKey: '{{ $user->api_key }}',
+            loading: false,
+            response: null,
+            status: null,
+            async send() {
+                this.loading = true;
+                this.response = null;
+                try {
+                    const res = await fetch('{{ config('app.url') }}/api/v1/windows?limit=3', {
+                        headers: { 'Authorization': 'Bearer ' + this.apiKey, 'Accept': 'application/json' }
+                    });
+                    this.status = res.status;
+                    const json = await res.json();
+                    this.response = JSON.stringify(json, null, 2);
+                } catch (e) {
+                    this.status = 0;
+                    this.response = 'Network error: ' + e.message;
+                }
+                this.loading = false;
+            }
+        }"
+        class="bg-[#17181c] border border-[#1f2937] rounded-2xl p-6 mb-4"
+    >
+        <h2 class="text-sm font-semibold text-[#e5e5e5] mb-4">Quick start</h2>
+
+        <div class="flex gap-2 mb-4">
+            <input
+                x-model="apiKey"
+                type="text"
+                placeholder="Paste your API key…"
+                class="flex-1 bg-[#0a0b10] border border-[#1f2937] rounded-xl px-3.5 py-2 text-xs font-mono text-[#0093fd] placeholder-[#2e3841] focus:outline-none focus:border-[#0093fd]/40 transition-colors"
+            />
+            <button
+                @click="send()"
+                :disabled="loading || !apiKey"
+                class="flex-shrink-0 bg-[#0093fd] hover:bg-[#0080e0] disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors"
+            >
+                <span x-show="!loading">Send</span>
+                <span x-show="loading">…</span>
+            </button>
+        </div>
+
+        <div class="bg-[#0a0b10] rounded-xl overflow-hidden border border-[#1f2937]">
+            <div class="flex items-center justify-between px-4 py-2.5 border-b border-[#1f2937]">
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-mono text-[#697d91]">GET /api/v1/windows?limit=3</span>
                 </div>
+                <span
+                    x-show="status !== null"
+                    class="text-xs font-mono px-2 py-0.5 rounded"
+                    :class="status === 200 ? 'bg-[#26a05e]/10 text-[#26a05e]' : 'bg-red-500/10 text-red-400'"
+                    x-text="status"
+                ></span>
             </div>
+            <pre
+                class="p-4 text-xs font-mono text-[#697d91] whitespace-pre-wrap leading-6 max-h-64 overflow-y-auto"
+                x-text="response || 'Hit Send to try the API with your key.'"
+            ></pre>
         </div>
 
-        @if ($user->isFreeTier())
-            <div class="mt-4 pt-4 border-t border-gray-800">
-                <a href="{{ route('billing') }}" class="inline-flex items-center gap-2 text-xs font-mono text-[#22c55e] hover:text-green-400 transition-colors">
-                    Upgrade for more requests &amp; history &rarr;
-                </a>
-            </div>
-        @endif
-    </div>
-
-    {{-- Quick Start --}}
-    <div class="bg-gray-900/50 border border-gray-800 rounded-lg p-6 mb-6">
-        <h2 class="text-sm font-mono text-[#22c55e] uppercase tracking-widest mb-4">Quick Start</h2>
-        <div class="bg-[#0f0f0f] border border-gray-800 rounded overflow-hidden">
-            <div class="flex items-center gap-2 px-4 py-2.5 bg-gray-900/70 border-b border-gray-800">
-                <span class="text-xs font-mono text-gray-500">curl</span>
-            </div>
-            <div class="p-4 text-xs font-mono leading-relaxed">
-                <div class="text-gray-400">curl {{ config('app.url') }}/api/v1/windows \</div>
-                <div class="text-gray-400 pl-4">-H <span class="text-[#22c55e]">"Authorization: Bearer YOUR_API_KEY"</span></div>
-            </div>
-        </div>
         <div class="mt-3">
-            <a href="{{ route('docs') }}" class="text-xs font-mono text-gray-500 hover:text-gray-300 transition-colors">
-                View full API documentation &rarr;
+            <a href="{{ route('docs') }}" class="text-xs text-[#697d91] hover:text-[#e5e5e5] transition-colors">
+                View full API documentation →
             </a>
         </div>
     </div>
 
-    {{-- Data Status --}}
-    <div class="bg-gray-900/50 border border-gray-800 rounded-lg p-6">
-        <h2 class="text-sm font-mono text-[#22c55e] uppercase tracking-widest mb-4">Data Status</h2>
+    {{-- Data status --}}
+    <div class="bg-[#17181c] border border-[#1f2937] rounded-2xl p-6">
+        <h2 class="text-sm font-semibold text-[#e5e5e5] mb-4">Feed status</h2>
         @if ($lastOracleTs)
             @php
-                $ts = \Carbon\Carbon::parse($lastOracleTs);
+                $ts = \Carbon\Carbon::createFromTimestampMs($lastOracleTs);
                 $diffMinutes = $ts->diffInMinutes(now());
                 $isStale = $diffMinutes > 10;
             @endphp
             <div class="flex items-center gap-3 mb-2">
-                <div class="flex items-center gap-2 text-sm font-mono">
-                    <span class="w-2 h-2 rounded-full {{ $isStale ? 'bg-yellow-500' : 'bg-[#22c55e] animate-pulse' }}"></span>
-                    <span class="{{ $isStale ? 'text-yellow-400' : 'text-[#22c55e]' }}">
-                        Recording: {{ $isStale ? 'Stale (>'.$diffMinutes.'min)' : 'Live' }}
+                <div class="flex items-center gap-2.5">
+                    <div class="w-2 h-2 rounded-full {{ $isStale ? 'bg-amber-400' : 'bg-[#26a05e] animate-pulse' }}"></div>
+                    <span class="text-sm font-medium {{ $isStale ? 'text-amber-400' : 'text-[#26a05e]' }}">
+                        {{ $isStale ? 'Stale — last tick '.$diffMinutes.' min ago' : 'Live' }}
                     </span>
                 </div>
             </div>
-            <div class="text-xs font-mono text-gray-500">
-                Last oracle tick: {{ $ts->format('Y-m-d H:i:s') }} UTC
-                ({{ $ts->diffForHumans() }})
+            <div class="text-xs text-[#697d91] font-mono">
+                Last oracle tick: {{ $ts->format('Y-m-d H:i:s') }} UTC · {{ $ts->diffForHumans() }}
             </div>
         @else
-            <div class="flex items-center gap-2 text-sm font-mono text-gray-500">
-                <span class="w-2 h-2 rounded-full bg-gray-600"></span>
+            <div class="flex items-center gap-2.5 text-sm text-[#697d91]">
+                <div class="w-2 h-2 rounded-full bg-[#2e3841]"></div>
                 No oracle data yet
             </div>
         @endif

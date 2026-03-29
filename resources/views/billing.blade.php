@@ -5,138 +5,126 @@
 @section('content')
 <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
 
-    {{-- Header --}}
     <div class="mb-10">
-        <h1 class="text-2xl font-mono font-bold text-white">Billing</h1>
-        <p class="text-gray-500 font-mono text-sm mt-1">Manage your plan and subscription</p>
+        <h1 class="text-2xl font-bold text-white">Billing</h1>
+        <p class="text-[#697d91] text-sm mt-1">Manage your plan and subscription</p>
     </div>
 
-    {{-- Checkout feedback --}}
     @if (request('checkout') === 'success')
-        <div class="bg-green-900/30 border border-[#22c55e]/30 text-green-300 text-sm font-mono rounded p-4 mb-8">
-            Subscription activated successfully. Your tier has been updated.
+        <div class="bg-[#26a05e]/10 border border-[#26a05e]/20 text-[#26a05e] text-sm rounded-xl p-4 mb-8">
+            Subscription activated. Your plan has been updated.
         </div>
     @elseif (request('checkout') === 'cancelled')
-        <div class="bg-gray-900/50 border border-gray-700 text-gray-400 text-sm font-mono rounded p-4 mb-8">
+        <div class="bg-[#17181c] border border-[#1f2937] text-[#697d91] text-sm rounded-xl p-4 mb-8">
             Checkout cancelled. No changes were made.
         </div>
     @endif
 
-    {{-- Current Plan --}}
-    <div class="bg-gray-900/50 border border-gray-800 rounded-lg p-6 mb-8">
-        <h2 class="text-sm font-mono text-[#22c55e] uppercase tracking-widest mb-4">Current Plan</h2>
+    {{-- Current plan --}}
+    <div class="bg-[#17181c] border border-[#1f2937] rounded-2xl p-6 mb-8">
+        <h2 class="text-sm font-semibold text-[#e5e5e5] mb-4">Current plan</h2>
         <div class="flex items-center gap-4">
             @if ($user->tier === 'pro')
-                <span class="bg-purple-500/20 border border-purple-500/40 text-purple-300 text-xs font-mono font-bold px-3 py-1 rounded-full uppercase tracking-widest">Pro</span>
-                <span class="text-gray-400 font-mono text-sm">100,000 req/day &bull; Full history &bull; CSV export &bull; Backtest</span>
+                <span class="bg-purple-500/10 border border-purple-500/30 text-purple-300 text-xs font-semibold px-3 py-1.5 rounded-full uppercase tracking-wider">Pro</span>
+                <span class="text-[#697d91] text-sm">100,000 req/day · Full history · CSV export · Backtest</span>
             @elseif ($user->tier === 'builder')
-                <span class="bg-blue-500/20 border border-blue-500/40 text-blue-300 text-xs font-mono font-bold px-3 py-1 rounded-full uppercase tracking-widest">Builder</span>
-                <span class="text-gray-400 font-mono text-sm">10,000 req/day &bull; 90 days history</span>
+                <span class="bg-[#0093fd]/10 border border-[#0093fd]/30 text-[#0093fd] text-xs font-semibold px-3 py-1.5 rounded-full uppercase tracking-wider">Builder</span>
+                <span class="text-[#697d91] text-sm">10,000 req/day · 90 days history</span>
             @else
-                <span class="bg-gray-700/50 border border-gray-600 text-gray-300 text-xs font-mono font-bold px-3 py-1 rounded-full uppercase tracking-widest">Free</span>
-                <span class="text-gray-400 font-mono text-sm">100 req/day &bull; 7 days history</span>
+                <span class="bg-[#1e2428] border border-[#2e3841] text-[#697d91] text-xs font-semibold px-3 py-1.5 rounded-full uppercase tracking-wider">Free</span>
+                <span class="text-[#697d91] text-sm">100 req/day · 7 days history</span>
             @endif
         </div>
-
         @if ($subscription && $subscription->stripe_status)
-            <div class="mt-4 pt-4 border-t border-gray-800 text-xs font-mono text-gray-500">
-                Subscription status: <span class="text-gray-300">{{ $subscription->stripe_status }}</span>
+            <div class="mt-4 pt-4 border-t border-[#1f2937] text-xs text-[#697d91]">
+                Subscription status: <span class="text-[#e5e5e5]">{{ $subscription->stripe_status }}</span>
             </div>
         @endif
     </div>
 
     {{-- Plans --}}
-    <h2 class="text-sm font-mono text-[#22c55e] uppercase tracking-widest mb-6">Plans</h2>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+    <h2 class="text-sm font-semibold text-[#e5e5e5] mb-5">Plans</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
 
         {{-- Free --}}
-        <div class="bg-gray-900/40 border {{ $user->isFreeTier() ? 'border-[#22c55e]/30' : 'border-gray-800' }} rounded-lg p-5">
+        <div class="bg-[#17181c] border {{ $user->isFreeTier() ? 'border-[#0093fd]/30' : 'border-[#1f2937]' }} rounded-2xl p-5">
             @if ($user->isFreeTier())
-                <div class="text-xs font-mono text-[#22c55e] bg-[#22c55e]/10 border border-[#22c55e]/20 rounded-full px-2 py-0.5 inline-block mb-3">current plan</div>
+                <div class="text-xs font-semibold text-[#0093fd] bg-[#0093fd]/10 border border-[#0093fd]/20 rounded-full px-2.5 py-0.5 inline-block mb-3">Current plan</div>
             @endif
-            <div class="text-sm font-mono text-gray-400 uppercase tracking-widest mb-2">Free</div>
-            <div class="text-2xl font-mono font-bold text-white mb-4">$0<span class="text-sm text-gray-500 font-normal">/mo</span></div>
-            <ul class="space-y-1.5 text-xs font-mono text-gray-400 mb-5">
-                <li><span class="text-[#22c55e]">&bull;</span> 100 req/day</li>
-                <li><span class="text-[#22c55e]">&bull;</span> 7 days history</li>
-                <li><span class="text-[#22c55e]">&bull;</span> All endpoints</li>
+            <div class="text-sm font-medium text-[#697d91] mb-3">Free</div>
+            <div class="mb-5"><span class="text-2xl font-bold text-white">$0</span><span class="text-[#697d91] text-sm ml-1">/mo</span></div>
+            <ul class="space-y-2 text-xs text-[#697d91] mb-5">
+                <li class="flex items-center gap-2"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3L11.5 3.5" stroke="#0093fd" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>100 req/day</li>
+                <li class="flex items-center gap-2"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3L11.5 3.5" stroke="#0093fd" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>7 days history</li>
+                <li class="flex items-center gap-2"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3L11.5 3.5" stroke="#0093fd" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>All endpoints</li>
             </ul>
             @if ($user->isFreeTier())
-                <div class="text-xs font-mono text-gray-600 text-center py-2">Active</div>
+                <div class="text-xs text-center text-[#697d91] py-2">Active</div>
             @else
-                <a href="{{ route('billing.portal') }}" class="block text-center text-xs font-mono text-gray-500 border border-gray-700 px-3 py-2 rounded hover:border-gray-500 transition-colors">
-                    Manage
-                </a>
+                <a href="{{ route('billing.portal') }}" class="block text-center text-xs font-medium text-[#697d91] bg-[#1e2428] border border-[#2e3841] px-3 py-2 rounded-lg hover:border-[#697d91] transition-colors">Manage</a>
             @endif
         </div>
 
         {{-- Builder --}}
-        <div class="bg-gray-900/40 border {{ $user->isBuilderTier() ? 'border-[#22c55e]/30' : 'border-gray-800' }} rounded-lg p-5">
-            @if ($user->isBuilderTier())
-                <div class="text-xs font-mono text-[#22c55e] bg-[#22c55e]/10 border border-[#22c55e]/20 rounded-full px-2 py-0.5 inline-block mb-3">current plan</div>
+        <div class="bg-[#17181c] border {{ $user->isBuilderTier() ? 'border-[#0093fd]/40' : 'border-[#0093fd]/20' }} rounded-2xl p-5 relative">
+            @if (! $user->isBuilderTier())
+                <div class="absolute -top-3 left-5 bg-[#0093fd] text-white text-xs font-semibold px-3 py-0.5 rounded-full">Popular</div>
             @endif
-            <div class="text-sm font-mono text-blue-400 uppercase tracking-widest mb-2">Builder</div>
-            <div class="text-2xl font-mono font-bold text-white mb-4">$29<span class="text-sm text-gray-500 font-normal">/mo</span></div>
-            <ul class="space-y-1.5 text-xs font-mono text-gray-400 mb-5">
-                <li><span class="text-[#22c55e]">&bull;</span> 10,000 req/day</li>
-                <li><span class="text-[#22c55e]">&bull;</span> 90 days history</li>
-                <li><span class="text-[#22c55e]">&bull;</span> Priority support</li>
+            @if ($user->isBuilderTier())
+                <div class="text-xs font-semibold text-[#0093fd] bg-[#0093fd]/10 border border-[#0093fd]/20 rounded-full px-2.5 py-0.5 inline-block mb-3">Current plan</div>
+            @endif
+            <div class="text-sm font-medium text-[#0093fd] mb-3">Builder</div>
+            <div class="mb-5"><span class="text-2xl font-bold text-white">$29</span><span class="text-[#697d91] text-sm ml-1">/mo</span></div>
+            <ul class="space-y-2 text-xs text-[#697d91] mb-5">
+                <li class="flex items-center gap-2"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3L11.5 3.5" stroke="#0093fd" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>10,000 req/day</li>
+                <li class="flex items-center gap-2"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3L11.5 3.5" stroke="#0093fd" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>90 days history</li>
+                <li class="flex items-center gap-2"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3L11.5 3.5" stroke="#0093fd" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>Priority support</li>
             </ul>
             @if ($user->isBuilderTier())
-                <div class="text-xs font-mono text-gray-600 text-center py-2">Active</div>
+                <div class="text-xs text-center text-[#697d91] py-2">Active</div>
             @elseif ($user->isFreeTier())
                 <form method="POST" action="{{ route('billing.checkout') }}">
-                    @csrf
-                    <input type="hidden" name="plan" value="builder" />
-                    <button type="submit" class="w-full bg-[#22c55e] text-black font-mono font-bold text-xs px-3 py-2 rounded hover:bg-green-400 transition-colors">
-                        Upgrade
-                    </button>
+                    @csrf <input type="hidden" name="plan" value="builder" />
+                    <button type="submit" class="w-full bg-[#0093fd] hover:bg-[#0080e0] text-white font-semibold text-xs px-3 py-2.5 rounded-lg transition-colors">Upgrade</button>
                 </form>
             @else
-                <a href="{{ route('billing.portal') }}" class="block text-center text-xs font-mono text-gray-500 border border-gray-700 px-3 py-2 rounded hover:border-gray-500 transition-colors">
-                    Manage
-                </a>
+                <a href="{{ route('billing.portal') }}" class="block text-center text-xs font-medium text-[#697d91] bg-[#1e2428] border border-[#2e3841] px-3 py-2 rounded-lg hover:border-[#697d91] transition-colors">Manage</a>
             @endif
         </div>
 
         {{-- Pro --}}
-        <div class="bg-gray-900/40 border {{ $user->isProTier() ? 'border-[#22c55e]/30' : 'border-gray-800' }} rounded-lg p-5">
+        <div class="bg-[#17181c] border {{ $user->isProTier() ? 'border-purple-500/30' : 'border-[#1f2937]' }} rounded-2xl p-5">
             @if ($user->isProTier())
-                <div class="text-xs font-mono text-[#22c55e] bg-[#22c55e]/10 border border-[#22c55e]/20 rounded-full px-2 py-0.5 inline-block mb-3">current plan</div>
+                <div class="text-xs font-semibold text-purple-300 bg-purple-500/10 border border-purple-500/20 rounded-full px-2.5 py-0.5 inline-block mb-3">Current plan</div>
             @endif
-            <div class="text-sm font-mono text-purple-400 uppercase tracking-widest mb-2">Pro</div>
-            <div class="text-2xl font-mono font-bold text-white mb-4">$99<span class="text-sm text-gray-500 font-normal">/mo</span></div>
-            <ul class="space-y-1.5 text-xs font-mono text-gray-400 mb-5">
-                <li><span class="text-[#22c55e]">&bull;</span> 100,000 req/day</li>
-                <li><span class="text-[#22c55e]">&bull;</span> Full history</li>
-                <li><span class="text-[#22c55e]">&bull;</span> CSV export</li>
-                <li><span class="text-[#22c55e]">&bull;</span> Backtest endpoint</li>
+            <div class="text-sm font-medium text-[#697d91] mb-3">Pro</div>
+            <div class="mb-5"><span class="text-2xl font-bold text-white">$99</span><span class="text-[#697d91] text-sm ml-1">/mo</span></div>
+            <ul class="space-y-2 text-xs text-[#697d91] mb-5">
+                <li class="flex items-center gap-2"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3L11.5 3.5" stroke="#0093fd" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>100,000 req/day</li>
+                <li class="flex items-center gap-2"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3L11.5 3.5" stroke="#0093fd" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>Full history</li>
+                <li class="flex items-center gap-2"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3L11.5 3.5" stroke="#0093fd" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>CSV / SQLite export</li>
+                <li class="flex items-center gap-2"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3L11.5 3.5" stroke="#0093fd" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>Backtest endpoint</li>
             </ul>
             @if ($user->isProTier())
-                <div class="text-xs font-mono text-gray-600 text-center py-2">Active</div>
-            @elseif (! $user->isProTier())
+                <div class="text-xs text-center text-[#697d91] py-2">Active</div>
+            @else
                 <form method="POST" action="{{ route('billing.checkout') }}">
-                    @csrf
-                    <input type="hidden" name="plan" value="pro" />
-                    <button type="submit" class="w-full border border-purple-500/40 text-purple-300 font-mono font-bold text-xs px-3 py-2 rounded hover:bg-purple-500/10 transition-colors">
-                        Upgrade
-                    </button>
+                    @csrf <input type="hidden" name="plan" value="pro" />
+                    <button type="submit" class="w-full bg-[#1e2428] hover:bg-[#242b32] border border-purple-500/30 hover:border-purple-500/50 text-purple-300 font-semibold text-xs px-3 py-2.5 rounded-lg transition-colors">Upgrade</button>
                 </form>
             @endif
         </div>
 
     </div>
 
-    {{-- Subscription Management --}}
+    {{-- Stripe portal --}}
     @if ($subscription)
-        <div class="bg-gray-900/50 border border-gray-800 rounded-lg p-6">
-            <h2 class="text-sm font-mono text-[#22c55e] uppercase tracking-widest mb-4">Subscription Management</h2>
-            <p class="text-gray-400 font-mono text-sm mb-4">
-                Manage payment methods, view invoices, or cancel your subscription via the Stripe portal.
-            </p>
+        <div class="bg-[#17181c] border border-[#1f2937] rounded-2xl p-6">
+            <h2 class="text-sm font-semibold text-[#e5e5e5] mb-2">Subscription management</h2>
+            <p class="text-[#697d91] text-sm mb-4">Update payment method, view invoices, or cancel via the Stripe portal.</p>
             <a href="{{ route('billing.portal') }}"
-               class="inline-flex items-center gap-2 border border-gray-700 text-gray-300 font-mono text-sm px-4 py-2 rounded hover:border-gray-500 hover:text-white transition-colors">
-                Manage Subscription &rarr;
+               class="inline-flex items-center gap-2 bg-[#1e2428] hover:bg-[#242b32] border border-[#2e3841] text-[#e5e5e5] font-medium text-sm px-4 py-2.5 rounded-xl transition-colors">
+                Manage subscription →
             </a>
         </div>
     @endif

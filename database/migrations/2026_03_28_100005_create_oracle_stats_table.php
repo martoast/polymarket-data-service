@@ -27,6 +27,7 @@ return new class extends Migration
         });
 
         if (DB::getDriverName() === 'pgsql') {
+            DB::statement("ALTER TABLE oracle_stats DROP CONSTRAINT oracle_stats_pkey");
             DB::statement("SELECT create_hypertable('oracle_stats', 'ts', chunk_time_interval => 2592000000, if_not_exists => TRUE)");
         }
     }

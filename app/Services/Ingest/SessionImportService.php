@@ -268,8 +268,15 @@ class SessionImportService
 
     private function flushCandles(array $rows): void
     {
+        // Deduplicate within the batch — PostgreSQL upsert can't handle two rows
+        // with the same conflict key in the same statement.
+        $deduped = [];
+        foreach ($rows as $row) {
+            $deduped[$row['asset_id'] . '_' . $row['ts']] = $row;
+        }
+
         DB::table('candles_1m')->upsert(
-            $rows,
+            array_values($deduped),
             ['asset_id', 'ts'],
             ['open_usd', 'high_usd', 'low_usd', 'close_usd', 'volume']
         );
