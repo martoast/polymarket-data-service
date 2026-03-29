@@ -31,15 +31,32 @@ class PublicLiveController extends Controller
         // Latest CLOB snapshot for any window
         $clob = ClobSnapshot::orderByDesc('ts')->first();
 
+        if ($clob) {
+            $yesBid = round((float) $clob->yes_bid, 3);
+            $yesAsk = round((float) $clob->yes_ask, 3);
+            $noBid  = round((float) $clob->no_bid,  3);
+            $noAsk  = round((float) $clob->no_ask,  3);
+            $spread = round($yesAsk - $yesBid, 3);
+            $mid    = round(($yesBid + $yesAsk) / 2, 3);
+            $denom  = $yesBid + $noBid;
+            $imbalance = $denom > 0 ? round(($yesBid - $noBid) / $denom, 3) : 0;
+            $clobData = compact('yesBid', 'yesAsk', 'noBid', 'noAsk', 'spread', 'mid', 'imbalance') + ['ts' => (int) $clob->ts];
+            // snake_case keys for consistency
+            $clobData = [
+                'yes_bid'   => $yesBid,
+                'yes_ask'   => $yesAsk,
+                'no_bid'    => $noBid,
+                'no_ask'    => $noAsk,
+                'spread'    => $spread,
+                'mid'       => $mid,
+                'imbalance' => $imbalance,
+                'ts'        => (int) $clob->ts,
+            ];
+        }
+
         return response()->json([
             'oracle' => $oracle,
-            'clob'   => $clob ? [
-                'yes_bid' => round((float) $clob->yes_bid, 3),
-                'yes_ask' => round((float) $clob->yes_ask, 3),
-                'no_bid'  => round((float) $clob->no_bid,  3),
-                'no_ask'  => round((float) $clob->no_ask,  3),
-                'ts'      => (int) $clob->ts,
-            ] : null,
+            'clob'   => $clob ? $clobData : null,
         ]);
     }
 }

@@ -665,7 +665,14 @@ document.addEventListener('alpine:init', () => {
                      price(row) {
                          const v = $store.live.clob?.[row.key];
                          return v != null ? v : row.fallback;
-                     }
+                     },
+                     get btcLabel() {
+                         const p = $store.live.oracle['BTC']?.price_usd;
+                         return p ? 'BTC $' + Number(p).toLocaleString('en-US', {maximumFractionDigits:0}) : 'BTC';
+                     },
+                     get spread()    { return $store.live.clob?.spread    ?? '—'; },
+                     get mid()       { return $store.live.clob?.mid       ?? '—'; },
+                     get imbalance() { return $store.live.clob?.imbalance ?? '—'; },
                  }"
                  x-init="setInterval(() => {
                      let i = Math.floor(Math.random()*4);
@@ -683,7 +690,7 @@ document.addEventListener('alpine:init', () => {
                     {{-- Live order book --}}
                     <div class="w-full sm:w-[55%] flex-shrink-0">
                         <div class="flex items-center justify-between mb-4">
-                            <span class="text-[10px] font-semibold text-[#697d91] uppercase tracking-widest">Order book — BTC ↑$84k</span>
+                            <span class="text-[10px] font-semibold text-[#697d91] uppercase tracking-widest" x-text="'Order book — ' + btcLabel"></span>
                             <span class="flex items-center gap-1.5 text-[10px] text-[#26a05e] font-semibold">
                                 <span class="w-1.5 h-1.5 rounded-full bg-[#26a05e] animate-pulse inline-block"></span>
                                 LIVE
@@ -717,6 +724,24 @@ document.addEventListener('alpine:init', () => {
                                           x-text="r.vol.toLocaleString()"></span>
                                 </div>
                             </template>
+                        </div>
+
+                        {{-- Live computed stats --}}
+                        <div class="mt-3 grid grid-cols-3 gap-2">
+                            <div class="bg-[#0a0b10] rounded-lg px-2.5 py-2 text-center">
+                                <div class="text-[9px] text-[#697d91] uppercase tracking-wider mb-0.5">Spread</div>
+                                <div class="text-[11px] font-bold font-mono text-[#0093fd]" x-text="spread"></div>
+                            </div>
+                            <div class="bg-[#0a0b10] rounded-lg px-2.5 py-2 text-center">
+                                <div class="text-[9px] text-[#697d91] uppercase tracking-wider mb-0.5">Mid</div>
+                                <div class="text-[11px] font-bold font-mono text-[#0093fd]" x-text="mid"></div>
+                            </div>
+                            <div class="bg-[#0a0b10] rounded-lg px-2.5 py-2 text-center">
+                                <div class="text-[9px] text-[#697d91] uppercase tracking-wider mb-0.5">Imbalance</div>
+                                <div class="text-[11px] font-bold font-mono"
+                                     :class="imbalance > 0 ? 'text-[#26a05e]' : (imbalance < 0 ? 'text-[#ff4d4d]' : 'text-[#0093fd]')"
+                                     x-text="typeof imbalance === 'number' ? (imbalance > 0 ? '+' : '') + imbalance : imbalance"></div>
+                            </div>
                         </div>
                     </div>
 
