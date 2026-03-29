@@ -27,8 +27,8 @@ class BillingWebController extends Controller
         $plan  = $request->input('plan');
 
         $priceId = $plan === 'pro'
-            ? env('STRIPE_PRO_PRICE_ID')
-            : env('STRIPE_BUILDER_PRICE_ID');
+            ? config('services.stripe.pro_price_id')
+            : config('services.stripe.builder_price_id');
 
         $checkoutSession = $user->newSubscription('default', $priceId)
             ->checkout([

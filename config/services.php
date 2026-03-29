@@ -35,6 +35,11 @@ return [
         ],
     ],
 
+    'stripe' => [
+        'builder_price_id' => env('STRIPE_BUILDER_PRICE_ID'),
+        'pro_price_id'     => env('STRIPE_PRO_PRICE_ID'),
+    ],
+
     'recorder' => [
         'sqlite_file'               => env('RECORDER_SQLITE_FILE', storage_path('app/polymarket.db')),
         'gamma_base'                => env('GAMMA_API_BASE', 'https://gamma-api.polymarket.com'),

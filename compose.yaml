@@ -28,6 +28,8 @@ services:
       QUEUE_CONNECTION: redis
       RECORDER_SQLITE_FILE: /var/data/polymarket.db
     volumes:
+      - .:/var/www/html
+      - vendor_data:/var/www/html/vendor
       - recorder_data:/var/data
     depends_on:
       pgsql:
@@ -83,4 +85,6 @@ volumes:
   sail-redis:
     driver: local
   recorder_data:
+    driver: local
+  vendor_data:
     driver: local
