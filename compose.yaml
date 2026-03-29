@@ -30,7 +30,7 @@ services:
     volumes:
       - .:/var/www/html
       - vendor_data:/var/www/html/vendor
-      - recorder_data:/var/data
+      - /home/hp/projects/market-recorder/data:/var/data
     depends_on:
       pgsql:
         condition: service_healthy
@@ -83,8 +83,6 @@ volumes:
   sail-pgsql:
     driver: local
   sail-redis:
-    driver: local
-  recorder_data:
     driver: local
   vendor_data:
     driver: local
