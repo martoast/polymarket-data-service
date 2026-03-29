@@ -39,10 +39,14 @@
         }
     </script>
     <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/intersect@3.x.x/dist/cdn.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
         * { font-family: 'Inter', system-ui, sans-serif; }
         code, pre, .font-mono { font-family: 'JetBrains Mono', 'Fira Code', monospace; }
+
+        /* Hide Alpine cloak until hydrated */
+        [x-cloak] { display: none !important; }
 
         /* Scrollbar */
         ::-webkit-scrollbar { width: 4px; height: 4px; }
@@ -62,7 +66,7 @@
 
     {{-- Nav --}}
     <nav class="border-b border-[#1f2937] bg-[#0a0b10]/95 backdrop-blur-sm sticky top-0 z-50">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-14">
 
                 {{-- Logo --}}
@@ -151,7 +155,7 @@
 
     {{-- Footer --}}
     <footer class="border-t border-[#1f2937] mt-24 py-8">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
             <div class="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-[#697d91]">
                 <span class="font-medium">Polymarket Data — Oracle API</span>
                 <div class="flex items-center gap-6 text-sm">
