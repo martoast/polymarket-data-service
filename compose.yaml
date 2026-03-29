@@ -26,11 +26,9 @@ services:
       REDIS_HOST: redis
       CACHE_STORE: redis
       QUEUE_CONNECTION: redis
-      RECORDER_SQLITE_FILE: /var/data/polymarket.db
     volumes:
       - .:/var/www/html
       - vendor_data:/var/www/html/vendor
-      - /home/hp/projects/market-recorder/data:/var/data
     depends_on:
       pgsql:
         condition: service_healthy
