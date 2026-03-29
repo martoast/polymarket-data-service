@@ -3,6 +3,22 @@
 @section('title', 'Polymarket Data API — Oracle Ticks, CLOB Snapshots & ML Features for Algo Traders')
 
 @section('head')
+<meta name="description" content="REST API for Polymarket historical data. Chainlink oracle ticks, CLOB order book snapshots, 1-minute OHLCV candles, and 40+ pre-computed ML features per market window. Free tier — API key in 60 seconds.">
+<meta name="keywords" content="Polymarket API, Polymarket data, Polymarket historical data, prediction market data API, Polymarket CLOB data, Polymarket order book API, Polymarket backtesting, Polymarket oracle data, Polymarket trading bot, Polymarket 1-minute candles, prediction market ML features, Polymarket WebSocket feed, Polymarket Chainlink oracle tick data">
+<link rel="canonical" href="{{ url('/') }}">
+
+{{-- Open Graph --}}
+<meta property="og:type" content="website">
+<meta property="og:url" content="{{ url('/') }}">
+<meta property="og:title" content="Polymarket Data API — Historical CLOB, Oracle Ticks & ML Features">
+<meta property="og:description" content="Chainlink oracle ticks, full CLOB order book snapshots, and 40+ pre-computed ML features for Polymarket algo traders. Free tier available.">
+<meta property="og:site_name" content="Polymarket Data API">
+
+{{-- Twitter Card --}}
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Polymarket Data API — Historical CLOB, Oracle Ticks & ML Features">
+<meta name="twitter:description" content="Chainlink oracle ticks, full CLOB order book snapshots, and 40+ pre-computed ML features for Polymarket algo traders. Free tier available.">
+
 <style>
 /* ── Dot-grid background ── */
 .dot-grid {
@@ -100,7 +116,7 @@
 
                 {{-- Sub --}}
                 <p class="text-[#8a9ab0] text-[1.1rem] leading-[1.75] mb-10 max-w-[480px]">
-                    Millisecond oracle ticks from Chainlink. Full CLOB order book snapshots. 40+ pre-computed ML features — per resolved window. REST API, available from day one.
+                    Historical Polymarket data via REST API — Chainlink oracle ticks, CLOB order book snapshots, 1-minute OHLCV candles, and 40+ pre-computed ML features per resolved window. Ready for backtesting and algo trading from day one.
                 </p>
 
                 {{-- CTAs --}}
