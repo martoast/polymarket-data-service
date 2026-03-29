@@ -83,8 +83,8 @@ class ClobFeedService
 
         if ($this->connected && $this->conn) {
             $this->conn->send(json_encode([
-                'operation' => 'subscribe',
                 'assets_ids' => array_values($new),
+                'type'       => 'market',
             ]));
             array_push($this->subscribedTokens, ...$new);
             echo '[clob] Subscribed to ' . count($new) . ' new token(s) (total: ' . count($this->subscribedTokens) . ')' . PHP_EOL;
@@ -103,15 +103,14 @@ class ClobFeedService
         $this->status         = 'connected';
         echo '[clob] Connected' . PHP_EOL;
 
-        // Initial subscription with all known tokens
-        $allTokens = array_unique(array_merge($this->subscribedTokens, $this->pendingTokens));
+        // Initial subscription — send all pending tokens in ONE message (endpoint rejects multiple calls)
+        $allTokens = array_values(array_unique(array_merge($this->subscribedTokens, $this->pendingTokens)));
         if (!empty($allTokens)) {
             $ws->send(json_encode([
-                'type'                   => 'market',
-                'assets_ids'             => array_values($allTokens),
-                'custom_feature_enabled' => true,
+                'assets_ids' => $allTokens,
+                'type'       => 'market',
             ]));
-            $this->subscribedTokens = array_values($allTokens);
+            $this->subscribedTokens = $allTokens;
             $this->pendingTokens    = [];
             echo '[clob] Subscribed to ' . count($allTokens) . ' token(s)' . PHP_EOL;
         }

@@ -39,7 +39,7 @@ class RecorderCommand extends Command
         $candles   = new CandleService();
         $discovery = new MarketDiscoveryService();
 
-        // Pre-populate token map from DB (windows already known from prior runs)
+        // Pre-populate full token map from DB (for lookup on price events)
         $this->tokenMap = $discovery->loadTokenMap();
         echo '[recorder] Pre-loaded ' . count($this->tokenMap) . ' token mappings from DB' . PHP_EOL;
 
@@ -50,10 +50,11 @@ class RecorderCommand extends Command
             fn (array $msg) => $this->onMarketResolved($msg)
         );
 
-        // Subscribe to all tokens already known
-        $existingTokens = array_keys($this->tokenMap);
-        if (!empty($existingTokens)) {
-            $clob->subscribe($existingTokens);
+        // Subscribe only to ACTIVE tokens at startup (avoids sending 700+ stale tokens in one WS frame)
+        $activeTokens = array_keys($discovery->loadActiveTokenMap());
+        if (!empty($activeTokens)) {
+            $clob->subscribe($activeTokens);
+            echo '[recorder] Queued ' . count($activeTokens) . ' active token(s) for CLOB subscription' . PHP_EOL;
         }
 
         // ── Oracle feed ─────────────────────────────────────────────────────

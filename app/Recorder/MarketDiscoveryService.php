@@ -88,6 +88,36 @@ class MarketDiscoveryService
     }
 
     /**
+     * Load only ACTIVE (not yet resolved, not yet closed) token→window map.
+     * Used for the initial CLOB subscription so we don't send 700+ stale tokens.
+     *
+     * @return array<string, array{window_id:string, is_yes:bool}>
+     */
+    public function loadActiveTokenMap(): array
+    {
+        $map   = [];
+        $nowMs = (int) (microtime(true) * 1000);
+        $rows  = DB::table('windows')
+            ->whereNotNull('yes_token_id')
+            ->whereNull('outcome')
+            ->where('close_ts', '>', $nowMs)
+            ->select('id', 'yes_token_id', 'no_token_id')
+            ->get();
+
+        foreach ($rows as $row) {
+            if ($row->yes_token_id) {
+                $map[$row->yes_token_id] = ['window_id' => $row->id, 'is_yes' => true];
+                $this->seen[$row->id] = true;
+            }
+            if ($row->no_token_id) {
+                $map[$row->no_token_id] = ['window_id' => $row->id, 'is_yes' => false];
+            }
+        }
+
+        return $map;
+    }
+
+    /**
      * Generate slug candidates for a given asset prefix + duration.
      * Covers: previous window, current window, next 3 windows.
      */
