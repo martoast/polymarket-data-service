@@ -38,7 +38,6 @@ class SqliteSyncService
                 null,
                 [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
             );
-
             $this->writePdo = new PDO(
                 'sqlite:' . $file,
                 null,
