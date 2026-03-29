@@ -12,7 +12,7 @@ class WebhookController extends Controller
 {
     public function handle(Request $request): JsonResponse
     {
-        $webhookSecret = config('cashier.webhook.secret', env('STRIPE_WEBHOOK_SECRET'));
+        $webhookSecret = config('cashier.webhook.secret');
         $payload       = $request->getContent();
         $sigHeader     = $request->header('Stripe-Signature');
 
@@ -46,8 +46,8 @@ class WebhookController extends Controller
         }
 
         $priceId        = $subscription->items->data[0]->price->id ?? null;
-        $builderPriceId = env('STRIPE_BUILDER_PRICE_ID');
-        $proPriceId     = env('STRIPE_PRO_PRICE_ID');
+        $builderPriceId = config('services.stripe.builder_price_id');
+        $proPriceId     = config('services.stripe.pro_price_id');
 
         $tier = match ($priceId) {
             $proPriceId     => 'pro',
