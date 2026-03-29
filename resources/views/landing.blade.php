@@ -788,11 +788,12 @@
 
             </div>
 
-            {{-- RIGHT: Visual panel — swaps per step --}}
+            {{-- RIGHT: Visual panel — fixed height so page never shifts --}}
             <div class="w-full lg:w-[56%] lg:sticky lg:top-24">
+              <div class="relative" style="min-height: 340px;">
 
                 {{-- Step 1 — Account / API key card --}}
-                <div x-show="step === 1" x-transition:enter="transition ease-out duration-400" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
+                <div x-show="step === 1" class="absolute inset-0" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-3" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
                     <div class="bg-[#17181c] border border-[#1f2937] rounded-2xl overflow-hidden">
                         <div class="px-5 py-3 border-b border-[#1f2937] flex items-center gap-2">
                             <div class="w-2.5 h-2.5 rounded-full bg-[#ff5f56]"></div>
@@ -819,7 +820,7 @@
                 </div>
 
                 {{-- Step 2 — API key + curl --}}
-                <div x-show="step === 2" x-transition:enter="transition ease-out duration-400" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
+                <div x-show="step === 2" class="absolute inset-0" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-3" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
                     <div class="bg-[#17181c] border border-[#1f2937] rounded-2xl overflow-hidden">
                         <div class="px-5 py-3 border-b border-[#1f2937] flex items-center gap-2">
                             <div class="w-2.5 h-2.5 rounded-full bg-[#ff5f56]"></div>
@@ -845,7 +846,7 @@
                 </div>
 
                 {{-- Step 3 — JSON response --}}
-                <div x-show="step === 3" x-transition:enter="transition ease-out duration-400" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
+                <div x-show="step === 3" class="absolute inset-0" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-3" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
                     <div class="bg-[#17181c] border border-[#1f2937] rounded-2xl overflow-hidden">
                         <div class="px-5 py-3 border-b border-[#1f2937] flex items-center gap-2">
                             <div class="w-2.5 h-2.5 rounded-full bg-[#ff5f56]"></div>
@@ -874,6 +875,7 @@
                     </div>
                 </div>
 
+              </div>{{-- /relative --}}
             </div>
         </div>
     </div>
