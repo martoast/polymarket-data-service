@@ -223,7 +223,22 @@
             </div>
 
             {{-- ── Right: product data card ── --}}
-            <div class="hidden lg:block fade-up relative" style="animation-delay:.15s">
+            <div class="hidden lg:block fade-up relative" style="animation-delay:.15s"
+                 x-data="{
+                     get btcPrice() {
+                         const p = $store.live.oracle['BTC']?.price_usd;
+                         return p ? '$' + Number(p).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) : '$—';
+                     },
+                     get yesBid() { return $store.live.clob?.yes_bid ?? 0.58; },
+                     get noBid()  { return $store.live.clob?.no_bid  ?? 0.42; },
+                     get yesAsk() { return $store.live.clob?.yes_ask ?? 0.60; },
+                     get noAsk()  { return $store.live.clob?.no_ask  ?? 0.44; },
+                     get spread() {
+                         if (!$store.live.clob) return '0.01';
+                         return ($store.live.clob.yes_ask - $store.live.clob.yes_bid).toFixed(2);
+                     },
+                     fmt(v) { return Number(v).toFixed(2); }
+                 }">
 
                 {{-- Glow behind card --}}
                 <div class="absolute -inset-8 bg-[#0093fd]/[.05] rounded-3xl blur-3xl pointer-events-none"></div>
@@ -242,21 +257,25 @@
                                     <span class="text-white text-sm font-bold">BTC Up/Down</span>
                                     <span class="text-[10px] font-semibold text-[#697d91] bg-[#1e2428] border border-[#2e3841] px-1.5 py-0.5 rounded">5m</span>
                                 </div>
-                                <div class="text-[10px] text-[#697d91] font-mono mt-0.5">01:30:00 — 01:35:00 UTC</div>
+                                <div class="text-[10px] text-[#697d91] font-mono mt-0.5">Live · Chainlink RTDS</div>
                             </div>
                         </div>
-                        <div class="flex items-center gap-1.5 text-[10px] font-bold text-[#26a05e]">
-                            <span class="w-1.5 h-1.5 rounded-full bg-[#26a05e] animate-pulse inline-block"></span>
-                            LIVE
+                        <div class="flex items-center gap-3">
+                            <span x-show="$store.live.latency"
+                                  class="text-[10px] font-mono text-[#697d91] bg-[#0d0e13] border border-[#1f2937] px-2 py-0.5 rounded"
+                                  x-text="$store.live.latency + 'ms'"></span>
+                            <div class="flex items-center gap-1.5 text-[10px] font-bold text-[#26a05e]">
+                                <span class="w-1.5 h-1.5 rounded-full bg-[#26a05e] animate-pulse inline-block"></span>
+                                LIVE
+                            </div>
                         </div>
                     </div>
 
                     {{-- Oracle reference price --}}
                     <div class="flex items-center justify-between px-5 py-3 border-b border-[#1f2937]">
-                        <span class="text-[10px] font-semibold text-[#697d91] uppercase tracking-widest">Oracle Reference</span>
+                        <span class="text-[10px] font-semibold text-[#697d91] uppercase tracking-widest">Oracle Reference · BTC/USD</span>
                         <div class="text-right">
-                            <span class="text-white font-bold text-sm font-mono">$84,231.50</span>
-                            <span class="text-[#26a05e] text-xs font-semibold ml-2">+0.42%</span>
+                            <span class="text-white font-bold text-sm font-mono" x-text="btcPrice"></span>
                         </div>
                     </div>
 
@@ -268,7 +287,7 @@
                             <div class="flex items-center gap-1.5 mb-2">
                                 <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 8l3-5 3 3" stroke="#26a05e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                                 <span class="text-[10px] font-bold text-[#26a05e] uppercase tracking-wider">YES</span>
-                                <span class="ml-auto text-[#26a05e] font-bold text-lg font-mono">0.58</span>
+                                <span class="ml-auto text-[#26a05e] font-bold text-lg font-mono" x-text="fmt(yesBid)"></span>
                             </div>
                             <svg viewBox="0 0 120 44" class="w-full" preserveAspectRatio="none">
                                 <defs>
@@ -281,8 +300,8 @@
                                 <path d="M0,38 L14,34 L28,30 L40,26 L54,20 L66,22 L78,15 L92,11 L106,8 L120,6" fill="none" stroke="#26a05e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
                             <div class="flex justify-between mt-1">
-                                <span class="text-[9px] text-[#697d91]">H: 0.61</span>
-                                <span class="text-[9px] text-[#697d91]">L: 0.44</span>
+                                <span class="text-[9px] text-[#697d91]" x-text="'Bid: ' + fmt(yesBid)"></span>
+                                <span class="text-[9px] text-[#697d91]" x-text="'Ask: ' + fmt(yesAsk)"></span>
                             </div>
                         </div>
 
@@ -291,7 +310,7 @@
                             <div class="flex items-center gap-1.5 mb-2">
                                 <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 2l3 5 3-3" stroke="#ff6b6b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                                 <span class="text-[10px] font-bold text-[#ff6b6b] uppercase tracking-wider">NO</span>
-                                <span class="ml-auto text-[#ff6b6b] font-bold text-lg font-mono">0.42</span>
+                                <span class="ml-auto text-[#ff6b6b] font-bold text-lg font-mono" x-text="fmt(noBid)"></span>
                             </div>
                             <svg viewBox="0 0 120 44" class="w-full" preserveAspectRatio="none">
                                 <defs>
@@ -304,8 +323,8 @@
                                 <path d="M0,8 L14,12 L28,16 L40,20 L54,26 L66,24 L78,30 L92,34 L106,36 L120,38" fill="none" stroke="#ff6b6b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
                             <div class="flex justify-between mt-1">
-                                <span class="text-[9px] text-[#697d91]">H: 0.56</span>
-                                <span class="text-[9px] text-[#697d91]">L: 0.39</span>
+                                <span class="text-[9px] text-[#697d91]" x-text="'Bid: ' + fmt(noBid)"></span>
+                                <span class="text-[9px] text-[#697d91]" x-text="'Ask: ' + fmt(noAsk)"></span>
                             </div>
                         </div>
                     </div>
@@ -314,28 +333,36 @@
                     <div class="px-5 py-3 border-b border-[#1f2937]">
                         <div class="flex items-center justify-between mb-3">
                             <span class="text-[10px] font-bold text-[#697d91] uppercase tracking-widest">Order Book — YES Token</span>
-                            <span class="text-[10px] font-semibold text-[#0093fd]">0.01 spread</span>
+                            <span class="text-[10px] font-semibold text-[#0093fd]" x-text="spread + ' spread'"></span>
                         </div>
                         <div class="grid grid-cols-2 gap-3 text-[10px] font-mono">
                             <div>
                                 <div class="text-[#26a05e] font-bold mb-1.5 uppercase tracking-wider">Bids</div>
-                                @foreach([[2450,'0.57',85],[3800,'0.56',70],[1900,'0.55',55]] as [$size,$price,$w])
-                                <div class="flex items-center gap-2 mb-1.5 relative">
-                                    <div class="absolute inset-y-0 left-0 rounded-sm" style="width:{{ $w }}%; background:#26a05e18;"></div>
-                                    <span class="relative text-[#697d91] w-10">{{ number_format($size) }}</span>
-                                    <span class="relative text-[#26a05e] ml-auto">{{ $price }}</span>
-                                </div>
-                                @endforeach
+                                <template x-for="(row, i) in [
+                                    { size: 2450, price: yesBid,        w: 85 },
+                                    { size: 3800, price: yesBid - 0.01, w: 70 },
+                                    { size: 1900, price: yesBid - 0.02, w: 55 },
+                                ]" :key="i">
+                                    <div class="flex items-center gap-2 mb-1.5 relative">
+                                        <div class="absolute inset-y-0 left-0 rounded-sm" :style="'width:' + row.w + '%; background:#26a05e18'"></div>
+                                        <span class="relative text-[#697d91] w-10" x-text="row.size.toLocaleString()"></span>
+                                        <span class="relative text-[#26a05e] ml-auto" x-text="fmt(row.price)"></span>
+                                    </div>
+                                </template>
                             </div>
                             <div>
                                 <div class="text-[#ff6b6b] font-bold mb-1.5 uppercase tracking-wider text-right">Asks</div>
-                                @foreach([[1800,'0.58',80],[2900,'0.59',68],[3100,'0.60',52]] as [$size,$price,$w])
-                                <div class="flex items-center gap-2 mb-1.5 relative">
-                                    <div class="absolute inset-y-0 right-0 rounded-sm" style="width:{{ $w }}%; background:#ff6b6b18;"></div>
-                                    <span class="relative text-[#ff6b6b]">{{ $price }}</span>
-                                    <span class="relative text-[#697d91] w-10 text-right ml-auto">{{ number_format($size) }}</span>
-                                </div>
-                                @endforeach
+                                <template x-for="(row, i) in [
+                                    { size: 1800, price: yesAsk,        w: 80 },
+                                    { size: 2900, price: yesAsk + 0.01, w: 68 },
+                                    { size: 3100, price: yesAsk + 0.02, w: 52 },
+                                ]" :key="i">
+                                    <div class="flex items-center gap-2 mb-1.5 relative">
+                                        <div class="absolute inset-y-0 right-0 rounded-sm" :style="'width:' + row.w + '%; background:#ff6b6b18'"></div>
+                                        <span class="relative text-[#ff6b6b]" x-text="fmt(row.price)"></span>
+                                        <span class="relative text-[#697d91] w-10 text-right ml-auto" x-text="row.size.toLocaleString()"></span>
+                                    </div>
+                                </template>
                             </div>
                         </div>
                     </div>
