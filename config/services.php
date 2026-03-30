@@ -47,6 +47,12 @@ return [
         'pro_price_id'     => env('STRIPE_PRO_PRICE_ID'),
     ],
 
+    'google' => [
+        'client_id'     => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect'      => env('GOOGLE_REDIRECT_URI'),
+    ],
+
     'recorder' => [
         'sqlite_file'               => env('RECORDER_SQLITE_FILE', storage_path('app/polymarket.db')),
         'gamma_base'                => env('GAMMA_API_BASE', 'https://gamma-api.polymarket.com'),

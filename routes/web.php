@@ -16,6 +16,8 @@ Route::get('/login', [WebAuthController::class, 'showLogin'])->name('login')->mi
 Route::post('/login', [WebAuthController::class, 'login'])->middleware('guest');
 Route::get('/register', [WebAuthController::class, 'showRegister'])->name('register')->middleware('guest');
 Route::post('/register', [WebAuthController::class, 'register'])->middleware('guest');
+Route::get('/auth/google', [WebAuthController::class, 'redirectToGoogle'])->name('auth.google')->middleware('guest');
+Route::get('/auth/google/callback', [WebAuthController::class, 'handleGoogleCallback'])->name('auth.google.callback');
 Route::get('/docs', fn () => view('docs'))->name('docs');
 Route::get('/terms', fn () => view('terms'))->name('terms');
 Route::get('/privacy', fn () => view('privacy'))->name('privacy');

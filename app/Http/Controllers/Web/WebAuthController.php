@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Laravel\Socialite\Facades\Socialite;
 
 class WebAuthController extends Controller
 {
@@ -88,6 +89,43 @@ class WebAuthController extends Controller
         $request->session()->regenerateToken();
 
         return redirect()->route('login');
+    }
+
+    public function redirectToGoogle(): RedirectResponse
+    {
+        return Socialite::driver('google')->redirect();
+    }
+
+    public function handleGoogleCallback(): RedirectResponse
+    {
+        try {
+            $googleUser = Socialite::driver('google')->user();
+        } catch (\Throwable $e) {
+            return redirect()->route('login')->withErrors(['email' => 'Google sign-in failed. Please try again.']);
+        }
+
+        $user = User::where('email', $googleUser->getEmail())->first();
+
+        if (!$user) {
+            $user = User::create([
+                'name'              => $googleUser->getName() ?: $googleUser->getEmail(),
+                'email'             => $googleUser->getEmail(),
+                'password'          => null,
+                'email_verified_at' => now(),
+                'tier'              => 'free',
+                'is_active'         => true,
+            ]);
+        }
+
+        // Always refresh the API key on OAuth login
+        $user->tokens()->delete();
+        $plain = $user->createToken('api')->plainTextToken;
+        $user->update(['api_key' => $plain]);
+
+        Auth::login($user, true);
+        request()->session()->regenerate();
+
+        return redirect()->intended(route('dashboard'));
     }
 
     public function showForgotPassword(): View
