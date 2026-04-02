@@ -94,6 +94,30 @@ class ClobFeedService
         }
     }
 
+    /**
+     * Replace the subscription with only the given active token IDs.
+     * Called every 20s by the discovery loop to prune expired tokens and
+     * prevent the subscription list from growing unboundedly over time.
+     * The WS server silently drops data when too many tokens are subscribed.
+     */
+    public function replaceSubscription(array $activeTokenIds): void
+    {
+        if (empty($activeTokenIds)) {
+            return;
+        }
+
+        $this->subscribedTokens = array_values($activeTokenIds);
+        $this->pendingTokens    = [];
+
+        if ($this->connected && $this->conn) {
+            $this->conn->send(json_encode([
+                'assets_ids' => $this->subscribedTokens,
+                'type'       => 'market',
+            ]));
+            echo '[clob] Subscription refreshed — ' . count($this->subscribedTokens) . ' active token(s)' . PHP_EOL;
+        }
+    }
+
     private function onOpen(WebSocket $ws): void
     {
         $this->conn           = $ws;

@@ -20,11 +20,28 @@ class RecorderCommand extends Command
     /** token_id → ['window_id' => slug, 'is_yes' => bool] */
     private array $tokenMap = [];
 
-    /** window_id → asset_id cache */
-    private array $windowAssetCache = [];
+    /**
+     * Per-window CLOB state — one row written per dirty window per second.
+     *
+     * Instead of buffering every raw tick (was ~700 rows/s), we maintain the
+     * latest known bid/ask for each window and write ONE sampled row per second
+     * per window that actually received an update.  At ~36 active windows this
+     * caps writes at ~36 rows/s regardless of CLOB message volume.
+     *
+     * Structure: window_id => [
+     *   'asset_id' => int,
+     *   'yes_bid'  => float|null,
+     *   'yes_ask'  => float|null,
+     *   'no_bid'   => float|null,
+     *   'no_ask'   => float|null,
+     *   'dirty'    => bool,   // true = received update since last flush
+     *   'ts'       => int,    // ms timestamp of most recent tick
+     * ]
+     */
+    private array $windowState = [];
 
-    /** CLOB snapshot buffer for batch inserts */
-    private array $clobBuffer = [];
+    /** window_id → asset_id DB cache */
+    private array $windowAssetCache = [];
 
     /** Shared mutable stats */
     private array $stats;
@@ -50,7 +67,7 @@ class RecorderCommand extends Command
             fn (array $msg) => $this->onMarketResolved($msg)
         );
 
-        // Subscribe only to ACTIVE tokens at startup (avoids sending 700+ stale tokens in one WS frame)
+        // Subscribe only to ACTIVE tokens at startup
         $activeTokens = array_keys($discovery->loadActiveTokenMap());
         if (!empty($activeTokens)) {
             $clob->subscribe($activeTokens);
@@ -66,15 +83,18 @@ class RecorderCommand extends Command
         $runDiscovery = function () use ($discovery, $clob) {
             $newMarkets = $discovery->discover();
             if (!empty($newMarkets)) {
-                $newTokenIds = [];
                 foreach ($newMarkets as $entry) {
                     $this->tokenMap[$entry['yes_token_id']] = ['window_id' => $entry['window_id'], 'is_yes' => true];
                     $this->tokenMap[$entry['no_token_id']]  = ['window_id' => $entry['window_id'], 'is_yes' => false];
-                    $newTokenIds[] = $entry['yes_token_id'];
-                    $newTokenIds[] = $entry['no_token_id'];
                 }
-                $clob->subscribe($newTokenIds);
             }
+
+            // Rebuild subscription from only currently active tokens — prevents the
+            // list from growing to thousands of expired tokens and silently breaking
+            // the WS feed. Active map is a cheap indexed query (~60 rows max).
+            $activeTokenMap = $discovery->loadActiveTokenMap();
+            $clob->replaceSubscription(array_keys($activeTokenMap));
+
             $nowMs = (int) (microtime(true) * 1000);
             $this->stats['markets']['total']  = DB::table('windows')->count();
             $this->stats['markets']['active'] = DB::table('windows')
@@ -86,11 +106,11 @@ class RecorderCommand extends Command
         $runDiscovery();
         $loop->addPeriodicTimer(20, $runDiscovery);
 
-        // ── CLOB buffer flush every 1s ────────────────────────────────────────
+        // ── Sampled CLOB flush every 1s ───────────────────────────────────────
         $loop->addPeriodicTimer(1, function () use ($clob) {
-            $this->flushClobBuffer();
-            $this->stats['clob']['connected']         = ($clob->status === 'connected');
-            $this->stats['clob']['subscribed']        = $clob->subscribedCount();
+            $this->flushWindowState();
+            $this->stats['clob']['connected']  = ($clob->status === 'connected');
+            $this->stats['clob']['subscribed'] = $clob->subscribedCount();
         });
 
         // ── Status update every 5s ────────────────────────────────────────────
@@ -104,7 +124,7 @@ class RecorderCommand extends Command
         if (function_exists('pcntl_signal')) {
             $shutdown = function () use ($loop) {
                 echo '[recorder] Shutting down...' . PHP_EOL;
-                $this->flushClobBuffer();
+                $this->flushWindowState();
                 RecorderState::update(array_merge($this->stats, ['running' => false]));
                 $loop->stop();
             };
@@ -158,7 +178,6 @@ class RecorderCommand extends Command
 
     private function onClobPrice(array $msg): void
     {
-        // Actual format: {event_type, market, price_changes: [{asset_id, price}, ...], timestamp}
         $changes = $msg['price_changes'] ?? [];
         if (empty($changes)) {
             return;
@@ -169,7 +188,7 @@ class RecorderCommand extends Command
         foreach ($changes as $change) {
             $tokenId = $change['asset_id'] ?? null;
             $price   = isset($change['price']) ? (float) $change['price'] : null;
-            $side    = strtoupper($change['side'] ?? '');  // 'BUY' = bid, 'SELL' = ask
+            $side    = strtoupper($change['side'] ?? '');
 
             if (!$tokenId || $price === null) {
                 continue;
@@ -182,36 +201,66 @@ class RecorderCommand extends Command
 
             $windowId = $entry['window_id'];
             $isYes    = $entry['is_yes'];
-            $assetId  = $this->getAssetIdByWindow($windowId);
-            if (!$assetId) {
-                continue;
+            $isBid    = ($side === 'BUY');
+
+            // Initialise state for new windows (one DB lookup, then cached forever)
+            if (!isset($this->windowState[$windowId])) {
+                $assetId = $this->getAssetIdByWindow($windowId);
+                if (!$assetId) {
+                    continue;
+                }
+                $this->windowState[$windowId] = [
+                    'asset_id' => $assetId,
+                    'yes_bid'  => null,
+                    'yes_ask'  => null,
+                    'no_bid'   => null,
+                    'no_ask'   => null,
+                    'dirty'    => false,
+                    'ts'       => $ts,
+                ];
             }
 
-            // Distinguish bid vs ask using the side field; fall back to ask if unknown
-            $isBid = ($side === 'BUY');
-            $this->clobBuffer[] = [
-                'window_id' => $windowId,
-                'asset_id'  => $assetId,
-                'yes_bid'   => ($isYes  && $isBid)  ? $price : null,
-                'yes_ask'   => ($isYes  && !$isBid) ? $price : null,
-                'no_bid'    => (!$isYes && $isBid)  ? $price : null,
-                'no_ask'    => (!$isYes && !$isBid) ? $price : null,
-                'ts'        => $ts,
-            ];
-        }
-
-        if (count($this->clobBuffer) >= 100) {
-            $this->flushClobBuffer();
+            // Merge latest price into running state (no row created yet)
+            $s = &$this->windowState[$windowId];
+            if      ($isYes  && $isBid)  { $s['yes_bid'] = $price; }
+            elseif  ($isYes  && !$isBid) { $s['yes_ask'] = $price; }
+            elseif  (!$isYes && $isBid)  { $s['no_bid']  = $price; }
+            else                         { $s['no_ask']  = $price; }
+            $s['dirty'] = true;
+            $s['ts']    = $ts;
+            unset($s);
         }
     }
 
-    private function flushClobBuffer(): void
+    /**
+     * Write one row per dirty window — called every second by the event loop.
+     * Each row captures the full current bid/ask state so queries never need
+     * to scan multiple rows to reconstruct a complete snapshot.
+     */
+    private function flushWindowState(): void
     {
-        if (empty($this->clobBuffer)) {
+        $rows = [];
+        foreach ($this->windowState as $windowId => &$state) {
+            if (!$state['dirty']) {
+                continue;
+            }
+            $rows[] = [
+                'window_id' => $windowId,
+                'asset_id'  => $state['asset_id'],
+                'yes_bid'   => $state['yes_bid'],
+                'yes_ask'   => $state['yes_ask'],
+                'no_bid'    => $state['no_bid'],
+                'no_ask'    => $state['no_ask'],
+                'ts'        => $state['ts'],
+            ];
+            $state['dirty'] = false;
+        }
+        unset($state);
+
+        if (empty($rows)) {
             return;
         }
-        $rows = $this->clobBuffer;
-        $this->clobBuffer = [];
+
         try {
             DB::table('clob_snapshots')->insert($rows);
             $this->stats['clob']['snapshots_written'] += count($rows);
@@ -238,6 +287,14 @@ class RecorderCommand extends Command
             ]);
         if ($updated) {
             echo "[resolved] condition={$conditionId} outcome={$outcome}" . PHP_EOL;
+        }
+
+        // Free memory for resolved windows — they won't receive more ticks
+        foreach ($this->windowState as $windowId => $state) {
+            $row = DB::table('windows')->where('id', $windowId)->where('condition_id', $conditionId)->first();
+            if ($row) {
+                unset($this->windowState[$windowId]);
+            }
         }
     }
 
@@ -269,13 +326,13 @@ class RecorderCommand extends Command
     private function emptyStats(): array
     {
         return [
-            'running'          => true,
-            'started_at'       => time(),
-            'oracle'           => [],
-            'clob'             => ['connected' => false, 'subscribed' => 0, 'snapshots_written' => 0],
-            'markets'          => ['total' => 0, 'active' => 0],
-            'candles_written'  => 0,
-            'oracle_written'   => 0,
+            'running'         => true,
+            'started_at'      => time(),
+            'oracle'          => [],
+            'clob'            => ['connected' => false, 'subscribed' => 0, 'snapshots_written' => 0],
+            'markets'         => ['total' => 0, 'active' => 0],
+            'candles_written' => 0,
+            'oracle_written'  => 0,
         ];
     }
 }

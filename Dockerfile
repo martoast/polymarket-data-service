@@ -57,6 +57,7 @@ RUN chmod +x /entrypoint.sh
 COPY --chown=sail:sail . /var/www/html
 
 # Install dependencies (no env needed at build time)
+RUN mkdir -p /var/www/html/bootstrap/cache && chown -R sail:sail /var/www/html/bootstrap
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
 # Storage dirs writable by sail

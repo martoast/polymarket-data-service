@@ -41,28 +41,18 @@ class OracleController extends Controller
     {
         $asset = Asset::where('symbol', strtoupper($request->asset))->firstOrFail();
 
+        // Single pass: aggregate + first/last via ordered array_agg
         $stats = OracleTick::where('asset_id', $asset->id)
             ->where('ts', '>=', $request->from)
             ->where('ts', '<=', $request->to)
             ->selectRaw('
-                MIN(price_bp)   AS min_price_bp,
-                MAX(price_bp)   AS max_price_bp,
-                COUNT(*)        AS tick_count
+                MIN(price_bp)                             AS min_price_bp,
+                MAX(price_bp)                             AS max_price_bp,
+                COUNT(*)                                  AS tick_count,
+                (array_agg(price_bp ORDER BY ts ASC))[1]  AS first_price_bp,
+                (array_agg(price_bp ORDER BY ts DESC))[1] AS last_price_bp
             ')
             ->first();
-
-        // Get first and last price_bp
-        $first = OracleTick::where('asset_id', $asset->id)
-            ->where('ts', '>=', $request->from)
-            ->where('ts', '<=', $request->to)
-            ->orderBy('ts', 'asc')
-            ->value('price_bp');
-
-        $last = OracleTick::where('asset_id', $asset->id)
-            ->where('ts', '>=', $request->from)
-            ->where('ts', '<=', $request->to)
-            ->orderBy('ts', 'desc')
-            ->value('price_bp');
 
         return response()->json([
             'data' => [
@@ -71,8 +61,8 @@ class OracleController extends Controller
                 'to'              => (int) $request->to,
                 'min_price_bp'    => $stats->min_price_bp,
                 'max_price_bp'    => $stats->max_price_bp,
-                'first_price_bp'  => $first,
-                'last_price_bp'   => $last,
+                'first_price_bp'  => $stats->first_price_bp,
+                'last_price_bp'   => $stats->last_price_bp,
                 'tick_count'      => (int) $stats->tick_count,
             ],
         ]);
