@@ -43,6 +43,15 @@ class RecorderCommand extends Command
     /** window_id → asset_id DB cache */
     private array $windowAssetCache = [];
 
+    /**
+     * Dead-band filter for oracle writes — last written price+ts per asset.
+     * asset => ['price_usd' => float, 'ts' => int (ms)]
+     */
+    private array $lastOracleWrite = [];
+
+    private const ORACLE_MIN_CHANGE_PCT = 0.01; // 0.01% minimum move to write
+    private const ORACLE_HEARTBEAT_SEC  = 30;   // always write at least every 30s
+
     /** Shared mutable stats */
     private array $stats;
 
@@ -148,14 +157,24 @@ class RecorderCommand extends Command
             return;
         }
 
-        DB::table('oracle_ticks')->insert([
-            'asset_id'  => $assetId,
-            'price_usd' => $price,
-            'price_bp'  => (int) ($price * 100),
-            'ts'        => $ts,
-        ]);
+        // Dead-band filter: skip DB write if price hasn't moved enough AND
+        // heartbeat hasn't expired. Candle service still gets every tick.
+        $last = $this->lastOracleWrite[$asset] ?? null;
+        $shouldWrite = $last === null
+            || (abs($price - $last['price_usd']) / $last['price_usd'] * 100) >= self::ORACLE_MIN_CHANGE_PCT
+            || ($ts - $last['ts']) >= self::ORACLE_HEARTBEAT_SEC * 1000;
 
-        $this->stats['oracle_written']++;
+        if ($shouldWrite) {
+            DB::table('oracle_ticks')->insert([
+                'asset_id'  => $assetId,
+                'price_usd' => $price,
+                'price_bp'  => (int) ($price * 100),
+                'ts'        => $ts,
+            ]);
+            $this->lastOracleWrite[$asset] = ['price_usd' => $price, 'ts' => $ts];
+            $this->stats['oracle_written']++;
+        }
+
         $this->stats['oracle'][$asset] = ['price' => $price, 'last_tick' => $ts];
 
         $completed = $candles->tick($asset, $price, $ts);
