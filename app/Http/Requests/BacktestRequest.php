@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Models\WindowFeature;
+use App\Models\CryptoMarketFeature;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Validator;
 
@@ -49,11 +49,11 @@ class BacktestRequest extends FormRequest
     public static function allowedBacktestFields(): array
     {
         $exclude = [
-            'window_id', 'asset', 'open_ts', 'close_ts', 'outcome',
+            'market_id', 'asset', 'open_ts', 'close_ts', 'outcome',
             'computed_at', 'duration_sec', 'hour_utc', 'day_of_week',
             'has_full_oracle_coverage', 'has_clob_coverage', 'recording_gap',
         ];
 
-        return array_values(array_diff((new WindowFeature())->getFillable(), $exclude));
+        return array_values(array_diff((new CryptoMarketFeature())->getFillable(), $exclude));
     }
 }

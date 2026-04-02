@@ -15,20 +15,15 @@ use React\EventLoop\Loop;
 class RecorderCommand extends Command
 {
     protected $signature   = 'recorder:start';
-    protected $description = 'Start the Polymarket market recorder (long-running ReactPHP process)';
+    protected $description = 'Start the Polymarket crypto market recorder (long-running ReactPHP process)';
 
-    /** token_id → ['window_id' => slug, 'is_yes' => bool] */
+    /** token_id → ['market_id' => slug, 'is_yes' => bool] */
     private array $tokenMap = [];
 
     /**
-     * Per-window CLOB state — one row written per dirty window per second.
+     * Per-market CLOB state — one row written per dirty market per second.
      *
-     * Instead of buffering every raw tick (was ~700 rows/s), we maintain the
-     * latest known bid/ask for each window and write ONE sampled row per second
-     * per window that actually received an update.  At ~36 active windows this
-     * caps writes at ~36 rows/s regardless of CLOB message volume.
-     *
-     * Structure: window_id => [
+     * Structure: market_id => [
      *   'asset_id' => int,
      *   'yes_bid'  => float|null,
      *   'yes_ask'  => float|null,
@@ -38,10 +33,10 @@ class RecorderCommand extends Command
      *   'ts'       => int,    // ms timestamp of most recent tick
      * ]
      */
-    private array $windowState = [];
+    private array $marketState = [];
 
-    /** window_id → asset_id DB cache */
-    private array $windowAssetCache = [];
+    /** market_id → asset_id DB cache */
+    private array $marketAssetCache = [];
 
     /**
      * Dead-band filter for oracle writes — last written price+ts per asset.
@@ -52,7 +47,6 @@ class RecorderCommand extends Command
     private const ORACLE_MIN_CHANGE_PCT = 0.01; // 0.01% minimum move to write
     private const ORACLE_HEARTBEAT_SEC  = 30;   // always write at least every 30s
 
-    /** Shared mutable stats */
     private array $stats;
 
     public function handle(): int
@@ -93,20 +87,20 @@ class RecorderCommand extends Command
             $newMarkets = $discovery->discover();
             if (!empty($newMarkets)) {
                 foreach ($newMarkets as $entry) {
-                    $this->tokenMap[$entry['yes_token_id']] = ['window_id' => $entry['window_id'], 'is_yes' => true];
-                    $this->tokenMap[$entry['no_token_id']]  = ['window_id' => $entry['window_id'], 'is_yes' => false];
+                    $this->tokenMap[$entry['yes_token_id']] = ['market_id' => $entry['market_id'], 'is_yes' => true];
+                    $this->tokenMap[$entry['no_token_id']]  = ['market_id' => $entry['market_id'], 'is_yes' => false];
                 }
             }
 
             // Rebuild subscription from only currently active tokens — prevents the
             // list from growing to thousands of expired tokens and silently breaking
-            // the WS feed. Active map is a cheap indexed query (~60 rows max).
+            // the WS feed.
             $activeTokenMap = $discovery->loadActiveTokenMap();
             $clob->replaceSubscription(array_keys($activeTokenMap));
 
             $nowMs = (int) (microtime(true) * 1000);
-            $this->stats['markets']['total']  = DB::table('windows')->count();
-            $this->stats['markets']['active'] = DB::table('windows')
+            $this->stats['markets']['total']  = DB::table('markets')->count();
+            $this->stats['markets']['active'] = DB::table('markets')
                 ->whereNull('outcome')
                 ->where('close_ts', '>', $nowMs)
                 ->count();
@@ -117,7 +111,7 @@ class RecorderCommand extends Command
 
         // ── Sampled CLOB flush every 1s ───────────────────────────────────────
         $loop->addPeriodicTimer(1, function () use ($clob) {
-            $this->flushWindowState();
+            $this->flushMarketState();
             $this->stats['clob']['connected']  = ($clob->status === 'connected');
             $this->stats['clob']['subscribed'] = $clob->subscribedCount();
         });
@@ -133,7 +127,7 @@ class RecorderCommand extends Command
         if (function_exists('pcntl_signal')) {
             $shutdown = function () use ($loop) {
                 echo '[recorder] Shutting down...' . PHP_EOL;
-                $this->flushWindowState();
+                $this->flushMarketState();
                 RecorderState::update(array_merge($this->stats, ['running' => false]));
                 $loop->stop();
             };
@@ -159,7 +153,7 @@ class RecorderCommand extends Command
 
         // Dead-band filter: skip DB write if price hasn't moved enough AND
         // heartbeat hasn't expired. Candle service still gets every tick.
-        $last = $this->lastOracleWrite[$asset] ?? null;
+        $last        = $this->lastOracleWrite[$asset] ?? null;
         $shouldWrite = $last === null
             || (abs($price - $last['price_usd']) / $last['price_usd'] * 100) >= self::ORACLE_MIN_CHANGE_PCT
             || ($ts - $last['ts']) >= self::ORACLE_HEARTBEAT_SEC * 1000;
@@ -218,17 +212,17 @@ class RecorderCommand extends Command
                 continue;
             }
 
-            $windowId = $entry['window_id'];
+            $marketId = $entry['market_id'];
             $isYes    = $entry['is_yes'];
             $isBid    = ($side === 'BUY');
 
-            // Initialise state for new windows (one DB lookup, then cached forever)
-            if (!isset($this->windowState[$windowId])) {
-                $assetId = $this->getAssetIdByWindow($windowId);
+            // Initialise state for new markets (one DB lookup, then cached)
+            if (!isset($this->marketState[$marketId])) {
+                $assetId = $this->getAssetIdByMarket($marketId);
                 if (!$assetId) {
                     continue;
                 }
-                $this->windowState[$windowId] = [
+                $this->marketState[$marketId] = [
                     'asset_id' => $assetId,
                     'yes_bid'  => null,
                     'yes_ask'  => null,
@@ -239,10 +233,9 @@ class RecorderCommand extends Command
                 ];
             }
 
-            // Merge latest price into running state (no row created yet)
-            $s = &$this->windowState[$windowId];
-            if      ($isYes  && $isBid)  { $s['yes_bid'] = $price; }
-            elseif  ($isYes  && !$isBid) { $s['yes_ask'] = $price; }
+            $s = &$this->marketState[$marketId];
+            if      ($isYes && $isBid)   { $s['yes_bid'] = $price; }
+            elseif  ($isYes && !$isBid)  { $s['yes_ask'] = $price; }
             elseif  (!$isYes && $isBid)  { $s['no_bid']  = $price; }
             else                         { $s['no_ask']  = $price; }
             $s['dirty'] = true;
@@ -252,19 +245,17 @@ class RecorderCommand extends Command
     }
 
     /**
-     * Write one row per dirty window — called every second by the event loop.
-     * Each row captures the full current bid/ask state so queries never need
-     * to scan multiple rows to reconstruct a complete snapshot.
+     * Write one row per dirty market — called every second by the event loop.
      */
-    private function flushWindowState(): void
+    private function flushMarketState(): void
     {
         $rows = [];
-        foreach ($this->windowState as $windowId => &$state) {
+        foreach ($this->marketState as $marketId => &$state) {
             if (!$state['dirty']) {
                 continue;
             }
             $rows[] = [
-                'window_id' => $windowId,
+                'market_id' => $marketId,
                 'asset_id'  => $state['asset_id'],
                 'yes_bid'   => $state['yes_bid'],
                 'yes_ask'   => $state['yes_ask'],
@@ -297,22 +288,24 @@ class RecorderCommand extends Command
         if (!$conditionId || !$outcome) {
             return;
         }
-        $updated = DB::table('windows')
+
+        $updated = DB::table('markets')
             ->where('condition_id', $conditionId)
             ->whereNull('outcome')
             ->update([
                 'outcome'     => strtoupper($outcome),
                 'resolved_ts' => (int) (microtime(true) * 1000),
             ]);
+
         if ($updated) {
             echo "[resolved] condition={$conditionId} outcome={$outcome}" . PHP_EOL;
         }
 
-        // Free memory for resolved windows — they won't receive more ticks
-        foreach ($this->windowState as $windowId => $state) {
-            $row = DB::table('windows')->where('id', $windowId)->where('condition_id', $conditionId)->first();
+        // Free memory for resolved markets — they won't receive more ticks
+        foreach ($this->marketState as $marketId => $state) {
+            $row = DB::table('markets')->where('id', $marketId)->where('condition_id', $conditionId)->first();
             if ($row) {
-                unset($this->windowState[$windowId]);
+                unset($this->marketState[$marketId]);
             }
         }
     }
@@ -331,15 +324,15 @@ class RecorderCommand extends Command
         return $cache[$symbol] ?? null;
     }
 
-    private function getAssetIdByWindow(string $windowId): ?int
+    private function getAssetIdByMarket(string $marketId): ?int
     {
-        if (!isset($this->windowAssetCache[$windowId])) {
-            $id = DB::table('windows')->where('id', $windowId)->value('asset_id');
+        if (!isset($this->marketAssetCache[$marketId])) {
+            $id = DB::table('markets')->where('id', $marketId)->value('asset_id');
             if ($id !== null) {
-                $this->windowAssetCache[$windowId] = (int) $id;
+                $this->marketAssetCache[$marketId] = (int) $id;
             }
         }
-        return $this->windowAssetCache[$windowId] ?? null;
+        return $this->marketAssetCache[$marketId] ?? null;
     }
 
     private function emptyStats(): array

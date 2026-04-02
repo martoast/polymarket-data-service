@@ -5,19 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class OracleStat extends Model
+class WeatherReading extends Model
 {
     public $timestamps = false;
 
     protected $fillable = [
-        'asset_id',
-        'ts',
-        'bucket_sec',
-        'high_bp',
-        'low_bp',
-        'open_bp',
-        'close_bp',
-        'tick_count',
+        'asset_id', 'temp_c', 'temp_f', 'running_daily_max_c',
+        'source', 'station_local_date', 'ts',
     ];
 
     public function asset(): BelongsTo

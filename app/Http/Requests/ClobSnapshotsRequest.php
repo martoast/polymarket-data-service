@@ -15,7 +15,7 @@ class ClobSnapshotsRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'window_id' => ['sometimes', 'string'],
+            'market_id' => ['sometimes', 'string'],
             'asset'     => ['sometimes', 'string'],
             'from'      => ['sometimes', 'integer'],
             'to'        => ['sometimes', 'integer'],
@@ -27,15 +27,15 @@ class ClobSnapshotsRequest extends FormRequest
     public function withValidator(Validator $validator): void
     {
         $validator->after(function (Validator $v) {
-            $hasWindowId = $this->filled('window_id');
+            $hasMarketId = $this->filled('market_id');
             $hasAsset    = $this->filled('asset');
             $hasFrom     = $this->filled('from');
             $hasTo       = $this->filled('to');
 
-            if (! $hasWindowId && ! ($hasAsset && $hasFrom && $hasTo)) {
+            if (! $hasMarketId && ! ($hasAsset && $hasFrom && $hasTo)) {
                 $v->errors()->add(
-                    'window_id',
-                    'Either window_id or all of asset, from, and to are required.'
+                    'market_id',
+                    'Either market_id or all of asset, from, and to are required.'
                 );
             }
         });

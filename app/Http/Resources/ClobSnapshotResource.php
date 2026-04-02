@@ -10,7 +10,7 @@ class ClobSnapshotResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'window_id' => $this->window_id,
+            'market_id' => $this->market_id,
             'asset'     => $this->asset->symbol ?? null,
             'yes_ask'   => $this->yes_ask,
             'yes_bid'   => $this->yes_bid,

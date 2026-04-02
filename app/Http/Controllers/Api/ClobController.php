@@ -13,9 +13,9 @@ class ClobController extends Controller
 {
     public function snapshots(ClobSnapshotsRequest $request): JsonResponse
     {
-        if ($request->filled('window_id')) {
+        if ($request->filled('market_id')) {
             $query = ClobSnapshot::with('asset')
-                ->where('window_id', $request->window_id)
+                ->where('market_id', $request->market_id)
                 ->orderBy('ts', 'asc');
         } else {
             $asset = Asset::where('symbol', strtoupper($request->asset))->firstOrFail();

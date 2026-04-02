@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class WindowIndexRequest extends FormRequest
+class MarketIndexRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -14,8 +14,9 @@ class WindowIndexRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'category'     => ['sometimes', 'string', 'in:crypto,weather'],
             'asset'        => ['sometimes', 'string'],
-            'duration'     => ['sometimes', 'integer', 'in:300,900'],
+            'duration'     => ['sometimes', 'integer'],
             'outcome'      => ['sometimes', 'string', 'in:YES,NO'],
             'has_coverage' => ['sometimes', 'boolean'],
             'from'         => ['sometimes', 'integer', 'min:0'],

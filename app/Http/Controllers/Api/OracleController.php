@@ -7,8 +7,8 @@ use App\Http\Requests\OracleRangeRequest;
 use App\Http\Requests\OracleTicksRequest;
 use App\Http\Resources\OracleTickResource;
 use App\Models\Asset;
+use App\Models\Market;
 use App\Models\OracleTick;
-use App\Models\Window;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -41,7 +41,6 @@ class OracleController extends Controller
     {
         $asset = Asset::where('symbol', strtoupper($request->asset))->firstOrFail();
 
-        // Single pass: aggregate + first/last via ordered array_agg
         $stats = OracleTick::where('asset_id', $asset->id)
             ->where('ts', '>=', $request->from)
             ->where('ts', '<=', $request->to)
@@ -56,14 +55,14 @@ class OracleController extends Controller
 
         return response()->json([
             'data' => [
-                'asset'           => strtoupper($request->asset),
-                'from'            => (int) $request->from,
-                'to'              => (int) $request->to,
-                'min_price_bp'    => $stats->min_price_bp,
-                'max_price_bp'    => $stats->max_price_bp,
-                'first_price_bp'  => $stats->first_price_bp,
-                'last_price_bp'   => $stats->last_price_bp,
-                'tick_count'      => (int) $stats->tick_count,
+                'asset'          => strtoupper($request->asset),
+                'from'           => (int) $request->from,
+                'to'             => (int) $request->to,
+                'min_price_bp'   => $stats->min_price_bp,
+                'max_price_bp'   => $stats->max_price_bp,
+                'first_price_bp' => $stats->first_price_bp,
+                'last_price_bp'  => $stats->last_price_bp,
+                'tick_count'     => (int) $stats->tick_count,
             ],
         ]);
     }
@@ -72,16 +71,16 @@ class OracleController extends Controller
     {
         $request->validate([
             'asset'     => ['required', 'string'],
-            'window_id' => ['required', 'string'],
+            'market_id' => ['required', 'string'],
         ]);
 
-        $window = Window::findOrFail($request->window_id);
+        $market = Market::findOrFail($request->market_id);
         $asset  = Asset::where('symbol', strtoupper($request->asset))->firstOrFail();
 
         $ticks = OracleTick::with('asset')
             ->where('asset_id', $asset->id)
-            ->where('ts', '>=', $window->open_ts)
-            ->where('ts', '<=', $window->close_ts)
+            ->where('ts', '>=', $market->open_ts)
+            ->where('ts', '<=', $market->close_ts)
             ->orderBy('ts', 'asc')
             ->get();
 

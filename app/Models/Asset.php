@@ -3,21 +3,26 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Asset extends Model
 {
-    public $timestamps = false;
+    protected $fillable = ['category_id', 'symbol', 'name', 'unit', 'source_config', 'is_active'];
 
-    protected $fillable = [
-        'symbol',
-        'chain',
-        'oracle_addr',
+    protected $casts = [
+        'source_config' => 'array',
+        'is_active'     => 'boolean',
     ];
 
-    public function windows(): HasMany
+    public function category(): BelongsTo
     {
-        return $this->hasMany(Window::class);
+        return $this->belongsTo(Category::class);
+    }
+
+    public function markets(): HasMany
+    {
+        return $this->hasMany(Market::class);
     }
 
     public function oracleTicks(): HasMany
@@ -30,13 +35,13 @@ class Asset extends Model
         return $this->hasMany(ClobSnapshot::class);
     }
 
-    public function candle1ms(): HasMany
+    public function candles(): HasMany
     {
         return $this->hasMany(Candle1m::class);
     }
 
-    public function oracleStats(): HasMany
+    public function weatherReadings(): HasMany
     {
-        return $this->hasMany(OracleStat::class);
+        return $this->hasMany(WeatherReading::class);
     }
 }

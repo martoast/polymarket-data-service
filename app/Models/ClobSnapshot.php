@@ -10,18 +10,13 @@ class ClobSnapshot extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'window_id',
-        'asset_id',
-        'yes_ask',
-        'yes_bid',
-        'no_ask',
-        'no_bid',
-        'ts',
+        'market_id', 'asset_id',
+        'yes_ask', 'yes_bid', 'no_ask', 'no_bid', 'ts',
     ];
 
-    public function window(): BelongsTo
+    public function market(): BelongsTo
     {
-        return $this->belongsTo(Window::class);
+        return $this->belongsTo(Market::class, 'market_id');
     }
 
     public function asset(): BelongsTo

@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Log;
 
 /**
  * Discovers Polymarket crypto binary markets via the Gamma API and upserts
- * them into the `windows` table. Returns newly-discovered token IDs so the
+ * them into the `markets` table. Returns newly-discovered token IDs so the
  * CLOB feed can subscribe to them.
  */
 class MarketDiscoveryService
@@ -22,10 +22,7 @@ class MarketDiscoveryService
     /**
      * Run one discovery pass for all enabled assets.
      *
-     * Returns array of entries for newly-discovered markets:
-     *   [['window_id' => slug, 'yes_token_id' => '0x...', 'no_token_id' => '0x...', 'is_yes' => bool], ...]
-     *
-     * @return array<int, array{window_id:string, yes_token_id:string, no_token_id:string}>
+     * @return array<int, array{market_id:string, yes_token_id:string, no_token_id:string}>
      */
     public function discover(): array
     {
@@ -49,7 +46,7 @@ class MarketDiscoveryService
                     }
 
                     $this->seen[$slug] = true;
-                    $entry = $this->upsertWindow($asset, $slug, $market);
+                    $entry = $this->upsertMarket($asset, $slug, $market);
                     if ($entry) {
                         $newMarkets[] = $entry;
                     }
@@ -61,26 +58,25 @@ class MarketDiscoveryService
     }
 
     /**
-     * Load the full token→window map from DB for all known windows.
-     * Call this on recorder start to pre-populate the cache.
+     * Load the full token→market map from DB for all known markets.
      *
-     * @return array<string, array{window_id:string, is_yes:bool}>  tokenId → {window_id, is_yes}
+     * @return array<string, array{market_id:string, is_yes:bool}>
      */
     public function loadTokenMap(): array
     {
         $map  = [];
-        $rows = DB::table('windows')
+        $rows = DB::table('markets')
             ->whereNotNull('yes_token_id')
             ->select('id', 'yes_token_id', 'no_token_id')
             ->get();
 
         foreach ($rows as $row) {
             if ($row->yes_token_id) {
-                $map[$row->yes_token_id] = ['window_id' => $row->id, 'is_yes' => true];
-                $this->seen[$row->id] = true;
+                $map[$row->yes_token_id] = ['market_id' => $row->id, 'is_yes' => true];
+                $this->seen[$row->id]    = true;
             }
             if ($row->no_token_id) {
-                $map[$row->no_token_id] = ['window_id' => $row->id, 'is_yes' => false];
+                $map[$row->no_token_id] = ['market_id' => $row->id, 'is_yes' => false];
             }
         }
 
@@ -88,16 +84,15 @@ class MarketDiscoveryService
     }
 
     /**
-     * Load only ACTIVE (not yet resolved, not yet closed) token→window map.
-     * Used for the initial CLOB subscription so we don't send 700+ stale tokens.
+     * Load only ACTIVE (not yet resolved, not yet closed) token→market map.
      *
-     * @return array<string, array{window_id:string, is_yes:bool}>
+     * @return array<string, array{market_id:string, is_yes:bool}>
      */
     public function loadActiveTokenMap(): array
     {
         $map   = [];
         $nowMs = (int) (microtime(true) * 1000);
-        $rows  = DB::table('windows')
+        $rows  = DB::table('markets')
             ->whereNotNull('yes_token_id')
             ->whereNull('outcome')
             ->where('close_ts', '>', $nowMs)
@@ -106,11 +101,11 @@ class MarketDiscoveryService
 
         foreach ($rows as $row) {
             if ($row->yes_token_id) {
-                $map[$row->yes_token_id] = ['window_id' => $row->id, 'is_yes' => true];
-                $this->seen[$row->id] = true;
+                $map[$row->yes_token_id] = ['market_id' => $row->id, 'is_yes' => true];
+                $this->seen[$row->id]    = true;
             }
             if ($row->no_token_id) {
-                $map[$row->no_token_id] = ['window_id' => $row->id, 'is_yes' => false];
+                $map[$row->no_token_id] = ['market_id' => $row->id, 'is_yes' => false];
             }
         }
 
@@ -119,7 +114,7 @@ class MarketDiscoveryService
 
     /**
      * Generate slug candidates for a given asset prefix + duration.
-     * Covers: previous window, current window, next 3 windows.
+     * Covers: previous market, current market, next 3 markets.
      */
     private function generateSlugs(string $prefix, int $durationSec): array
     {
@@ -136,7 +131,6 @@ class MarketDiscoveryService
         return $slugs;
     }
 
-    /** Fetch a single market from Gamma API by slug. Returns raw market array or null. */
     private function fetchMarket(string $gammaBase, string $slug): ?array
     {
         try {
@@ -161,12 +155,11 @@ class MarketDiscoveryService
     }
 
     /**
-     * Upsert discovered market into `windows` table.
-     * Returns entry with token IDs if newly inserted, null if already known.
+     * Upsert discovered market into `markets` table.
      *
-     * @return array{window_id:string,yes_token_id:string,no_token_id:string}|null
+     * @return array{market_id:string, yes_token_id:string, no_token_id:string}|null
      */
-    private function upsertWindow(string $asset, string $slug, array $market): ?array
+    private function upsertMarket(string $asset, string $slug, array $market): ?array
     {
         $assetId = $this->getAssetId($asset);
         if ($assetId === null) {
@@ -175,22 +168,22 @@ class MarketDiscoveryService
         }
 
         // Parse open_ts from slug: {prefix}-updown-{dur}-{open_ts_sec}
-        $parts      = explode('-', $slug);
-        $openTs     = ((int) end($parts)) * 1000; // ms
-        $durLabel   = $parts[count($parts) - 2] ?? '5m';
+        $parts       = explode('-', $slug);
+        $openTs      = ((int) end($parts)) * 1000; // ms
+        $durLabel    = $parts[count($parts) - 2] ?? '5m';
         $durationSec = $durLabel === '15m' ? 900 : 300;
-        $closeTs    = $openTs + ($durationSec * 1000);
+        $closeTs     = $openTs + ($durationSec * 1000);
 
-        $breakPriceUsd = $this->parseBreakPrice($market);
-        $conditionId   = $market['conditionId'] ?? null;
+        $breakValue  = $this->parseBreakValue($market);
+        $conditionId = $market['conditionId'] ?? null;
 
-        $tokens    = json_decode($market['clobTokenIds'] ?? '[]', true);
-        $yesToken  = is_array($tokens) && isset($tokens[0]) ? (string) $tokens[0] : null;
-        $noToken   = is_array($tokens) && isset($tokens[1]) ? (string) $tokens[1] : null;
+        $tokens   = json_decode($market['clobTokenIds'] ?? '[]', true);
+        $yesToken = is_array($tokens) && isset($tokens[0]) ? (string) $tokens[0] : null;
+        $noToken  = is_array($tokens) && isset($tokens[1]) ? (string) $tokens[1] : null;
 
-        $existing = DB::table('windows')->where('id', $slug)->first();
+        $existing = DB::table('markets')->where('id', $slug)->first();
         if (!$existing) {
-            // Use oracle tick closest to open_ts as break price (within 5 min)
+            // Use oracle tick closest to open_ts as break value (within 5 min)
             $oracleTick = DB::table('oracle_ticks')
                 ->where('asset_id', $assetId)
                 ->orderByRaw('ABS(ts - ?)', [$openTs])
@@ -198,27 +191,29 @@ class MarketDiscoveryService
                 ->first(['price_usd', 'ts']);
 
             if ($oracleTick && abs($oracleTick->ts - $openTs) <= 300_000) {
-                $breakPriceUsd = (float) $oracleTick->price_usd;
+                $breakValue = (float) $oracleTick->price_usd;
             }
 
-            DB::table('windows')->insertOrIgnore([
-                'id'              => $slug,
-                'asset_id'        => $assetId,
-                'duration_sec'    => $durationSec,
-                'break_price_usd' => $breakPriceUsd,
-                'break_price_bp'  => (int) ($breakPriceUsd * 100),
-                'open_ts'         => $openTs,
-                'close_ts'        => $closeTs,
-                'condition_id'    => $conditionId,
-                'gamma_slug'      => $slug,
-                'yes_token_id'    => $yesToken,
-                'no_token_id'     => $noToken,
+            DB::table('markets')->insertOrIgnore([
+                'id'           => $slug,
+                'category'     => 'crypto',
+                'asset_id'     => $assetId,
+                'duration_sec' => $durationSec,
+                'duration_label' => $durLabel,
+                'break_value'  => $breakValue,
+                'value_unit'   => 'usd',
+                'open_ts'      => $openTs,
+                'close_ts'     => $closeTs,
+                'condition_id' => $conditionId,
+                'gamma_slug'   => $slug,
+                'yes_token_id' => $yesToken,
+                'no_token_id'  => $noToken,
             ]);
 
             echo "[discovery] Discovered: {$slug} yes={$yesToken} no={$noToken}" . PHP_EOL;
 
             if ($yesToken && $noToken) {
-                return ['window_id' => $slug, 'yes_token_id' => $yesToken, 'no_token_id' => $noToken];
+                return ['market_id' => $slug, 'yes_token_id' => $yesToken, 'no_token_id' => $noToken];
             }
             return null;
         }
@@ -233,22 +228,17 @@ class MarketDiscoveryService
             $updates['no_token_id']  = $noToken;
         }
         if ($updates) {
-            DB::table('windows')->where('id', $slug)->update($updates);
+            DB::table('markets')->where('id', $slug)->update($updates);
         }
 
-        // Return token entry even for existing windows if we now have token IDs
         if ($yesToken && $noToken) {
-            return ['window_id' => $slug, 'yes_token_id' => $yesToken, 'no_token_id' => $noToken];
+            return ['market_id' => $slug, 'yes_token_id' => $yesToken, 'no_token_id' => $noToken];
         }
         return null;
     }
 
-    private function parseBreakPrice(array $market): float
+    private function parseBreakValue(array $market): float
     {
-        // Break price is stored in "description" or can be inferred from question
-        // For crypto binary markets the break price is the oracle price at window open.
-        // Gamma often exposes it in the question text: "Will BTC be above $84,500..."
-        // We store 0 if we can't parse it — it can be backfilled later.
         $question = $market['question'] ?? '';
         if (preg_match('/\$([0-9,]+(?:\.[0-9]+)?)/', $question, $m)) {
             return (float) str_replace(',', '', $m[1]);
@@ -265,6 +255,6 @@ class MarketDiscoveryService
         if ($id !== null) {
             $this->assetIdCache[$symbol] = (int) $id;
         }
-        return isset($this->assetIdCache[$symbol]) ? $this->assetIdCache[$symbol] : null;
+        return $this->assetIdCache[$symbol] ?? null;
     }
 }
