@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\ClobController;
 use App\Http\Controllers\Api\BacktestController;
 use App\Http\Controllers\Api\ExportController;
 use App\Http\Controllers\Api\PublicLiveController;
+use App\Http\Controllers\Api\Weather\ReadingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -81,11 +82,12 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
             Route::get('/oracle/aligned', [OracleController::class, 'aligned']);
         });
 
-        // ── Weather-specific (placeholder — recorder coming next) ─────────────
-        // Route::prefix('weather')->group(function () {
-        //     Route::get('/readings',   [WeatherReadingController::class, 'index']);
-        //     Route::get('/daily-max',  [WeatherReadingController::class, 'dailyMax']);
-        // });
+        // ── Weather-specific ─────────────────────────────────────────────────
+        Route::prefix('weather')->group(function () {
+            Route::get('/stations',   [ReadingController::class, 'stations']);
+            Route::get('/readings',   [ReadingController::class, 'index']);
+            Route::get('/daily-max',  [ReadingController::class, 'dailyMax']);
+        });
 
         // ── Pro tier only ────────────────────────────────────────────────────
         Route::middleware('tier:pro')->group(function () {

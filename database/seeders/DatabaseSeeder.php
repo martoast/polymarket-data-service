@@ -26,28 +26,28 @@ class DatabaseSeeder extends Seeder
         $weatherId = Category::where('slug', 'weather')->value('id');
 
         // ── Assets (idempotent) ───────────────────────────────────────────────
+        // Pass source_config as array — Eloquent's array cast handles JSON encoding.
         $assets = [
-            // Crypto
             [
                 'category_id'   => $cryptoId,
                 'symbol'        => 'BTC',
                 'name'          => 'Bitcoin',
                 'unit'          => 'usd',
-                'source_config' => json_encode(['oracle_addr' => '0xF4030086522a5bEEa4988F8cA5B36dbC97BeE88b', 'chain' => 'ethereum', 'chainlink_symbol' => 'btc/usd']),
+                'source_config' => ['oracle_addr' => '0xF4030086522a5bEEa4988F8cA5B36dbC97BeE88b', 'chain' => 'ethereum', 'chainlink_symbol' => 'btc/usd'],
             ],
             [
                 'category_id'   => $cryptoId,
                 'symbol'        => 'ETH',
                 'name'          => 'Ethereum',
                 'unit'          => 'usd',
-                'source_config' => json_encode(['oracle_addr' => '0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419', 'chain' => 'ethereum', 'chainlink_symbol' => 'eth/usd']),
+                'source_config' => ['oracle_addr' => '0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419', 'chain' => 'ethereum', 'chainlink_symbol' => 'eth/usd'],
             ],
             [
                 'category_id'   => $cryptoId,
                 'symbol'        => 'SOL',
                 'name'          => 'Solana',
                 'unit'          => 'usd',
-                'source_config' => json_encode(['oracle_addr' => '0x4ffC43a60e009B551865A93d232E33Fce9f01507', 'chain' => 'ethereum', 'chainlink_symbol' => 'sol/usd']),
+                'source_config' => ['oracle_addr' => '0x4ffC43a60e009B551865A93d232E33Fce9f01507', 'chain' => 'ethereum', 'chainlink_symbol' => 'sol/usd'],
             ],
             // Weather — Tokyo Haneda Airport (ICAO: RJTT)
             [
@@ -55,21 +55,21 @@ class DatabaseSeeder extends Seeder
                 'symbol'        => 'RJTT',
                 'name'          => 'Tokyo High Temperature',
                 'unit'          => 'celsius',
-                'source_config' => json_encode([
-                    'icao'          => 'RJTT',
-                    'city'          => 'Tokyo',
-                    'country'       => 'JP',
-                    'latitude'      => 35.5494,
-                    'longitude'     => 139.7798,
-                    'timezone'      => 'Asia/Tokyo',
-                    'wunderground'  => 'RJTT',
-                    'open_meteo'    => true,
-                ]),
+                'source_config' => [
+                    'icao'         => 'RJTT',
+                    'city'         => 'Tokyo',
+                    'country'      => 'JP',
+                    'latitude'     => 35.5494,
+                    'longitude'    => 139.7798,
+                    'timezone'     => 'Asia/Tokyo',
+                    'wunderground' => 'RJTT',
+                    'open_meteo'   => true,
+                ],
             ],
         ];
 
         foreach ($assets as $asset) {
-            Asset::firstOrCreate(['symbol' => $asset['symbol']], $asset);
+            Asset::updateOrCreate(['symbol' => $asset['symbol']], $asset);
         }
 
         // ── Test accounts ─────────────────────────────────────────────────────

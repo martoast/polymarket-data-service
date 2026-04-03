@@ -74,6 +74,36 @@ services:
     networks:
       - sail
 
+  recorder-weather:
+    image: polymarket-data-service
+    container_name: polymarket-recorder-weather
+    restart: unless-stopped
+    entrypoint: ['php', '/var/www/html/artisan', 'weather:start']
+    env_file: .env
+    environment:
+      DB_CONNECTION: pgsql
+      DB_HOST: pgsql
+      DB_PORT: 5432
+      DB_DATABASE: '${DB_DATABASE:-polymarket}'
+      DB_USERNAME: '${DB_USERNAME:-sail}'
+      DB_PASSWORD: '${DB_PASSWORD:-password}'
+      REDIS_HOST: redis
+      CACHE_STORE: redis
+      QUEUE_CONNECTION: redis
+    mem_limit: 192m
+    volumes:
+      - .:/var/www/html
+      - vendor_data:/var/www/html/vendor
+    depends_on:
+      app:
+        condition: service_healthy
+      pgsql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - sail
+
   pgsql:
     image: timescale/timescaledb:latest-pg16
     container_name: polymarket-pgsql

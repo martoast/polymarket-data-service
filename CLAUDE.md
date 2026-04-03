@@ -45,6 +45,8 @@ docker compose up -d --build
 | Container | Image | Purpose |
 |---|---|---|
 | `polymarket-app` | built from Dockerfile | Laravel app on port 8001 |
+| `polymarket-recorder` | same image | Crypto market recorder (`recorder:start`) |
+| `polymarket-recorder-weather` | same image | Weather market recorder (`weather:start`) |
 | `polymarket-pgsql` | timescale/timescaledb:latest-pg16 | Database |
 | `polymarket-redis` | redis:7-alpine | Cache + queues |
 
@@ -53,8 +55,7 @@ docker compose up -d --build
 |---|---|---|
 | `php` | `artisan serve --host=0.0.0.0 --port=80` | HTTP |
 | `queue-worker` | `artisan queue:work` | Jobs |
-| `scheduler` | `artisan schedule:run` every 60s | Cron tasks (includes backfill-windows every 5m) |
-| `recorder` | `artisan recorder:start` | Long-running ReactPHP WS recorder |
+| `scheduler` | `artisan schedule:run` every 60s | Cron tasks |
 
 ### On every container start (entrypoint.sh)
 1. `php artisan config:cache`
@@ -102,31 +103,49 @@ REDIS_HOST=redis
 
 The recorder runs as a persistent Laravel artisan command (`recorder:start`) using ReactPHP's event loop. No separate process or service needed.
 
-### Data flow
+### Data flow — Crypto recorder (`recorder:start`)
 ```
 Chainlink RTDS WS (wss://ws-live-data.polymarket.com)
-  → OracleFeedService → oracle_ticks table + CandleService → candles_1m table
+  → OracleFeedService → oracle_ticks + CandleService → candles_1m
 
 Polymarket CLOB WS (wss://ws-subscriptions-clob.polymarket.com/ws/market)
-  → ClobFeedService → clob_snapshots table (buffered, flushed every 1s)
-  → resolution events → windows.outcome updated
+  → ClobFeedService → clob_snapshots (flushed every 1s)
+  → resolution events → markets.outcome updated
 
 Gamma API (https://gamma-api.polymarket.com)
-  → MarketDiscoveryService (every 20s) → windows table upserted
-  → break_price_usd set from oracle_ticks at open_ts
+  → MarketDiscoveryService (every 20s) → markets table upserted (category=crypto)
+  → break_value set from oracle_ticks at open_ts
+```
+
+### Data flow — Weather recorder (`weather:start`)
+```
+Open-Meteo API (https://api.open-meteo.com) — free, no key
+  → OpenMeteoService (every 5 min) → weather_readings table
+  → tracks running daily max in memory, resets at local midnight
+
+Polymarket CLOB WS (same protocol as crypto)
+  → ClobFeedService → clob_snapshots (flushed every 1s)
+  → resolution events → markets.outcome updated
+
+Gamma API
+  → WeatherMarketDiscoveryService (every 20s) → markets table upserted (category=weather)
+  → generates date-based slugs: "highest-temperature-in-tokyo-on-april-3-2026"
+  → parses temperature bracket from question → break_value in Celsius
 ```
 
 ### Key files
 | File | Purpose |
 |---|---|
-| `app/Console/Commands/RecorderCommand.php` | Boots event loop, wires all services |
-| `app/Recorder/OracleFeedService.php` | Chainlink RTDS WebSocket (single shared connection) |
-| `app/Recorder/ClobFeedService.php` | Polymarket CLOB WebSocket (token subscriptions) |
-| `app/Recorder/MarketDiscoveryService.php` | Gamma API market discovery + window upserts |
+| `app/Console/Commands/RecorderCommand.php` | Crypto recorder — Chainlink + CLOB + Gamma |
+| `app/Console/Commands/WeatherRecorderCommand.php` | Weather recorder — Open-Meteo + CLOB + Gamma |
+| `app/Recorder/OracleFeedService.php` | Chainlink RTDS WebSocket |
+| `app/Recorder/ClobFeedService.php` | Polymarket CLOB WebSocket (shared by both recorders) |
+| `app/Recorder/MarketDiscoveryService.php` | Gamma API discovery for crypto markets |
+| `app/Recorder/Weather/WeatherMarketDiscoveryService.php` | Gamma API discovery for weather markets |
+| `app/Recorder/Weather/OpenMeteoService.php` | Open-Meteo HTTP poller |
 | `app/Recorder/CandleService.php` | In-memory 1m OHLCV candle aggregation |
-| `app/Recorder/RecorderState.php` | Writes stats to Redis key `recorder:status` (TTL 120s) |
+| `app/Recorder/RecorderState.php` | Writes crypto recorder stats to Redis `recorder:status` |
 | `app/Recorder/AssetConfig.php` | BTC/ETH/SOL config — slug prefixes, Chainlink symbols |
-| `app/Console/Commands/BackfillWindowsCommand.php` | Backfills break_price_usd + outcomes for expired windows |
 
 ### RTDS subscription format (critical — wrong format = silent no-data)
 ```json
