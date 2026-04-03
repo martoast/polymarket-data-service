@@ -1,17 +1,17 @@
 @extends('layouts.app')
 
-@section('title', 'Polymarket Data API — Oracle Ticks, CLOB Snapshots & ML Features for Algo Traders')
+@section('title', 'Polymarket Data API — Crypto, Weather & Multi-Market Data for Algo Traders')
 
 @section('head')
-<meta name="description" content="REST API for Polymarket historical data. Chainlink oracle ticks, CLOB order book snapshots, 1-minute OHLCV candles, and 40+ pre-computed ML features per market window. Free tier — API key in 60 seconds.">
-<meta name="keywords" content="Polymarket API, Polymarket data, Polymarket historical data, prediction market data API, Polymarket CLOB data, Polymarket order book API, Polymarket backtesting, Polymarket oracle data, Polymarket trading bot, Polymarket 1-minute candles, prediction market ML features, Polymarket WebSocket feed, Polymarket Chainlink oracle tick data">
+<meta name="description" content="REST API for Polymarket multi-market data. Crypto price ticks, weather temperature feeds, CLOB order book snapshots, and ML-ready features per market. Covers crypto Up/Down and daily temperature markets. Free tier — API key in 60 seconds.">
+<meta name="keywords" content="Polymarket API, Polymarket data, Polymarket historical data, prediction market data API, Polymarket CLOB data, Polymarket order book API, Polymarket backtesting, Polymarket crypto data, Polymarket weather markets, Polymarket temperature markets, Polymarket trading bot, prediction market ML features, Polymarket WebSocket feed, Chainlink oracle tick data, Tokyo temperature Polymarket">
 <link rel="canonical" href="{{ url('/') }}">
 
 {{-- Open Graph --}}
 <meta property="og:type" content="website">
 <meta property="og:url" content="{{ url('/') }}">
-<meta property="og:title" content="Polymarket Data API — Historical CLOB, Oracle Ticks & ML Features">
-<meta property="og:description" content="Chainlink oracle ticks, full CLOB order book snapshots, and 40+ pre-computed ML features for Polymarket algo traders. Free tier available.">
+<meta property="og:title" content="Polymarket Data API — Multi-Market: Crypto, Weather & More">
+<meta property="og:description" content="Crypto oracle ticks, weather temperature feeds, full CLOB order book snapshots, and ML-ready features across Polymarket market categories. Free tier available.">
 <meta property="og:site_name" content="Polymarket Data API">
 <meta property="og:image" content="{{ url('/og-image.png') }}">
 <meta property="og:image:width" content="1200">
@@ -19,8 +19,8 @@
 
 {{-- Twitter Card --}}
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Polymarket Data API — Historical CLOB, Oracle Ticks & ML Features">
-<meta name="twitter:description" content="Chainlink oracle ticks, full CLOB order book snapshots, and 40+ pre-computed ML features for Polymarket algo traders. Free tier available.">
+<meta name="twitter:title" content="Polymarket Data API — Multi-Market: Crypto, Weather & More">
+<meta name="twitter:description" content="Crypto oracle ticks, weather temperature feeds, full CLOB order book snapshots, and ML-ready features across Polymarket market categories. Free tier available.">
 <meta name="twitter:image" content="{{ url('/og-image.png') }}">
 
 <style>
@@ -173,20 +173,20 @@
                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#0093fd] opacity-75"></span>
                         <span class="relative inline-flex rounded-full h-2 w-2 bg-[#0093fd]"></span>
                     </span>
-                    <span class="text-[#0093fd] text-xs font-semibold tracking-wide">Crypto Up/Down &nbsp;·&nbsp; Production-ready API</span>
+                    <span class="text-[#0093fd] text-xs font-semibold tracking-wide">Crypto &nbsp;·&nbsp; Weather &nbsp;·&nbsp; More markets coming</span>
                 </div>
 
                 {{-- Headline --}}
                 <h1 class="font-extrabold leading-[1.04] tracking-[-0.03em] text-white mb-6"
                     style="font-size: clamp(2.6rem, 6vw, 4.2rem);">
-                    The data layer<br>
-                    every Polymarket<br>
-                    <span class="text-[#0093fd]">bot needs.</span>
+                    One API.<br>
+                    Every Polymarket<br>
+                    <span class="text-[#0093fd]">market category.</span>
                 </h1>
 
                 {{-- Sub --}}
                 <p class="text-[#8a9ab0] text-lg leading-relaxed mb-10 max-w-[460px]">
-                    Oracle prices, order book depth, and 40+ ML-ready features — live captured and served via REST. Free to start, no card.
+                    Crypto price feeds, live weather temperature data, CLOB order books, and ML-ready features — all captured live and served via one clean REST API. Free to start, no card.
                 </p>
 
                 {{-- CTAs --}}
@@ -412,7 +412,7 @@
                     <div class="flex items-center justify-between px-5 py-3 text-[10px] text-[#697d91]">
                         <span class="flex items-center gap-1.5">
                             <svg width="9" height="9" viewBox="0 0 9 9" fill="none"><circle cx="4.5" cy="4.5" r="4" stroke="#0093fd" stroke-width="0.8"/><path d="M4.5 2.5v2l1.2 1" stroke="#0093fd" stroke-width="0.8" stroke-linecap="round"/></svg>
-                            Oracle ticks <span class="text-[#e5e5e5] font-semibold ml-0.5">188K+</span>
+                            2 categories <span class="text-[#e5e5e5] font-semibold ml-0.5">Crypto · Weather</span>
                         </span>
                         <span>⚡ Features <span class="text-[#e5e5e5] font-semibold">40+</span></span>
                         <span class="flex items-center gap-1">
@@ -437,18 +437,18 @@
             @foreach([
                 [
                     'icon' => '<path d="M8 2v4l3 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.4"/>',
-                    'label' => 'Millisecond Oracle Ticks',
-                    'sub'   => 'BTC · ETH · SOL · every Chainlink update',
+                    'label' => 'Multi-Market Categories',
+                    'sub'   => 'Crypto · Weather · more being added',
                 ],
                 [
                     'icon' => '<path d="M2 10l3-5 3 3 2-4 3 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>',
                     'label' => '40+ ML Features',
-                    'sub'   => 'Pre-computed per market window',
+                    'sub'   => 'Pre-computed per market, ready to train',
                 ],
                 [
                     'icon' => '<rect x="2" y="4" width="12" height="8" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M5 8h6M5 11h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>',
-                    'label' => 'Full CLOB Order Book',
-                    'sub'   => 'Yes/No depth at every oracle tick',
+                    'label' => 'Live CLOB Order Book',
+                    'sub'   => 'Yes/No depth across all market types',
                 ],
                 [
                     'icon' => '<path d="M2 8h2.5M9.5 8H12M8 2v2.5M8 9.5V12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.4"/><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2" stroke-dasharray="2 2"/>',
@@ -528,11 +528,11 @@ document.addEventListener('alpine:init', () => {
         {{-- Headline --}}
         <div class="text-center mb-12">
             <h2 class="text-4xl sm:text-5xl font-extrabold text-white leading-[1.1] tracking-tight">
-                Your bot needs months of data.
+                Every signal, every market.
             </h2>
             <p class="text-4xl sm:text-5xl font-extrabold leading-[1.1] tracking-tight mt-1.5"
                style="background: linear-gradient(90deg, #0093fd 0%, #60b8ff 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
-                We got you covered.
+                One unified API.
             </p>
         </div>
 
@@ -569,13 +569,13 @@ document.addEventListener('alpine:init', () => {
                         <div class="p-5 font-mono text-xs leading-7">
                             <span class="tw-line tw-l1 text-[#697d91]">$ curl \</span>
                             <span class="tw-line tw-l2 pl-4 text-[#697d91]">-H <span class="text-[#26a05e]">"Authorization: Bearer sk-••••••••"</span> \</span>
-                            <span class="tw-line tw-l3 pl-4 text-[#0093fd]">"https://polymarket-data-api.fullstacklabs.org/api/v1/oracle/ticks?asset=BTC"<span class="cursor-blink text-[#697d91]">█</span></span>
+                            <span class="tw-line tw-l3 pl-4 text-[#0093fd]">"https://polymarket-data-api.fullstacklabs.org/api/v1/markets?category=crypto"<span class="cursor-blink text-[#697d91]">█</span></span>
                             <div class="mt-3 space-y-0.5">
                                 <div class="tw-j tw-j1 text-[#697d91]">{</div>
                                 <div class="tw-j tw-j2 pl-4 text-[#697d91]">"data": [{</div>
-                                <div class="tw-j tw-j3 pl-8"><span class="text-[#8a9ab0]">"asset"</span><span class="text-[#697d91]">: </span><span class="text-[#f97316]">"BTC"</span><span class="text-[#697d91]">,</span></div>
-                                <div class="tw-j tw-j4 pl-8"><span class="text-[#8a9ab0]">"price_usd"</span><span class="text-[#697d91]">: </span><span class="text-[#26a05e]" x-text="btcPrice"></span><span class="text-[#697d91]">,</span></div>
-                                <div class="tw-j tw-j5 pl-8"><span class="text-[#8a9ab0]">"features"</span><span class="text-[#697d91]">: { </span><span class="text-[#8a9ab0]">twap_1m</span><span class="text-[#697d91]">: </span><span class="text-[#26a05e]" x-text="twap"></span><span class="text-[#697d91]">, ... }</span></div>
+                                <div class="tw-j tw-j3 pl-8"><span class="text-[#8a9ab0]">"category"</span><span class="text-[#697d91]">: </span><span class="text-[#f97316]">"crypto"</span><span class="text-[#697d91]">,</span></div>
+                                <div class="tw-j tw-j4 pl-8"><span class="text-[#8a9ab0]">"break_value"</span><span class="text-[#697d91]">: </span><span class="text-[#26a05e]" x-text="btcPrice"></span><span class="text-[#697d91]">,</span></div>
+                                <div class="tw-j tw-j5 pl-8"><span class="text-[#8a9ab0]">"outcome"</span><span class="text-[#697d91]">: </span><span class="text-[#26a05e]">"YES"</span><span class="text-[#697d91]">, </span><span class="text-[#8a9ab0]">...</span></div>
                                 <div class="tw-j tw-j6 pl-4 text-[#697d91]">}]}</div>
                             </div>
                         </div>
@@ -711,8 +711,8 @@ document.addEventListener('alpine:init', () => {
                         <span class="text-sm font-bold font-mono text-[#0093fd]" x-text="tags[hi].v"></span>
                     </div>
 
-                    <div class="text-base font-bold text-white">40+ ML features</div>
-                    <div class="text-sm text-[#697d91] mt-0.5">Pre-computed per window. Ready to train.</div>
+                    <div class="text-base font-bold text-white">40+ ML features per market</div>
+                    <div class="text-sm text-[#697d91] mt-0.5">Crypto & weather. Pre-computed. Ready to train.</div>
                 </div>
             </div>
 
@@ -813,12 +813,12 @@ document.addEventListener('alpine:init', () => {
                     <div>
                         <div class="text-base font-bold text-white mb-2">Full CLOB order book</div>
                         <p class="text-sm text-[#697d91] leading-relaxed">
-                            Yes/No bid-ask depth captured at every oracle tick.
+                            Yes/No bid-ask depth captured per market, per tick — across every category.
                             Spread, mid price, and imbalance ratio —
                             the microstructure signal most traders never see.
                         </p>
                         <div class="mt-4 flex flex-wrap gap-2">
-                            @foreach(['Bid/ask depth','Imbalance ratio','Mid price','Spread'] as $chip)
+                            @foreach(['Bid/ask depth','Imbalance ratio','Mid price','Spread','All categories'] as $chip)
                             <span class="text-[10px] text-[#697d91] border border-[#1f2937] rounded-full px-2.5 py-1">{{ $chip }}</span>
                             @endforeach
                         </div>
@@ -830,9 +830,9 @@ document.addEventListener('alpine:init', () => {
 
         {{-- CTA --}}
         <div class="text-center mt-16 pt-12 border-t border-[#1f2937]">
-            <h3 class="text-2xl sm:text-3xl font-bold text-white mb-2">Ready to see the data yourself?</h3>
+            <h3 class="text-2xl sm:text-3xl font-bold text-white mb-2">Ready to explore the data yourself?</h3>
             <p class="text-[#697d91] text-sm mb-8 max-w-lg mx-auto">
-                Free tier · No credit card · Works with Cursor, Claude Code, OpenClaw, Codex, v0, and any tool you build with
+                Free tier · No credit card · Crypto, weather, and more — works with Cursor, Claude Code, Codex, and any tool you build with
             </p>
             <a href="{{ route('register') }}"
                class="inline-flex items-center gap-2 bg-[#0093fd] hover:bg-[#0080e0] text-white font-semibold px-8 py-3 rounded-xl transition-colors text-sm">
@@ -895,7 +895,7 @@ document.addEventListener('alpine:init', () => {
                 @foreach ([
                     ['n'=>1, 'icon'=>'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z', 'label'=>'Create free account', 'sub'=>'Sign up with your email — no card required. Your API key is provisioned instantly.'],
                     ['n'=>2, 'icon'=>'M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z', 'label'=>'Copy your API key', 'sub'=>'One key. Works with curl, Python, JS — anything that speaks HTTP. Paste it in and you\'re live.'],
-                    ['n'=>3, 'icon'=>'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z', 'label'=>'Start pulling data', 'sub'=>'Hit any endpoint. Oracle ticks, CLOB snapshots, 40+ ML features — all timestamped, clean JSON, ready to plug into your strategy.'],
+                    ['n'=>3, 'icon'=>'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z', 'label'=>'Start pulling data', 'sub'=>'Pick a category — crypto or weather. Markets, CLOB snapshots, 40+ ML features — all timestamped, clean JSON, ready to plug into your strategy.'],
                 ] as $s)
                 <div class="flex gap-5 cursor-pointer group" @click="setStep({{ $s['n'] }})">
 
@@ -993,7 +993,7 @@ document.addEventListener('alpine:init', () => {
                             </div>
                             <div class="bg-[#0d0e13] border border-[#1f2937] rounded-lg p-4">
                                 <div class="text-xs text-[#697d91] mb-2 font-mono">Quick test</div>
-                                <pre class="text-xs font-mono leading-relaxed text-[#e5e5e5] overflow-x-auto whitespace-pre-wrap"><span class="text-[#697d91]">$</span> curl https://polymarket-data-api.fullstacklabs.org/api/v1/windows \
+                                <pre class="text-xs font-mono leading-relaxed text-[#e5e5e5] overflow-x-auto whitespace-pre-wrap"><span class="text-[#697d91]">$</span> curl https://polymarket-data-api.fullstacklabs.org/api/v1/markets \
   <span class="text-[#697d91]">-H</span> <span class="text-[#26a05e]">"Authorization: Bearer sk-••••••••"</span></pre>
                             </div>
                         </div>
@@ -1013,18 +1013,15 @@ document.addEventListener('alpine:init', () => {
                         <div class="p-5">
                             <pre class="text-xs font-mono leading-relaxed text-[#e5e5e5] overflow-x-auto"><span class="text-[#697d91]">{</span>
   <span class="text-[#0093fd]">"data"</span><span class="text-[#697d91]">:</span> <span class="text-[#697d91]">[{</span>
+    <span class="text-[#0093fd]">"category"</span><span class="text-[#697d91]">:</span> <span class="text-[#26a05e]">"crypto"</span><span class="text-[#697d91]">,</span>
     <span class="text-[#0093fd]">"asset"</span><span class="text-[#697d91]">:</span> <span class="text-[#26a05e]">"BTC"</span><span class="text-[#697d91]">,</span>
-    <span class="text-[#0093fd]">"direction"</span><span class="text-[#697d91]">:</span> <span class="text-[#26a05e]">"UP"</span><span class="text-[#697d91]">,</span>
-    <span class="text-[#0093fd]">"break_price_usd"</span><span class="text-[#697d91]">:</span> <span class="text-[#f0a500]">84231.50</span><span class="text-[#697d91]">,</span>
+    <span class="text-[#0093fd]">"break_value"</span><span class="text-[#697d91]">:</span> <span class="text-[#f0a500]">84231.50</span><span class="text-[#697d91]">,</span>
+    <span class="text-[#0093fd]">"value_unit"</span><span class="text-[#697d91]">:</span> <span class="text-[#26a05e]">"usd"</span><span class="text-[#697d91]">,</span>
     <span class="text-[#0093fd]">"outcome"</span><span class="text-[#697d91]">:</span> <span class="text-[#26a05e]">"YES"</span><span class="text-[#697d91]">,</span>
-    <span class="text-[#0093fd]">"features"</span><span class="text-[#697d91]">:</span> <span class="text-[#697d91]">{</span>
-      <span class="text-[#0093fd]">"twap_1m"</span><span class="text-[#697d91]">:</span> <span class="text-[#f0a500]">84198.22</span><span class="text-[#697d91]">,</span>
-      <span class="text-[#0093fd]">"vol_3m"</span><span class="text-[#697d91]">:</span> <span class="text-[#f0a500]">312.45</span><span class="text-[#697d91]">,</span>
-      <span class="text-[#0093fd]">"clob_imbalance"</span><span class="text-[#697d91]">:</span> <span class="text-[#f0a500]">0.62</span><span class="text-[#697d91]">,</span>
-      <span class="text-[#0093fd]">"momentum"</span><span class="text-[#697d91]">:</span> <span class="text-[#f0a500]">0.0041</span>
-    <span class="text-[#697d91]">}</span>
+    <span class="text-[#0093fd]">"duration_label"</span><span class="text-[#697d91]">:</span> <span class="text-[#26a05e]">"5m"</span><span class="text-[#697d91]">,</span>
+    <span class="text-[#0093fd]">"has_coverage"</span><span class="text-[#697d91]">:</span> <span class="text-[#f0a500]">true</span>
   <span class="text-[#697d91]">}]</span><span class="text-[#697d91]">,</span>
-  <span class="text-[#0093fd]">"meta"</span><span class="text-[#697d91]">:</span> <span class="text-[#697d91]">{</span> <span class="text-[#0093fd]">"total"</span><span class="text-[#697d91]">:</span> <span class="text-[#f0a500]">2734</span> <span class="text-[#697d91]">}</span>
+  <span class="text-[#0093fd]">"next_cursor"</span><span class="text-[#697d91]">:</span> <span class="text-[#f0a500]">"eyJpZCI6..."</span>
 <span class="text-[#697d91]">}</span></pre>
                         </div>
                     </div>
@@ -1042,8 +1039,8 @@ document.addEventListener('alpine:init', () => {
 ============================================================ --}}
 <section class="border-t border-[#1f2937] py-28"
     x-data="{
-        tab: 'windows',
-        tabs: ['windows','oracle','clob','candles'],
+        tab: 'markets',
+        tabs: ['markets','oracle','clob','weather'],
         vis: false,
         pinned: false,
         progress: 0,
@@ -1075,7 +1072,7 @@ document.addEventListener('alpine:init', () => {
              :class="vis ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'">
             <div class="text-xs font-semibold text-[#0093fd] uppercase tracking-[0.15em] mb-3">Endpoints</div>
             <h2 class="text-3xl sm:text-4xl font-bold text-white">Everything in one API</h2>
-            <p class="text-[#697d91] mt-3 max-w-xl mx-auto">Four endpoints. Every signal that matters for trading Polymarket binary markets.</p>
+            <p class="text-[#697d91] mt-3 max-w-xl mx-auto">One key. Every category. Every signal that matters for trading Polymarket markets.</p>
         </div>
 
         {{-- Tab bar --}}
@@ -1083,10 +1080,10 @@ document.addEventListener('alpine:init', () => {
                     rounded-xl p-1.5 w-fit mx-auto transition-all duration-700 delay-150"
              :class="vis ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'">
             @foreach([
-                ['windows', 'Windows'],
+                ['markets', 'Markets'],
                 ['oracle',  'Oracle Ticks'],
                 ['clob',    'CLOB Snapshots'],
-                ['candles', '1m Candles'],
+                ['weather', 'Weather'],
             ] as [$key, $label])
             <button @click="pick('{{ $key }}')"
                     class="relative text-xs sm:text-sm font-medium px-4 py-2 rounded-lg transition-all duration-200 overflow-hidden"
@@ -1105,31 +1102,31 @@ document.addEventListener('alpine:init', () => {
         {{-- Tab panels — CSS grid stacking: all panels share [1/1] cell, container height = tallest panel --}}
         <div class="grid">
         @foreach([
-            'windows' => [
-                'route'      => 'GET /api/v1/windows',
-                'title'      => 'Market Windows & ML Features',
-                'desc'       => 'The core dataset. Every Polymarket binary market window — open/close timestamps, break price, final outcome, and 40+ pre-computed ML-ready features. This is the training data for prediction models.',
-                'use'        => 'Use for: model training · backtesting · feature analysis',
-                'fields'     => ['id', 'asset', 'open_ts', 'close_ts', 'break_price_usd', 'outcome', 'oracle_dist_bp_at_1m', 'oracle_dist_bp_at_close', 'yes_bid_open', 'yes_ask_open', 'clob_imbalance_open', 'twap_1m_usd', 'vol_1m', 'momentum_3m', '+ 30 more'],
-                'meta_total' => '2734',
+            'markets' => [
+                'route'      => 'GET /api/v1/markets?category=crypto|weather',
+                'title'      => 'Markets — All Categories',
+                'desc'       => 'The unified market index. Every Polymarket binary market across all categories — crypto Up/Down and daily weather temperature markets. Open/close timestamps, break value, final outcome, and category-specific ML features. The training data for any prediction model.',
+                'use'        => 'Use for: model training · backtesting · feature analysis · market discovery',
+                'fields'     => ['id', 'category', 'asset', 'duration_label', 'break_value', 'value_unit', 'open_ts', 'close_ts', 'outcome', 'has_coverage', '+ features'],
+                'meta_total' => '3200+',
                 'json'       => [
                     '"id": <span class="text-[#f97316]">"btc-updown-5m-1774770300"</span>',
+                    '"category": <span class="text-[#f97316]">"crypto"</span>',
                     '"asset": <span class="text-[#f97316]">"BTC"</span>',
-                    '"break_price_usd": <span class="text-[#26a05e]">84231.50</span>',
+                    '"break_value": <span class="text-[#26a05e]">84231.50</span>',
+                    '"value_unit": <span class="text-[#0093fd]">"usd"</span>',
                     '"outcome": <span class="text-[#0093fd]">"YES"</span>',
-                    '"oracle_dist_bp_at_1m": <span class="text-[#26a05e]">142</span>',
-                    '"clob_imbalance_open": <span class="text-[#26a05e]">0.062</span>',
-                    '"twap_1m_usd": <span class="text-[#26a05e]">84198.40</span>',
-                    '"yes_bid_open": <span class="text-[#26a05e]">0.48</span>',
+                    '"duration_label": <span class="text-[#26a05e]">"5m"</span>',
+                    '"has_coverage": <span class="text-[#26a05e]">true</span>',
                 ],
             ],
             'oracle' => [
-                'route'      => 'GET /api/v1/oracle-ticks',
+                'route'      => 'GET /api/v1/crypto/oracle/ticks',
                 'title'      => 'Oracle Price Ticks',
-                'desc'       => 'Every Chainlink RTDS price update captured in real-time via direct WebSocket. Millisecond-accurate timestamps for BTC, ETH, and SOL — the exact same prices Polymarket uses to settle every market.',
-                'use'        => 'Use for: price reconstruction · volatility calc · custom features',
-                'fields'     => ['id', 'asset_id', 'asset', 'price_usd', 'price_bp', 'ts'],
-                'meta_total' => '188203',
+                'desc'       => 'Every Chainlink RTDS price update captured in real-time via direct WebSocket. Millisecond-accurate timestamps for BTC, ETH, and SOL — the exact same prices Polymarket uses to settle every crypto market.',
+                'use'        => 'Use for: price reconstruction · volatility calc · custom crypto features',
+                'fields'     => ['asset_id', 'asset', 'price_usd', 'price_bp', 'ts'],
+                'meta_total' => '250K+',
                 'json'       => [
                     '"asset": <span class="text-[#f97316]">"BTC"</span>',
                     '"price_usd": <span class="text-[#26a05e]">84231.50</span>',
@@ -1138,14 +1135,14 @@ document.addEventListener('alpine:init', () => {
                 ],
             ],
             'clob' => [
-                'route'      => 'GET /api/v1/clob-snapshots',
+                'route'      => 'GET /api/v1/clob/snapshots',
                 'title'      => 'CLOB Order Book Snapshots',
-                'desc'       => 'Full Yes/No bid-ask order book state captured from the Polymarket CLOB WebSocket at every oracle tick. Spread, mid price, and imbalance ratio per market window per tick.',
+                'desc'       => 'Full Yes/No bid-ask order book state captured from the Polymarket CLOB WebSocket. Works across all market categories — crypto and weather markets share the same CLOB infrastructure. Spread, mid price, and imbalance ratio per market per tick.',
                 'use'        => 'Use for: market microstructure · liquidity analysis · spread modelling',
-                'fields'     => ['window_id', 'asset_id', 'yes_bid', 'yes_ask', 'no_bid', 'no_ask', 'ts'],
-                'meta_total' => '3245835',
+                'fields'     => ['market_id', 'asset_id', 'yes_bid', 'yes_ask', 'no_bid', 'no_ask', 'ts'],
+                'meta_total' => '5M+',
                 'json'       => [
-                    '"window_id": <span class="text-[#f97316]">"btc-updown-5m-1774770300"</span>',
+                    '"market_id": <span class="text-[#f97316]">"btc-updown-5m-1774770300"</span>',
                     '"yes_bid": <span class="text-[#26a05e]">0.48</span>',
                     '"yes_ask": <span class="text-[#26a05e]">0.50</span>',
                     '"no_bid": <span class="text-[#26a05e]">0.49</span>',
@@ -1153,21 +1150,20 @@ document.addEventListener('alpine:init', () => {
                     '"ts": <span class="text-[#26a05e]">1774770301842</span>',
                 ],
             ],
-            'candles' => [
-                'route'      => 'GET /api/v1/candles',
-                'title'      => '1-Minute OHLCV Candles',
-                'desc'       => 'Standard 1-minute candlestick data aggregated directly from oracle ticks. OHLCV per asset per minute — ready to plug into any charting library or technical analysis pipeline.',
-                'use'        => 'Use for: technical analysis · chart rendering · momentum signals',
-                'fields'     => ['asset_id', 'asset', 'open_usd', 'high_usd', 'low_usd', 'close_usd', 'volume', 'ts'],
-                'meta_total' => '31420',
+            'weather' => [
+                'route'      => 'GET /api/v1/weather/readings',
+                'title'      => 'Weather Temperature Feeds',
+                'desc'       => 'Live temperature readings from weather stations powering Polymarket\'s daily high temperature markets. Running daily max tracked in local timezone, polled every 5 minutes from Open-Meteo. Covers Tokyo Haneda (RJTT) — more stations being added.',
+                'use'        => 'Use for: temperature forecasting · weather market signals · daily-max prediction',
+                'fields'     => ['symbol', 'temp_c', 'temp_f', 'running_daily_max_c', 'station_local_date', 'ts'],
+                'meta_total' => 'Live',
                 'json'       => [
-                    '"asset": <span class="text-[#f97316]">"BTC"</span>',
-                    '"open_usd": <span class="text-[#26a05e]">84100.00</span>',
-                    '"high_usd": <span class="text-[#26a05e]">84298.50</span>',
-                    '"low_usd": <span class="text-[#26a05e]">84056.10</span>',
-                    '"close_usd": <span class="text-[#26a05e]">84231.50</span>',
-                    '"volume": <span class="text-[#26a05e]">17</span>',
-                    '"ts": <span class="text-[#26a05e]">1774770300000</span>',
+                    '"symbol": <span class="text-[#f97316]">"RJTT"</span>',
+                    '"temp_c": <span class="text-[#26a05e]">12.8</span>',
+                    '"temp_f": <span class="text-[#26a05e]">55.04</span>',
+                    '"running_daily_max_c": <span class="text-[#26a05e]">14.2</span>',
+                    '"station_local_date": <span class="text-[#0093fd]">"2026-04-03"</span>',
+                    '"ts": <span class="text-[#26a05e]">1775174459773</span>',
                 ],
             ],
         ] as $key => $panel)
@@ -1257,11 +1253,11 @@ document.addEventListener('alpine:init', () => {
                 sub: 'Validate before you risk capital',
                 accent: '#0093fd',
                 title: 'Algo Traders',
-                desc: 'Backtest entry and exit signals against real Chainlink oracle ticks and CLOB snapshots. Replay months of BTC, ETH, and SOL Up/Down markets — measure your edge before risking a single dollar.',
+                desc: 'Backtest entry and exit signals across both crypto and weather markets. Replay BTC, ETH, and SOL Up/Down markets and Tokyo daily temperature markets — measure your edge before risking a single dollar on either category.',
                 metrics: [
-                    { label: 'Strategy', val: 'Mean Reversion', green: false },
-                    { label: 'Timeframe', val: '5m BTC Up/Down', green: false },
-                    { label: 'Windows', val: '2,734', green: false },
+                    { label: 'Strategy', val: 'Multi-market', green: false },
+                    { label: 'Categories', val: 'Crypto · Weather', green: false },
+                    { label: 'Markets', val: '3,200+', green: false },
                     { label: 'Win Rate', val: '68.3%', green: true },
                     { label: 'Sharpe', val: '2.14', green: true },
                     { label: 'Max DD', val: '-6.2%', green: false },
@@ -1273,10 +1269,10 @@ document.addEventListener('alpine:init', () => {
                 sub: 'Real data, any language, ship fast',
                 accent: '#0093fd',
                 title: 'Bot Builders',
-                desc: 'Your bot needs oracle prices and CLOB depth on every tick. One API key, four endpoints, clean JSON. Works with Python, JavaScript, curl — anything with HTTP. No setup headaches, API key in 60 seconds.',
+                desc: 'Your bot needs live prices and CLOB depth on every tick — whether it\'s trading BTC Up/Down or Tokyo temperature markets. One API key covers everything. Clean JSON, any language, API key in 60 seconds.',
                 metrics: [
-                    { label: 'Endpoint', val: '/oracle-ticks', green: false },
-                    { label: 'Latency', val: 'Real-time', green: true },
+                    { label: 'Categories', val: 'Crypto · Weather', green: false },
+                    { label: 'Data', val: 'Live · Realtime', green: true },
                     { label: 'Auth', val: 'Bearer token', green: false },
                     { label: 'Format', val: 'JSON', green: false },
                     { label: 'SDKs', val: 'Any HTTP client', green: false },
@@ -1289,14 +1285,14 @@ document.addEventListener('alpine:init', () => {
                 sub: 'Real labels, real financial stakes',
                 accent: '#0093fd',
                 title: 'ML Researchers',
-                desc: '188K+ labeled binary outcomes from Polymarket\'s 5-minute Up/Down markets. 40+ pre-computed features per window — TWAPs, volatility, momentum, CLOB imbalance. Real financial stakes, millisecond timestamps. Novel dataset for prediction research.',
+                desc: 'Thousands of labeled binary outcomes across crypto price and weather temperature markets. 40+ pre-computed features per market — TWAPs, volatility, momentum, CLOB imbalance, daily temperature max. Two entirely different market dynamics in one dataset.',
                 metrics: [
-                    { label: 'Records', val: '188,203', green: false },
+                    { label: 'Categories', val: '2 (growing)', green: false },
                     { label: 'Label type', val: 'Binary YES/NO', green: false },
                     { label: 'Features', val: '40+', green: true },
-                    { label: 'Assets', val: 'BTC · ETH · SOL', green: false },
+                    { label: 'Crypto', val: 'BTC · ETH · SOL', green: false },
+                    { label: 'Weather', val: 'RJTT Tokyo', green: false },
                     { label: 'Timestamps', val: 'Millisecond', green: true },
-                    { label: 'Source', val: 'Chainlink RTDS', green: false },
                 ]
             },
             {
@@ -1305,9 +1301,9 @@ document.addEventListener('alpine:init', () => {
                 sub: 'Ship prediction market products fast',
                 accent: '#0093fd',
                 title: 'App Developers',
-                desc: 'Build Polymarket dashboards, analytics tools, or trading apps on top of a clean REST API. Four endpoints. Consistent JSON schema. Free tier to prototype, Pro when you\'re ready to ship to users.',
+                desc: 'Build Polymarket dashboards, analytics tools, or trading apps on top of a clean REST API. Category-organized endpoints, stable JSON schema across market types. Free tier to prototype, Pro when you\'re ready to ship.',
                 metrics: [
-                    { label: 'Endpoints', val: '4 total', green: false },
+                    { label: 'Categories', val: '2 market types', green: false },
                     { label: 'Auth', val: 'API key header', green: false },
                     { label: 'Schema', val: 'Stable JSON', green: true },
                     { label: 'Pagination', val: 'Cursor-based', green: false },
@@ -1326,7 +1322,7 @@ document.addEventListener('alpine:init', () => {
              :class="vis ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'">
             <div class="text-xs font-semibold text-[#0093fd] uppercase tracking-[0.15em] mb-3">Use cases</div>
             <h2 class="text-3xl sm:text-4xl font-bold text-white">Built for builders who move fast.</h2>
-            <p class="text-[#697d91] mt-3">From first-time prediction market traders to production quant systems.</p>
+            <p class="text-[#697d91] mt-3">From first-time prediction market traders to production quant systems — across every market category.</p>
         </div>
 
         {{-- 5-col grid: 2 left nav + 3 right detail --}}
@@ -1463,14 +1459,15 @@ document.addEventListener('alpine:init', () => {
                     Stop rebuilding<br>the same pipeline.
                 </h2>
                 <p class="text-[#697d91] text-base leading-relaxed mb-8">
-                    Every strategy starts the same way — scrape, reconstruct, misalign, start over. We wired directly into the sources and built the recorder ourselves.
+                    Every strategy starts the same way — scrape, reconstruct, misalign, start over. We wired directly into the sources, built the recorder ourselves, and made it work across every market category.
                 </p>
 
                 <div class="space-y-3 mb-8">
                     @foreach([
-                        ['Oracle prices with millisecond timestamps', '#0093fd'],
-                        ['Full CLOB order book at every oracle tick', '#a78bfa'],
-                        ['40+ ML features, pre-computed per window', '#26a05e'],
+                        ['Crypto oracle prices with millisecond timestamps', '#0093fd'],
+                        ['Live weather temperature feeds per station', '#26a05e'],
+                        ['Full CLOB order book across all market types', '#a78bfa'],
+                        ['40+ ML features, pre-computed per market', '#f97316'],
                     ] as [$point, $col])
                     <div class="flex items-center gap-3">
                         <div class="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style="background:{{ $col }}18; border:1px solid {{ $col }}40">
@@ -1484,7 +1481,7 @@ document.addEventListener('alpine:init', () => {
                 </div>
 
                 <p class="text-sm text-[#697d91] border-l-2 border-[#0093fd]/40 pl-4 italic">
-                    We built the recorder. Now it's your API.
+                    We built the multi-market recorder. Now it's your API.
                 </p>
             </div>
 
@@ -1492,10 +1489,10 @@ document.addEventListener('alpine:init', () => {
             <div class="transition-all duration-700 delay-200" :class="vis ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'">
                 @php
                 $pipeline = [
-                    ['Chainlink RTDS',        'wss://ws-live-data.polymarket.com',          'Real-time oracle prices',      '#0093fd', 'M5 3h6M3 7h10M5 11h6', true],
-                    ['Polymarket CLOB',       'wss://ws-subscriptions-clob.polymarket.com', 'Yes/No order book per tick',   '#a78bfa', 'M2 4h12M2 8h12M2 12h8',true],
-                    ['Gamma API',             'https://gamma-api.polymarket.com',            'Market discovery every 20s',   '#26a05e', 'M8 2a6 6 0 100 12A6 6 0 008 2zm0 4v4m0 0l-2-2m2 2l2-2', true],
-                    ['REST API',              'polymarket-data-api.fullstacklabs.org/api/v1/*', 'Your language. Your queries.', '#f97316', 'M2 6h12v8H2zM6 6V4h4v2',false],
+                    ['Chainlink RTDS',        'wss://ws-live-data.polymarket.com',          'Real-time crypto oracle prices',       '#0093fd', 'M5 3h6M3 7h10M5 11h6', true],
+                    ['Open-Meteo API',        'https://api.open-meteo.com',                  'Weather temperature · every 5 min',    '#26a05e', 'M8 2a6 6 0 100 12A6 6 0 008 2zm0 4v4m0 0l-2-2m2 2l2-2', true],
+                    ['Polymarket CLOB',       'wss://ws-subscriptions-clob.polymarket.com', 'Yes/No order book · all categories',   '#a78bfa', 'M2 4h12M2 8h12M2 12h8',true],
+                    ['REST API',              'polymarket-data-api.fullstacklabs.org/api/v1/*', 'Your language. Your queries.',     '#f97316', 'M2 6h12v8H2zM6 6V4h4v2',false],
                 ];
                 @endphp
 
@@ -1606,7 +1603,7 @@ document.addEventListener('alpine:init', () => {
                     @foreach([
                         ['100 requests / day', true],
                         ['7 days history', true],
-                        ['All 4 endpoints', true],
+                        ['Crypto + weather markets', true],
                         ['REST API access', true],
                         ['CSV / SQLite export', false],
                         ['Backtest endpoint', false],
@@ -1651,7 +1648,7 @@ document.addEventListener('alpine:init', () => {
                     @foreach([
                         '10,000 requests / day',
                         '90 days history',
-                        'All 4 endpoints',
+                        'Crypto + weather markets',
                         'REST API access',
                         'Priority email support',
                     ] as $f)
@@ -1685,7 +1682,7 @@ document.addEventListener('alpine:init', () => {
                     @foreach([
                         '100,000 requests / day',
                         'Full history (unlimited)',
-                        'All 4 endpoints',
+                        'Crypto + weather markets',
                         'REST API access',
                         'CSV / SQLite export',
                         'Backtest endpoint',
@@ -1727,10 +1724,10 @@ document.addEventListener('alpine:init', () => {
                         @foreach([
                             ['Daily requests',      '100',        '10,000',    '100,000'],
                             ['History depth',       '7 days',     '90 days',   'Unlimited'],
-                            ['Windows endpoint',    true,         true,        true],
-                            ['Oracle ticks',        true,         true,        true],
+                            ['Markets endpoint',    true,         true,        true],
+                            ['Crypto oracle ticks', true,         true,        true],
+                            ['Weather feeds',       true,         true,        true],
                             ['CLOB snapshots',      true,         true,        true],
-                            ['1m candles',          true,         true,        true],
                             ['CSV / SQLite export', false,        false,       true],
                             ['Backtest endpoint',   false,        false,       true],
                             ['Support',             'Community',  'Priority email', 'Dedicated'],
@@ -1791,22 +1788,22 @@ document.addEventListener('alpine:init', () => {
                 [
                     'n' => '01',
                     'Q' => 'Where does the data come from?',
-                    'A' => 'We connect directly to three live sources: Chainlink\'s RTDS WebSocket for oracle price feeds (the same prices Polymarket uses to settle markets), the Polymarket CLOB WebSocket for order book data, and the Gamma API for market metadata and outcomes. Everything is timestamped at the socket layer — no secondary scraping.',
+                    'A' => 'We connect directly to four live sources: Chainlink\'s RTDS WebSocket for crypto oracle price feeds, Open-Meteo\'s free weather API for live temperature readings (polled every 5 minutes per station), the Polymarket CLOB WebSocket for order book data across all market types, and the Gamma API for market discovery and outcomes. Everything is timestamped at the source — no secondary scraping.',
                 ],
                 [
                     'n' => '02',
-                    'Q' => 'How far back does history go?',
-                    'A' => 'We started live recording in early 2026 and are actively backfilling session recordings from before launch. Free tier gets 7 days. Builder gets 90 days. Pro gets the full archive.',
+                    'Q' => 'What market categories are available?',
+                    'A' => 'Currently two: Crypto (BTC, ETH, SOL Up/Down markets settled via Chainlink prices) and Weather (daily highest temperature markets, starting with Tokyo Haneda / RJTT). More categories are being added — the architecture is built to extend into any Polymarket category cleanly.',
                 ],
                 [
                     'n' => '03',
-                    'Q' => 'What are "window features" exactly?',
-                    'A' => 'A window is one Polymarket binary market — e.g. "Will BTC be above $84,000 in 5 minutes?". For each resolved window we pre-compute 40+ ML-ready features: TWAPs at multiple intervals, oracle distance from break price, CLOB imbalance, volatility, momentum, and more. Features you\'d otherwise spend days computing yourself.',
+                    'Q' => 'What are "market features" exactly?',
+                    'A' => 'A market is one Polymarket binary event — e.g. "Will BTC be above $84,000 in 5 minutes?" or "Will Tokyo\'s high temperature be above 15°C today?". For each resolved market we pre-compute 40+ ML-ready features: TWAPs, oracle distance from break value, CLOB imbalance, volatility, momentum, and more. Features you\'d otherwise spend days computing yourself.',
                 ],
                 [
                     'n' => '04',
                     'Q' => 'How accurate are the timestamps?',
-                    'A' => 'Oracle ticks carry the timestamp from the Chainlink WebSocket message — millisecond precision. CLOB snapshots are timestamped when received alongside the oracle tick. There is a small constant network latency, but no batch-processing delay.',
+                    'A' => 'Crypto oracle ticks carry the timestamp from the Chainlink WebSocket message — millisecond precision. Weather readings are timestamped when polled. CLOB snapshots are timestamped on receipt. There is a small constant network latency, but no batch-processing delay.',
                 ],
                 [
                     'n' => '05',
@@ -1883,10 +1880,11 @@ document.addEventListener('alpine:init', () => {
         </div>
 
         <h2 class="text-4xl sm:text-5xl font-extrabold text-white mb-5 leading-tight tracking-tight">
-            Start pulling real<br>Polymarket data today
+            Crypto. Weather.<br>
+            <span class="text-[#0093fd]">One API. Start now.</span>
         </h2>
         <p class="text-[#8a9ab0] text-lg mb-12 max-w-lg mx-auto leading-relaxed">
-            API key in 60 seconds. 100 requests a day, free forever. Upgrade only when your strategy is ready for production.
+            API key in 60 seconds. 100 requests a day, free forever. All market categories included. Upgrade only when your strategy is ready for production.
         </p>
 
         <div class="flex flex-wrap gap-4 justify-center mb-10">
