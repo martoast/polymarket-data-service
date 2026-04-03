@@ -1153,16 +1153,16 @@ document.addEventListener('alpine:init', () => {
             'weather' => [
                 'route'      => 'GET /api/v1/weather/readings',
                 'title'      => 'Weather Temperature Feeds',
-                'desc'       => 'Live temperature readings from weather stations powering Polymarket\'s daily high temperature markets. Running daily max tracked in local timezone, polled every 5 minutes from Open-Meteo. Covers Tokyo Haneda (RJTT) — more stations being added.',
+                'desc'       => 'Live temperature readings from weather stations powering Polymarket\'s daily high temperature markets. 10 cities across 3 continents — Tokyo, London, Paris, Singapore, Seoul, Beijing, Chicago, NYC, Los Angeles, and Miami. Running daily max tracked per local timezone, polled every 5 minutes from Open-Meteo. °C and °F markets fully supported.',
                 'use'        => 'Use for: temperature forecasting · weather market signals · daily-max prediction',
                 'fields'     => ['symbol', 'temp_c', 'temp_f', 'running_daily_max_c', 'station_local_date', 'ts'],
                 'meta_total' => 'Live',
                 'json'       => [
-                    '"symbol": <span class="text-[#f97316]">"RJTT"</span>',
-                    '"temp_c": <span class="text-[#26a05e]">12.8</span>',
-                    '"temp_f": <span class="text-[#26a05e]">55.04</span>',
-                    '"running_daily_max_c": <span class="text-[#26a05e]">14.2</span>',
-                    '"station_local_date": <span class="text-[#0093fd]">"2026-04-03"</span>',
+                    '"symbol": <span class="text-[#f97316]">"KJFK"</span>',
+                    '"temp_c": <span class="text-[#26a05e]">14.1</span>',
+                    '"temp_f": <span class="text-[#26a05e]">57.38</span>',
+                    '"running_daily_max_c": <span class="text-[#26a05e]">16.4</span>',
+                    '"station_local_date": <span class="text-[#0093fd]">"2026-04-02"</span>',
                     '"ts": <span class="text-[#26a05e]">1775174459773</span>',
                 ],
             ],
@@ -1291,7 +1291,7 @@ document.addEventListener('alpine:init', () => {
                     { label: 'Label type', val: 'Binary YES/NO', green: false },
                     { label: 'Features', val: '40+', green: true },
                     { label: 'Crypto', val: 'BTC · ETH · SOL', green: false },
-                    { label: 'Weather', val: 'RJTT Tokyo', green: false },
+                    { label: 'Weather', val: '10 cities', green: false },
                     { label: 'Timestamps', val: 'Millisecond', green: true },
                 ]
             },
@@ -1793,7 +1793,7 @@ document.addEventListener('alpine:init', () => {
                 [
                     'n' => '02',
                     'Q' => 'What market categories are available?',
-                    'A' => 'Currently two: Crypto (BTC, ETH, SOL Up/Down markets settled via Chainlink prices) and Weather (daily highest temperature markets, starting with Tokyo Haneda / RJTT). More categories are being added — the architecture is built to extend into any Polymarket category cleanly.',
+                    'A' => 'Currently two: Crypto (BTC, ETH, SOL Up/Down markets settled via Chainlink prices) and Weather (daily highest temperature markets across 10 cities — Tokyo, London, Paris, Singapore, Seoul, Beijing, Chicago, NYC, Los Angeles, and Miami — covering both °C and °F markets). More categories are being added — see the Roadmap for what\'s coming next.',
                 ],
                 [
                     'n' => '03',
@@ -1851,6 +1851,123 @@ document.addEventListener('alpine:init', () => {
                 </div>
             </div>
             @endforeach
+        </div>
+
+    </div>
+</section>
+
+
+{{-- ============================================================
+     §8b  ROADMAP TEASER
+============================================================ --}}
+<section class="border-t border-[#1f2937] py-24 relative overflow-hidden"
+    x-data="{ vis: false }"
+    x-intersect.once="vis = true">
+
+    <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-[#0093fd]/[.03] rounded-full blur-[120px] pointer-events-none"></div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        {{-- Header --}}
+        <div class="text-center mb-16 transition-all duration-700"
+             :class="vis ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'">
+            <div class="text-xs font-semibold text-[#0093fd] uppercase tracking-[0.15em] mb-3">Roadmap</div>
+            <h2 class="text-3xl sm:text-4xl font-bold text-white mb-3">The mission: every Polymarket market.</h2>
+            <p class="text-[#697d91] max-w-xl mx-auto">We started with crypto. We added weather. We're not stopping until every Polymarket category has a data feed.</p>
+        </div>
+
+        {{-- Coverage grid --}}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
+            @php
+            $coverage = [
+                [
+                    'label'   => 'Crypto',
+                    'status'  => 'live',
+                    'color'   => '#0093fd',
+                    'icon'    => 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v.01M12 16v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
+                    'markets' => ['BTC Up/Down', 'ETH Up/Down', 'SOL Up/Down'],
+                    'note'    => 'Chainlink oracle · ms precision',
+                ],
+                [
+                    'label'   => 'Weather',
+                    'status'  => 'live',
+                    'color'   => '#26a05e',
+                    'icon'    => 'M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z',
+                    'markets' => ['Tokyo · London · Paris', 'Singapore · Seoul · Beijing', 'NYC · Chicago · LA · Miami'],
+                    'note'    => '10 cities · °C and °F',
+                ],
+                [
+                    'label'   => 'Sports',
+                    'status'  => 'coming',
+                    'color'   => '#f97316',
+                    'icon'    => 'M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4',
+                    'markets' => ['NFL · NBA · MLB', 'Soccer · Tennis', 'UFC · Esports'],
+                    'note'    => 'Match results · player props',
+                ],
+                [
+                    'label'   => 'Politics',
+                    'status'  => 'coming',
+                    'color'   => '#a78bfa',
+                    'icon'    => 'M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3',
+                    'markets' => ['Elections · Approval polls', 'Policy outcomes', 'Global geopolitics'],
+                    'note'    => 'News signals · sentiment',
+                ],
+            ];
+            @endphp
+
+            @foreach($coverage as $i => $cat)
+            <div class="rounded-2xl border p-6 transition-all duration-500 relative overflow-hidden"
+                 style="border-color:{{ $cat['color'] }}{{ $cat['status'] === 'live' ? '33' : '18' }}; background: {{ $cat['color'] }}{{ $cat['status'] === 'live' ? '08' : '04' }}"
+                 :style="vis ? 'opacity:1;transform:translateY(0);transition-delay:{{ $i * 80 }}ms' : 'opacity:0;transform:translateY(20px)'">
+
+                {{-- Status badge --}}
+                <div class="flex items-center justify-between mb-5">
+                    <div class="w-9 h-9 rounded-xl flex items-center justify-center"
+                         style="background:{{ $cat['color'] }}18; border:1px solid {{ $cat['color'] }}30">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="{{ $cat['color'] }}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="{{ $cat['icon'] }}"/>
+                        </svg>
+                    </div>
+                    @if($cat['status'] === 'live')
+                    <div class="flex items-center gap-1.5">
+                        <span class="relative flex h-1.5 w-1.5">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style="background:{{ $cat['color'] }}"></span>
+                            <span class="relative inline-flex rounded-full h-1.5 w-1.5" style="background:{{ $cat['color'] }}"></span>
+                        </span>
+                        <span class="text-[9px] font-bold uppercase tracking-wider" style="color:{{ $cat['color'] }}">Live</span>
+                    </div>
+                    @else
+                    <span class="text-[9px] font-bold uppercase tracking-wider text-[#2e3841] border border-[#1f2937] rounded-full px-2 py-0.5">Coming soon</span>
+                    @endif
+                </div>
+
+                <h3 class="text-sm font-bold text-white mb-3">{{ $cat['label'] }}</h3>
+
+                <ul class="space-y-1.5 mb-4">
+                    @foreach($cat['markets'] as $m)
+                    <li class="text-xs {{ $cat['status'] === 'live' ? 'text-[#8a9ab0]' : 'text-[#2e3841]' }} flex items-center gap-1.5">
+                        <span style="color:{{ $cat['color'] }}; opacity:{{ $cat['status'] === 'live' ? '1' : '0.4' }}">·</span>
+                        {{ $m }}
+                    </li>
+                    @endforeach
+                </ul>
+
+                <div class="text-[10px] font-mono" style="color:{{ $cat['color'] }}; opacity:{{ $cat['status'] === 'live' ? '0.8' : '0.3' }}">{{ $cat['note'] }}</div>
+            </div>
+            @endforeach
+        </div>
+
+        {{-- CTA to roadmap --}}
+        <div class="text-center transition-all duration-700 delay-500"
+             :class="vis ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'">
+            <a href="{{ route('roadmap') }}"
+               class="inline-flex items-center gap-2 border border-[#2e3841] hover:border-[#0093fd]/40 text-[#697d91] hover:text-white
+                      font-medium px-6 py-3 rounded-xl transition-all text-sm hover:bg-[#0093fd]/5 group">
+                See the full roadmap
+                <svg class="w-4 h-4 transition-transform group-hover:translate-x-0.5" viewBox="0 0 16 16" fill="none">
+                    <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </a>
         </div>
 
     </div>

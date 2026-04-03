@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Recorder\ClobFeedService;
+use App\Recorder\RecorderState;
 use App\Recorder\Weather\OpenMeteoService;
 use App\Recorder\Weather\WeatherMarketDiscoveryService;
 use Illuminate\Console\Command;
@@ -43,6 +44,12 @@ class WeatherRecorderCommand extends Command
 
     /** Last local date we recorded for each asset, used to detect midnight rollovers */
     private array $lastLocalDate = [];
+
+    /** Dead-band filter: last written temp_c per asset symbol */
+    private array $lastWrittenTemp = [];
+
+    /** Dead-band filter: last write timestamp (ms) per asset symbol */
+    private array $lastWrittenTs = [];
 
     private array $stats;
 
@@ -97,13 +104,14 @@ class WeatherRecorderCommand extends Command
         $loop->addPeriodicTimer(20, $runDiscovery);
 
         // ── Temperature polling: immediately + every 5 minutes ────────────────
-        $weatherAssets = DB::table('assets')
-            ->join('categories', 'assets.category_id', '=', 'categories.id')
-            ->where('categories.slug', 'weather')
-            ->where('assets.is_active', true)
-            ->get(['assets.id', 'assets.symbol', 'assets.unit', 'assets.source_config']);
+        // Assets are re-queried each poll so new cities are picked up without restart.
+        $pollTemperatures = function () use ($openMeteo) {
+            $weatherAssets = DB::table('assets')
+                ->join('categories', 'assets.category_id', '=', 'categories.id')
+                ->where('categories.slug', 'weather')
+                ->where('assets.is_active', true)
+                ->get(['assets.id', 'assets.symbol', 'assets.unit', 'assets.source_config']);
 
-        $pollTemperatures = function () use ($openMeteo, $weatherAssets) {
             foreach ($weatherAssets as $asset) {
                 $sourceConfig = json_decode($asset->source_config ?? '{}', true);
                 $tz           = $sourceConfig['timezone'] ?? 'UTC';
@@ -132,6 +140,19 @@ class WeatherRecorderCommand extends Command
 
                 $runningMax = $this->runningDailyMax[$asset->symbol];
 
+                // Dead-band filter: skip write if temp unchanged and < 30 min since last write
+                $nowMs        = (int) (microtime(true) * 1000);
+                $lastTemp     = $this->lastWrittenTemp[$asset->symbol] ?? null;
+                $lastTs       = $this->lastWrittenTs[$asset->symbol] ?? 0;
+                $sinceLastMs  = $nowMs - $lastTs;
+                $tempChanged  = ($lastTemp === null || $tempC !== $lastTemp);
+                $heartbeat    = ($sinceLastMs >= 1_800_000); // 30 min
+
+                if (!$tempChanged && !$heartbeat) {
+                    echo "[weather] {$asset->symbol} {$tempC}°C unchanged — skipping write" . PHP_EOL;
+                    continue;
+                }
+
                 DB::table('weather_readings')->insert([
                     'asset_id'            => $asset->id,
                     'temp_c'              => $tempC,
@@ -142,6 +163,8 @@ class WeatherRecorderCommand extends Command
                     'ts'                  => $ts,
                 ]);
 
+                $this->lastWrittenTemp[$asset->symbol] = $tempC;
+                $this->lastWrittenTs[$asset->symbol]   = $nowMs;
                 $this->stats['readings_written']++;
                 $this->stats['current'][$asset->symbol] = [
                     'temp_c'             => $tempC,
@@ -166,7 +189,7 @@ class WeatherRecorderCommand extends Command
 
         // ── Status update every 5s ────────────────────────────────────────────
         $loop->addPeriodicTimer(5, function () {
-            \Illuminate\Support\Facades\Cache::put('weather_recorder:status', $this->stats, 120);
+            RecorderState::updateWeather($this->stats);
         });
 
         // ── Start CLOB connection ─────────────────────────────────────────────

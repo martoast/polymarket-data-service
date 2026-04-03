@@ -19,6 +19,7 @@ Route::post('/register', [WebAuthController::class, 'register'])->middleware('gu
 Route::get('/auth/google', [WebAuthController::class, 'redirectToGoogle'])->name('auth.google')->middleware('guest');
 Route::get('/auth/google/callback', [WebAuthController::class, 'handleGoogleCallback'])->name('auth.google.callback');
 Route::get('/docs', fn () => view('docs'))->name('docs');
+Route::get('/roadmap', fn () => view('roadmap'))->name('roadmap');
 Route::get('/terms', fn () => view('terms'))->name('terms');
 Route::get('/privacy', fn () => view('privacy'))->name('privacy');
 

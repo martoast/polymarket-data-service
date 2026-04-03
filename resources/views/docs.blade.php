@@ -163,16 +163,16 @@ $sections = [
         'id'    => 'weather-stations',
         'label' => 'Stations',
         'group' => 'weather',
-        'desc'  => 'Weather station assets currently being tracked. Each station maps to a set of daily high temperature markets.',
+        'desc'  => '10 weather station assets tracked globally. Each station polls Open-Meteo every 5 minutes and maps to a set of daily high temperature markets on Polymarket. International stations use °C markets; US stations use °F markets.',
         'pro'   => false,
         'endpoints' => [
             [
                 'method'  => 'GET',
                 'path'    => '/api/v1/weather/stations',
                 'title'   => 'List Stations',
-                'desc'    => 'All active weather station assets. The `source_config` includes coordinates and ICAO code. Use the `symbol` value as the `asset` parameter in weather reading endpoints.',
+                'desc'    => 'All active weather station assets. `unit` is `celsius` or `fahrenheit` — matches the unit Polymarket uses for that city\'s markets. Use `symbol` as the `asset` parameter in weather reading endpoints.',
                 'params'  => [],
-                'example' => "{\n  \"data\": [\n    {\n      \"symbol\": \"RJTT\",\n      \"name\": \"Tokyo High Temperature\",\n      \"unit\": \"celsius\",\n      \"source_config\": {\n        \"icao\": \"RJTT\",\n        \"city\": \"Tokyo\",\n        \"country\": \"JP\",\n        \"latitude\": 35.5494,\n        \"longitude\": 139.7798,\n        \"timezone\": \"Asia/Tokyo\"\n      }\n    }\n  ]\n}",
+                'example' => "{\n  \"data\": [\n    { \"symbol\": \"RJTT\", \"name\": \"Tokyo High Temperature\",          \"unit\": \"celsius\",    \"source_config\": { \"icao\": \"RJTT\", \"city\": \"Tokyo\",       \"country\": \"JP\", \"latitude\": 35.5494,  \"longitude\": 139.7798,  \"timezone\": \"Asia/Tokyo\" } },\n    { \"symbol\": \"EGLL\", \"name\": \"London High Temperature\",         \"unit\": \"celsius\",    \"source_config\": { \"icao\": \"EGLL\", \"city\": \"London\",      \"country\": \"GB\", \"latitude\": 51.4775,  \"longitude\": -0.4614,   \"timezone\": \"Europe/London\" } },\n    { \"symbol\": \"LFPG\", \"name\": \"Paris High Temperature\",          \"unit\": \"celsius\",    \"source_config\": { \"icao\": \"LFPG\", \"city\": \"Paris\",       \"country\": \"FR\", \"latitude\": 49.0097,  \"longitude\": 2.5479,    \"timezone\": \"Europe/Paris\" } },\n    { \"symbol\": \"WSSS\", \"name\": \"Singapore High Temperature\",      \"unit\": \"celsius\",    \"source_config\": { \"icao\": \"WSSS\", \"city\": \"Singapore\",   \"country\": \"SG\", \"latitude\": 1.3644,   \"longitude\": 103.9915,  \"timezone\": \"Asia/Singapore\" } },\n    { \"symbol\": \"RKSI\", \"name\": \"Seoul High Temperature\",          \"unit\": \"celsius\",    \"source_config\": { \"icao\": \"RKSI\", \"city\": \"Seoul\",       \"country\": \"KR\", \"latitude\": 37.4693,  \"longitude\": 126.4503,  \"timezone\": \"Asia/Seoul\" } },\n    { \"symbol\": \"ZBAA\", \"name\": \"Beijing High Temperature\",        \"unit\": \"celsius\",    \"source_config\": { \"icao\": \"ZBAA\", \"city\": \"Beijing\",     \"country\": \"CN\", \"latitude\": 40.0799,  \"longitude\": 116.5857,  \"timezone\": \"Asia/Shanghai\" } },\n    { \"symbol\": \"KORD\", \"name\": \"Chicago High Temperature\",        \"unit\": \"fahrenheit\", \"source_config\": { \"icao\": \"KORD\", \"city\": \"Chicago\",     \"country\": \"US\", \"latitude\": 41.9742,  \"longitude\": -87.9073,  \"timezone\": \"America/Chicago\" } },\n    { \"symbol\": \"KJFK\", \"name\": \"New York City High Temperature\",  \"unit\": \"fahrenheit\", \"source_config\": { \"icao\": \"KJFK\", \"city\": \"nyc\",         \"country\": \"US\", \"latitude\": 40.6413,  \"longitude\": -73.7781,  \"timezone\": \"America/New_York\" } },\n    { \"symbol\": \"KLAX\", \"name\": \"Los Angeles High Temperature\",    \"unit\": \"fahrenheit\", \"source_config\": { \"icao\": \"KLAX\", \"city\": \"Los Angeles\", \"country\": \"US\", \"latitude\": 33.9425,  \"longitude\": -118.4081, \"timezone\": \"America/Los_Angeles\" } },\n    { \"symbol\": \"KMIA\", \"name\": \"Miami High Temperature\",          \"unit\": \"fahrenheit\", \"source_config\": { \"icao\": \"KMIA\", \"city\": \"Miami\",       \"country\": \"US\", \"latitude\": 25.7959,  \"longitude\": -80.2870,  \"timezone\": \"America/New_York\" } }\n  ]\n}",
             ],
         ],
     ],
@@ -180,34 +180,34 @@ $sections = [
         'id'    => 'weather-readings',
         'label' => 'Readings',
         'group' => 'weather',
-        'desc'  => 'Live temperature readings polled from Open-Meteo every 5 minutes per station. Includes running daily maximum in the station\'s local timezone.',
+        'desc'  => 'Live temperature readings polled from Open-Meteo every 5 minutes per station. Includes running daily maximum in both °C and °F, keyed to the station\'s local timezone. `running_daily_max_c` resets at local midnight.',
         'pro'   => false,
         'endpoints' => [
             [
                 'method'  => 'GET',
                 'path'    => '/api/v1/weather/readings',
                 'title'   => 'Temperature Readings',
-                'desc'    => 'Cursor-paginated temperature readings. Filter by station (`asset`), local date, or timestamp range. `ts` is Unix milliseconds. `running_daily_max_c` resets at local midnight.',
+                'desc'    => 'Cursor-paginated temperature readings. Filter by station (`asset`), local date, or timestamp range. `ts` is Unix milliseconds.',
                 'params'  => [
-                    ['name'=>'asset',    'type'=>'select', 'options'=>['','RJTT'],       'required'=>false],
+                    ['name'=>'asset',    'type'=>'select', 'options'=>['','RJTT','EGLL','LFPG','WSSS','RKSI','ZBAA','KORD','KJFK','KLAX','KMIA'], 'required'=>false],
                     ['name'=>'date',     'type'=>'text',   'placeholder'=>'2026-04-03', 'required'=>false],
                     ['name'=>'from',     'type'=>'text',   'placeholder'=>'1775088000000', 'required'=>false],
                     ['name'=>'to',       'type'=>'text',   'placeholder'=>'1775174400000', 'required'=>false],
                     ['name'=>'per_page', 'type'=>'number', 'placeholder'=>'500',        'required'=>false],
                     ['name'=>'cursor',   'type'=>'text',   'placeholder'=>'eyJ...',     'required'=>false],
                 ],
-                'example' => "{\n  \"data\": [\n    {\n      \"symbol\": \"RJTT\",\n      \"temp_c\": 12.8,\n      \"temp_f\": 55.04,\n      \"running_daily_max_c\": 14.2,\n      \"source\": \"open_meteo\",\n      \"station_local_date\": \"2026-04-03\",\n      \"ts\": 1775174459773\n    }\n  ],\n  \"next_cursor\": \"eyJ0cyI6MTc3NTE3NDQ1OTc3M30=\",\n  \"has_more\": false\n}",
+                'example' => "{\n  \"data\": [\n    {\n      \"symbol\": \"KJFK\",\n      \"temp_c\": 4.8,\n      \"temp_f\": 40.64,\n      \"running_daily_max_c\": 4.8,\n      \"source\": \"observed\",\n      \"station_local_date\": \"2026-04-02\",\n      \"ts\": 1775174459773\n    },\n    {\n      \"symbol\": \"RJTT\",\n      \"temp_c\": 16.4,\n      \"temp_f\": 61.52,\n      \"running_daily_max_c\": 16.4,\n      \"source\": \"observed\",\n      \"station_local_date\": \"2026-04-03\",\n      \"ts\": 1775185305842\n    }\n  ],\n  \"next_cursor\": \"eyJ0cyI6MTc3NTE4NTMwNTg0Mn0=\",\n  \"has_more\": false\n}",
             ],
             [
                 'method'  => 'GET',
                 'path'    => '/api/v1/weather/daily-max',
                 'title'   => 'Daily Maximum',
-                'desc'    => 'Current running daily maximum temperature for a station on a given date (defaults to today in the station\'s local timezone). Includes `day_elapsed_pct` — how far through the day we are — which is useful for building resolution confidence signals.',
+                'desc'    => 'Running daily maximum temperature for a station on a given date (defaults to today in the station\'s local timezone). Returns both °C and °F. `day_elapsed_pct` is how far through the local day we are — useful for building resolution confidence signals. US city markets resolve against `running_daily_max_f`; international markets against `running_daily_max_c`.',
                 'params'  => [
-                    ['name'=>'asset', 'type'=>'select', 'options'=>['RJTT'], 'required'=>true],
+                    ['name'=>'asset', 'type'=>'select', 'options'=>['RJTT','EGLL','LFPG','WSSS','RKSI','ZBAA','KORD','KJFK','KLAX','KMIA'], 'required'=>true],
                     ['name'=>'date',  'type'=>'text',   'placeholder'=>'2026-04-03 (default: today local)', 'required'=>false],
                 ],
-                'example' => "{\n  \"data\": {\n    \"asset\": \"RJTT\",\n    \"station_local_date\": \"2026-04-03\",\n    \"current_temp_c\": 12.8,\n    \"current_temp_f\": 55.04,\n    \"running_daily_max_c\": 14.2,\n    \"day_elapsed_pct\": 37.6,\n    \"reading_count\": 8,\n    \"ts\": 1775174459773\n  }\n}",
+                'example' => "{\n  \"data\": {\n    \"asset\": \"KJFK\",\n    \"unit\": \"fahrenheit\",\n    \"station_local_date\": \"2026-04-02\",\n    \"current_temp_c\": 4.8,\n    \"current_temp_f\": 40.64,\n    \"running_daily_max_c\": 4.8,\n    \"running_daily_max_f\": 40.6,\n    \"day_elapsed_pct\": 83.2,\n    \"reading_count\": 10,\n    \"ts\": 1775174459773\n  }\n}",
             ],
         ],
     ],
@@ -412,7 +412,7 @@ $sections = [
                         <span class="text-sm font-semibold text-white">Weather</span>
                         <code class="mono text-[10px] text-[#697d91] ml-auto">category=weather</code>
                     </div>
-                    <p class="text-xs text-[#697d91] leading-relaxed">Daily highest temperature markets (e.g. Tokyo RJTT). Temperature from Open-Meteo polled every 5 min. 1-day duration markets.</p>
+                    <p class="text-xs text-[#697d91] leading-relaxed">Daily highest temperature markets across 10 cities (Tokyo, London, Paris, Singapore, Seoul, Beijing, Chicago, NYC, LA, Miami). Open-Meteo polled every 5 min. °C and °F markets supported.</p>
                 </div>
             </div>
 

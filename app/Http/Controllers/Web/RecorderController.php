@@ -17,34 +17,67 @@ class RecorderController extends Controller
 
     public function status(): JsonResponse
     {
-        $state = RecorderState::get();
-        $nowMs = (int) (microtime(true) * 1000);
+        $state   = RecorderState::get();
+        $weather = RecorderState::getWeather();
+        $nowMs   = (int) (microtime(true) * 1000);
 
         // Supplement in-session counters with real DB totals
         $state['oracle_written']              = DB::table('oracle_ticks')->count();
-        $state['clob']['snapshots_written']   = DB::table('clob_snapshots')->count();
+        $state['clob']['snapshots_written']   = DB::table('clob_snapshots')
+            ->join('markets', 'markets.id', '=', 'clob_snapshots.market_id')
+            ->where('markets.category', 'crypto')
+            ->count();
         $state['candles_written']             = DB::table('candles_1m')->count();
 
-        // Active markets list for the table — only already-opened windows (break price known)
-        $state['active_markets'] = DB::table('windows')
-            ->join('assets', 'assets.id', '=', 'windows.asset_id')
-            ->whereNull('windows.outcome')
-            ->where('windows.close_ts', '>', $nowMs)
-            ->where('windows.open_ts', '<=', $nowMs)
-            ->where('windows.break_price_usd', '>', 0)
-            ->select('windows.id', 'assets.symbol', 'windows.duration_sec', 'windows.break_price_usd', 'windows.open_ts', 'windows.close_ts')
-            ->orderBy('windows.close_ts')
+        // Weather counters from DB
+        $weather['readings_written']          = DB::table('weather_readings')->count();
+        $weather['clob']['snapshots_written'] = DB::table('clob_snapshots')
+            ->join('markets', 'markets.id', '=', 'clob_snapshots.market_id')
+            ->where('markets.category', 'weather')
+            ->count();
+
+        // Active crypto markets
+        $state['active_markets'] = DB::table('markets')
+            ->join('assets', 'assets.id', '=', 'markets.asset_id')
+            ->where('markets.category', 'crypto')
+            ->whereNull('markets.outcome')
+            ->where('markets.close_ts', '>', $nowMs)
+            ->where('markets.open_ts', '<=', $nowMs)
+            ->where('markets.break_value', '>', 0)
+            ->select('markets.id', 'assets.symbol', 'markets.break_value', 'markets.open_ts', 'markets.close_ts')
+            ->orderBy('markets.close_ts')
             ->get()
-            ->map(fn ($w) => [
-                'id'              => $w->id,
-                'asset'           => $w->symbol,
-                'duration'        => $w->duration_sec >= 900 ? '15m' : '5m',
-                'break_price_usd' => (float) $w->break_price_usd,
-                'open_ts'         => (int) $w->open_ts,
-                'close_ts'        => (int) $w->close_ts,
-                'closes_in_ms'    => $w->close_ts - $nowMs,
+            ->map(fn ($m) => [
+                'id'          => $m->id,
+                'asset'       => $m->symbol,
+                'break_value' => (float) $m->break_value,
+                'open_ts'     => (int) $m->open_ts,
+                'close_ts'    => (int) $m->close_ts,
+                'closes_in_ms' => $m->close_ts - $nowMs,
             ]);
 
-        return response()->json($state);
+        // Active weather markets
+        $weather['active_markets'] = DB::table('markets')
+            ->join('assets', 'assets.id', '=', 'markets.asset_id')
+            ->where('markets.category', 'weather')
+            ->whereNull('markets.outcome')
+            ->where('markets.close_ts', '>', $nowMs)
+            ->where('markets.open_ts', '<=', $nowMs)
+            ->select('markets.id', 'assets.symbol', 'markets.break_value', 'markets.open_ts', 'markets.close_ts')
+            ->orderBy('markets.close_ts')
+            ->get()
+            ->map(fn ($m) => [
+                'id'          => $m->id,
+                'asset'       => $m->symbol,
+                'break_value' => (float) $m->break_value,
+                'open_ts'     => (int) $m->open_ts,
+                'close_ts'    => (int) $m->close_ts,
+                'closes_in_ms' => $m->close_ts - $nowMs,
+            ]);
+
+        return response()->json([
+            'crypto'  => $state,
+            'weather' => $weather,
+        ]);
     }
 }

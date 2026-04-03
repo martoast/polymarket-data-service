@@ -121,13 +121,18 @@ class ReadingController extends Controller
         $secondsInDay = 86400;
         $elapsed      = min(1.0, ($now->getTimestamp() - $midnight->getTimestamp()) / $secondsInDay);
 
+        $maxC = (float) $row->running_daily_max_c;
+        $maxF = round($maxC * 9 / 5 + 32, 1);
+
         return response()->json([
             'data' => [
                 'asset'               => $asset->symbol,
+                'unit'                => $asset->unit,
                 'station_local_date'  => $row->station_local_date,
                 'current_temp_c'      => (float) $row->temp_c,
                 'current_temp_f'      => (float) $row->temp_f,
-                'running_daily_max_c' => (float) $row->running_daily_max_c,
+                'running_daily_max_c' => $maxC,
+                'running_daily_max_f' => $maxF,
                 'day_elapsed_pct'     => round($elapsed * 100, 1),
                 'reading_count'       => $readingCount,
                 'ts'                  => (int) $row->ts,
