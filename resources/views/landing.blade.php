@@ -1883,7 +1883,6 @@ document.addEventListener('alpine:init', () => {
                 [
                     'label'   => 'Crypto',
                     'status'  => 'live',
-                    'color'   => '#0093fd',
                     'icon'    => 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v.01M12 16v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
                     'markets' => ['BTC Up/Down', 'ETH Up/Down', 'SOL Up/Down'],
                     'note'    => 'Chainlink oracle · ms precision',
@@ -1891,7 +1890,6 @@ document.addEventListener('alpine:init', () => {
                 [
                     'label'   => 'Weather',
                     'status'  => 'live',
-                    'color'   => '#26a05e',
                     'icon'    => 'M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z',
                     'markets' => ['Tokyo · London · Paris', 'Singapore · Seoul · Beijing', 'NYC · Chicago · LA · Miami'],
                     'note'    => '10 cities · °C and °F',
@@ -1899,7 +1897,6 @@ document.addEventListener('alpine:init', () => {
                 [
                     'label'   => 'Sports',
                     'status'  => 'coming',
-                    'color'   => '#f97316',
                     'icon'    => 'M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4',
                     'markets' => ['NFL · NBA · MLB', 'Soccer · Tennis', 'UFC · Esports'],
                     'note'    => 'Match results · player props',
@@ -1907,7 +1904,6 @@ document.addEventListener('alpine:init', () => {
                 [
                     'label'   => 'Politics',
                     'status'  => 'coming',
-                    'color'   => '#a78bfa',
                     'icon'    => 'M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3',
                     'markets' => ['Elections · Approval polls', 'Policy outcomes', 'Global geopolitics'],
                     'note'    => 'News signals · sentiment',
@@ -1916,43 +1912,44 @@ document.addEventListener('alpine:init', () => {
             @endphp
 
             @foreach($coverage as $i => $cat)
-            <div class="rounded-2xl border p-6 transition-all duration-500 relative overflow-hidden"
-                 style="border-color:{{ $cat['color'] }}{{ $cat['status'] === 'live' ? '33' : '18' }}; background: {{ $cat['color'] }}{{ $cat['status'] === 'live' ? '08' : '04' }}"
+            <div class="rounded-2xl border p-6 transition-all duration-500 relative overflow-hidden
+                        {{ $cat['status'] === 'live' ? 'bg-[#17181c] border-[#0093fd]/20' : 'bg-[#17181c]/50 border-[#1f2937]' }}"
                  :style="vis ? 'opacity:1;transform:translateY(0);transition-delay:{{ $i * 80 }}ms' : 'opacity:0;transform:translateY(20px)'">
 
-                {{-- Status badge --}}
+                {{-- Icon + status --}}
                 <div class="flex items-center justify-between mb-5">
-                    <div class="w-9 h-9 rounded-xl flex items-center justify-center"
-                         style="background:{{ $cat['color'] }}18; border:1px solid {{ $cat['color'] }}30">
-                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="{{ $cat['color'] }}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <div class="w-9 h-9 rounded-xl flex items-center justify-center
+                                {{ $cat['status'] === 'live' ? 'bg-[#0093fd]/10 border border-[#0093fd]/20' : 'bg-[#1f2937] border border-[#1f2937]' }}">
+                        <svg class="w-4 h-4 {{ $cat['status'] === 'live' ? 'text-[#0093fd]' : 'text-[#2e3841]' }}"
+                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                             <path d="{{ $cat['icon'] }}"/>
                         </svg>
                     </div>
                     @if($cat['status'] === 'live')
                     <div class="flex items-center gap-1.5">
                         <span class="relative flex h-1.5 w-1.5">
-                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style="background:{{ $cat['color'] }}"></span>
-                            <span class="relative inline-flex rounded-full h-1.5 w-1.5" style="background:{{ $cat['color'] }}"></span>
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#26a05e] opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#26a05e]"></span>
                         </span>
-                        <span class="text-[9px] font-bold uppercase tracking-wider" style="color:{{ $cat['color'] }}">Live</span>
+                        <span class="text-[9px] font-bold uppercase tracking-wider text-[#26a05e]">Live</span>
                     </div>
                     @else
                     <span class="text-[9px] font-bold uppercase tracking-wider text-[#2e3841] border border-[#1f2937] rounded-full px-2 py-0.5">Coming soon</span>
                     @endif
                 </div>
 
-                <h3 class="text-sm font-bold text-white mb-3">{{ $cat['label'] }}</h3>
+                <h3 class="text-sm font-bold {{ $cat['status'] === 'live' ? 'text-white' : 'text-[#2e3841]' }} mb-3">{{ $cat['label'] }}</h3>
 
                 <ul class="space-y-1.5 mb-4">
                     @foreach($cat['markets'] as $m)
-                    <li class="text-xs {{ $cat['status'] === 'live' ? 'text-[#8a9ab0]' : 'text-[#2e3841]' }} flex items-center gap-1.5">
-                        <span style="color:{{ $cat['color'] }}; opacity:{{ $cat['status'] === 'live' ? '1' : '0.4' }}">·</span>
+                    <li class="text-xs {{ $cat['status'] === 'live' ? 'text-[#697d91]' : 'text-[#2e3841]' }} flex items-center gap-1.5">
+                        <span class="{{ $cat['status'] === 'live' ? 'text-[#0093fd]' : 'text-[#2e3841]' }}">·</span>
                         {{ $m }}
                     </li>
                     @endforeach
                 </ul>
 
-                <div class="text-[10px] font-mono" style="color:{{ $cat['color'] }}; opacity:{{ $cat['status'] === 'live' ? '0.8' : '0.3' }}">{{ $cat['note'] }}</div>
+                <div class="text-[10px] font-mono {{ $cat['status'] === 'live' ? 'text-[#0093fd]/60' : 'text-[#2e3841]' }}">{{ $cat['note'] }}</div>
             </div>
             @endforeach
         </div>
