@@ -179,9 +179,9 @@
                 {{-- Headline --}}
                 <h1 class="font-extrabold leading-[1.04] tracking-[-0.03em] text-white mb-6"
                     style="font-size: clamp(2.6rem, 6vw, 4.2rem);">
-                    One API.<br>
-                    Every Polymarket<br>
-                    <span class="text-[#0093fd]">market category.</span>
+                    The data layer<br>
+                    every Polymarket<br>
+                    <span class="text-[#0093fd]">bot needs.</span>
                 </h1>
 
                 {{-- Sub --}}
