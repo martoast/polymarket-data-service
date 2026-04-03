@@ -70,15 +70,13 @@ class OracleController extends Controller
     public function aligned(Request $request): JsonResponse
     {
         $request->validate([
-            'asset'     => ['required', 'string'],
             'market_id' => ['required', 'string'],
         ]);
 
         $market = Market::findOrFail($request->market_id);
-        $asset  = Asset::where('symbol', strtoupper($request->asset))->firstOrFail();
 
         $ticks = OracleTick::with('asset')
-            ->where('asset_id', $asset->id)
+            ->where('asset_id', $market->asset_id)
             ->where('ts', '>=', $market->open_ts)
             ->where('ts', '<=', $market->close_ts)
             ->orderBy('ts', 'asc')

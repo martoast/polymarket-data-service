@@ -10,5 +10,5 @@ Artisan::command('inspire', function () {
 
 // Recorder runs as a persistent supervisor process (recorder:start) — no schedule needed here.
 
-// Backfill outcomes for windows that expired since last run (every 5 minutes)
-Schedule::command('recorder:backfill-windows')->everyFiveMinutes()->withoutOverlapping();
+// Backfill break_value, has_coverage, and outcomes for markets that expired between CLOB events
+Schedule::command('recorder:backfill-markets')->everyFiveMinutes()->withoutOverlapping();
