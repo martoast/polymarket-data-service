@@ -137,7 +137,7 @@
                     <div class="grid grid-cols-2 gap-2">
                         @foreach([
                             ['Oracle feed', 'Chainlink RTDS'],
-                            ['Durations', '5m · 10m · 20m · 1h'],
+                            ['Durations', '5m · 15m · 1h'],
                             ['Market data', 'CLOB snapshots'],
                             ['Features', '40+ ML features'],
                         ] as [$k, $v])
