@@ -26,7 +26,8 @@ services:
       CACHE_STORE: redis
       QUEUE_CONNECTION: redis
       RECORDER_ENABLED: 'false'   # recorder runs in its own container below
-    mem_limit: 384m
+      PHP_OPCACHE_ENABLE: '1'
+    mem_limit: 512m
     volumes:
       - .:/var/www/html
       - vendor_data:/var/www/html/vendor
