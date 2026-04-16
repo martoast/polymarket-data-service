@@ -85,6 +85,8 @@ class MarketDiscoveryService
 
     /**
      * Load only ACTIVE (not yet resolved, not yet closed) token→market map.
+     * Includes markets that closed within the last 60s so the subscription
+     * stays live long enough to receive the market_result WS event.
      *
      * @return array<string, array{market_id:string, is_yes:bool}>
      */
@@ -95,7 +97,7 @@ class MarketDiscoveryService
         $rows  = DB::table('markets')
             ->whereNotNull('yes_token_id')
             ->whereNull('outcome')
-            ->where('close_ts', '>', $nowMs)
+            ->where('close_ts', '>', $nowMs - 60_000)  // stay subscribed 60s past close
             ->select('id', 'yes_token_id', 'no_token_id')
             ->get();
 

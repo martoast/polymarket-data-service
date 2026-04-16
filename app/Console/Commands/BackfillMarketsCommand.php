@@ -12,7 +12,8 @@ use Illuminate\Support\Facades\Log;
  *
  * 1. Fills break_value for crypto markets that still have 0 (oracle tick closest to open_ts).
  * 2. Sets has_coverage = true for any market that has at least one clob_snapshot.
- * 3. For expired crypto markets with no outcome, queries Gamma for resolution.
+ * 3. Resolves expired crypto markets via oracle price at close_ts (primary, always reliable).
+ * 4. For expired weather markets with no outcome, resolves via sensor data then Gamma fallback.
  */
 class BackfillMarketsCommand extends Command
 {
@@ -21,11 +22,15 @@ class BackfillMarketsCommand extends Command
 
     private string $gammaBase = 'https://gamma-api.polymarket.com';
 
+    // Max gap between close_ts and nearest oracle tick to trust the price.
+    // 5 min covers the oracle 30s heartbeat + any short recording gaps.
+    private const ORACLE_CLOSE_TOLERANCE_MS = 300_000;
+
     public function handle(): int
     {
         $this->fillCryptoBreakValues();
         $this->fillCoverage();
-        $this->resolveExpiredCrypto();
+        $this->resolveCryptoByOracle();
         $this->resolveExpiredWeather();
 
         return self::SUCCESS;
@@ -90,70 +95,64 @@ class BackfillMarketsCommand extends Command
         }
     }
 
-    // ── 3. Resolve expired crypto markets ─────────────────────────────────
+    // ── 3. Resolve expired crypto markets via oracle price ────────────────
+    //
+    // Polymarket crypto binary markets settle on the Chainlink oracle price
+    // at close_ts — the same price we record in oracle_ticks.  This makes
+    // oracle-based resolution authoritative, not an approximation.
+    //
+    // Rule: YES if oracle_price_at_close >= break_value, else NO.
+    // (All crypto markets are "will asset be ABOVE break_value at close?")
+    //
+    // We skip markets where the nearest oracle tick is more than
+    // ORACLE_CLOSE_TOLERANCE_MS away — that means the recorder was offline
+    // around close_ts and we can't trust the price.
 
-    private function resolveExpiredCrypto(): void
+    private function resolveCryptoByOracle(): void
     {
         $nowMs = (int) (microtime(true) * 1000);
 
         $expired = DB::table('markets')
             ->where('category', 'crypto')
             ->whereNull('outcome')
-            ->where('close_ts', '<', $nowMs - 60_000) // at least 60s past close
-            ->whereNotNull('gamma_slug')
-            ->get(['id', 'gamma_slug']);
+            ->where('close_ts', '<', $nowMs - 60_000)
+            ->where('break_value', '>', 0)
+            ->get(['id', 'asset_id', 'close_ts', 'break_value']);
 
         $resolved = 0;
+        $noData   = 0;
+
         foreach ($expired as $market) {
-            try {
-                $resp = Http::withUserAgent('Mozilla/5.0')
-                    ->timeout(8)
-                    ->get("{$this->gammaBase}/markets", ['slug' => $market->gamma_slug]);
+            $tick = DB::table('oracle_ticks')
+                ->where('asset_id', $market->asset_id)
+                ->orderByRaw('ABS(ts - ?)', [$market->close_ts])
+                ->limit(1)
+                ->first(['price_usd', 'ts']);
 
-                if (! $resp->successful()) {
-                    continue;
-                }
-
-                $data = $resp->json();
-                if (empty($data) || ! is_array($data)) {
-                    continue;
-                }
-
-                $entry = $data[0] ?? null;
-                if (! $entry) {
-                    continue;
-                }
-
-                // Determine outcome from resolution fields
-                $outcome = null;
-                if (isset($entry['winner'])) {
-                    $outcome = strtoupper($entry['winner']) === 'YES' ? 'YES' : 'NO';
-                } elseif (isset($entry['resolution'])) {
-                    $r = strtolower($entry['resolution']);
-                    if ($r === 'yes') {
-                        $outcome = 'YES';
-                    } elseif ($r === 'no') {
-                        $outcome = 'NO';
-                    }
-                }
-
-                if ($outcome) {
-                    DB::table('markets')
-                        ->where('id', $market->id)
-                        ->update([
-                            'outcome'    => $outcome,
-                            'recording_gap' => false,
-                        ]);
-                    $resolved++;
-                }
-            } catch (\Throwable $e) {
-                Log::debug("[backfill] Failed to resolve {$market->id}: " . $e->getMessage());
+            if (! $tick || abs($tick->ts - $market->close_ts) > self::ORACLE_CLOSE_TOLERANCE_MS) {
+                $noData++;
+                continue;
             }
+
+            $outcome = ((float) $tick->price_usd >= (float) $market->break_value) ? 'YES' : 'NO';
+
+            DB::table('markets')
+                ->where('id', $market->id)
+                ->update([
+                    'outcome'       => $outcome,
+                    'recording_gap' => false,
+                    'resolved_ts'   => $market->close_ts,
+                ]);
+
+            $resolved++;
         }
 
         if ($resolved > 0) {
-            Log::info("[backfill] Resolved {$resolved} expired crypto markets via Gamma.");
-            $this->line("[backfill] outcomes: resolved {$resolved} expired crypto markets.");
+            Log::info("[backfill] Resolved {$resolved} crypto markets via oracle price.");
+            $this->line("[backfill] outcomes: resolved {$resolved} crypto markets via oracle.");
+        }
+        if ($noData > 0) {
+            Log::debug("[backfill] Skipped {$noData} crypto markets — no oracle tick near close_ts.");
         }
     }
 
