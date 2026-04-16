@@ -66,12 +66,20 @@ class BackfillMarketsCommand extends Command
 
     private function fillCoverage(): void
     {
+        // Only check markets opened in the last 7 days — older uncovered markets
+        // will never get clob data. Time-bounding the EXISTS subquery lets
+        // TimescaleDB prune old chunks and avoids full 6.5 GB scans.
+        $sevenDaysAgoMs = (int) ((microtime(true) - 7 * 86400) * 1000);
+        $oneDayAgoMs    = (int) ((microtime(true) - 86400) * 1000);
+
         $updated = DB::table('markets')
             ->where('has_coverage', false)
-            ->whereExists(function ($q) {
+            ->where('open_ts', '>', $sevenDaysAgoMs)
+            ->whereExists(function ($q) use ($oneDayAgoMs) {
                 $q->select(DB::raw(1))
                   ->from('clob_snapshots')
                   ->whereColumn('clob_snapshots.market_id', 'markets.id')
+                  ->where('ts', '>', $oneDayAgoMs)
                   ->limit(1);
             })
             ->update(['has_coverage' => true]);

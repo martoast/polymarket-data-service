@@ -64,8 +64,10 @@ class PublicLiveController extends Controller
         $marketIds = collect($marketMap)->flatten()->unique()->values()->all();
 
         // ── CLOB: one query for all active markets ───────────────────────────
+        // Time-bound to last hour so TimescaleDB can prune old chunks (6.5 GB table).
         $snapshots = DB::table('clob_snapshots')
             ->whereIn('market_id', $marketIds)
+            ->where('ts', '>', $nowMs - 3_600_000)
             ->orderByDesc('ts')
             ->limit(200)
             ->get(['market_id', 'yes_bid', 'yes_ask', 'no_bid', 'no_ask', 'ts']);
